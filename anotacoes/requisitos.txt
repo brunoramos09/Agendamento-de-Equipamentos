@@ -1,0 +1,8 @@
+Requisitos Funcionais
+    -
+
+Requisitos Não Funcionais
+    -
+
+Requisitos Inversos
+    -

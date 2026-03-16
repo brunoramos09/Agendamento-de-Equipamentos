@@ -1,0 +1,9 @@
+Reunião 1 (13/03/2026)
+    - Participantes: Bruno, Henrique, Vicente e Vinícius
+    - CBiot: Édson
+    - Horário: 15h20 - 16h
+
+
+Resumo
+    - Sistema que seja possível agendar utilização de equipamentos
+    - Controle de quais equipamentos estão sendo utilizados e por quem
