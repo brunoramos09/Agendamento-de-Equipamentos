@@ -1,0 +1,7 @@
+Equipamento
+    - Infos (Nome, Identificação, Foto, Status, Informações, Observações, Sala, Prédio, Pavimento)
+    - Ao buscar por equipamentos (mostrar foto e nome técnico/usual)
+
+
+Planilha de Uso
+    - Equipamento - Empresa - Usuário - Data Início - Data Fim - Contato - Tipo de Serviço - Observações
