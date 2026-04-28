@@ -1,11 +1,13 @@
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 
-export class CreateEquipmentDto {
+export class UpdateEquipmentDto {
+  @IsOptional()
   @IsString()
-  name!: string;
+  name?: string;
 
+  @IsOptional()
   @IsString()
-  location!: string;
+  location?: string;
 
   @IsOptional()
   @IsInt()
