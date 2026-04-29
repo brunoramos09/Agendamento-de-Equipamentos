@@ -35,13 +35,20 @@ export default function ListaEquipamentos() {
               Consulte, edite ou remova os equipamentos cadastrados.
             </p>
           </div>
-
-          <Link
-            to="/equipamentos/cadastrar"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium text-center transition"
-          >
-            Novo equipamento
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              to="/reservas"
+              className="border border-gray-300 text-gray-700 hover:bg-gray-100 px-5 py-2.5 rounded-lg text-sm font-medium transition"
+            >
+              Ver reservas
+            </Link>
+            <Link
+              to="/equipamentos/cadastrar"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition"
+            >
+              Novo equipamento
+            </Link>
+          </div>{" "}
         </header>
 
         {loading && (
