@@ -14,7 +14,7 @@ docker compose up -d
 ```bash
 cd backend
 npm install
-. env -> colocar DATABASE_URL="postgresql://postgres:postgres@localhost:5432/engsoft"
+Adicionar arquivo ".env" na raiz -> colocar DATABASE_URL="postgresql://postgres:postgres@localhost:5432/engsoft"
 npx prisma migrate dev
 npx prisma generate
 npm run start:dev
