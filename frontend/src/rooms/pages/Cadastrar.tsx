@@ -8,7 +8,7 @@ export default function CadastrarSala() {
   const [name, setName] = useState("");
   const [building, setBuilding] = useState("");
   const [floor, setFloor] = useState<number | "">("");
-  const [campus, setCampus] = useState("");
+  const campus = "Campus do Vale";
 
   async function salvar() {
     if (!name.trim() || !building.trim() || !campus.trim() || floor === "") {
@@ -77,17 +77,6 @@ export default function CadastrarSala() {
                 onChange={(e) =>
                   setFloor(e.target.value === "" ? "" : Number(e.target.value))
                 }
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Campus
-              </label>
-              <input
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={campus}
-                onChange={(e) => setCampus(e.target.value)}
               />
             </div>
           </div>
