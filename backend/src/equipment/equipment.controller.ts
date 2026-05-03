@@ -6,18 +6,25 @@ import {
   Param,
   Patch,
   Post,
+  Res,
 } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
+import { Response } from 'express';
 
-@Controller('equipment')
+@Controller('equipments')
 export class EquipmentController {
   constructor(private readonly equipmentService: EquipmentService) {}
 
   @Get()
   findAll() {
     return this.equipmentService.findAll();
+  }
+
+  @Get(':id/report')
+  async generateReport(@Param('id') id: string, @Res() res: Response) {
+    return this.equipmentService.generateReport(Number(id), res);
   }
 
   @Get(':id')

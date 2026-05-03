@@ -10,10 +10,12 @@ datasource db {
 model Equipment {
   id            Int @id @default(autoincrement())
   name          String
-  location      String
-  quantity      Int @default(1) 
   description   String?
   notes         String?
+
+  roomId        Int
+  room          Room @relation(fields: [roomId], references: [id])
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -31,4 +33,17 @@ id              Int @id @default(autoincrement())
   updatedAt     DateTime @updatedAt
 
   equipment  Equipment @relation(fields: [equipmentId], references: [id])
+}
+
+model Room {
+  id            Int @id @default(autoincrement())
+  name          String
+  building      String
+  floor         Int
+  campus        String
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  equipments Equipment[]
 }
