@@ -9,7 +9,7 @@ export default function EditarSala() {
   const [name, setName] = useState("");
   const [building, setBuilding] = useState("");
   const [floor, setFloor] = useState<number | "">("");
-  const [campus, setCampus] = useState("");
+  const campus = "Campus do Vale";
 
   useEffect(() => {
     if (!id) return;
@@ -18,7 +18,6 @@ export default function EditarSala() {
       setName(room.name);
       setBuilding(room.building);
       setFloor(room.floor);
-      setCampus(room.campus);
     });
   }, [id]);
 
@@ -59,7 +58,7 @@ export default function EditarSala() {
         </header>
 
         <section className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
                 Nome da sala
@@ -94,18 +93,6 @@ export default function EditarSala() {
                 onChange={(e) =>
                   setFloor(e.target.value === "" ? "" : Number(e.target.value))
                 }
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Campus
-              </label>
-              <input
-                className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ex: Campus Central"
-                value={campus}
-                onChange={(e) => setCampus(e.target.value)}
               />
             </div>
           </div>
