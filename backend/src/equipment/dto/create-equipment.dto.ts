@@ -1,16 +1,11 @@
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateEquipmentDto {
   @IsString()
   name!: string;
 
-  @IsString()
-  location!: string;
-
-  @IsOptional()
   @IsInt()
-  @Min(1)
-  quantity?: number;
+  roomId!: number;
 
   @IsOptional()
   @IsString()

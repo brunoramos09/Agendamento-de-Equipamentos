@@ -5,6 +5,10 @@ import EditarEquipamento from "./equipaments/pages/Editar";
 import ExcluirEquipamento from "./equipaments/pages/Excluir";
 import CadastrarReserva from "./reservations/pages/Cadastrar";
 import ListaReservas from "./reservations/pages/Listar";
+import ListarSalas from "./rooms/pages/Listar";
+import CadastrarSala from "./rooms/pages/Cadastrar";
+import EditarSala from "./rooms/pages/Editar";
+import ExcluirSala from "./rooms/pages/Excluir";
 
 export default function App() {
   return (
@@ -26,8 +30,13 @@ export default function App() {
           element={<ExcluirEquipamento />}
         />
         // Reservas
-        <Route path="/reservas/cadastrar" element={<CadastrarReserva />} />
         <Route path="/reservas" element={<ListaReservas />} />
+        <Route path="/reservas/cadastrar" element={<CadastrarReserva />} />
+        // Salas
+        <Route path="/salas" element={<ListarSalas />} />
+        <Route path="/salas/cadastrar" element={<CadastrarSala />} />
+        <Route path="/salas/editar/:id" element={<EditarSala />} />
+        <Route path="/salas/excluir/:id" element={<ExcluirSala />} />
       </Routes>
     </BrowserRouter>
   );
