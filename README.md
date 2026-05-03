@@ -2,11 +2,15 @@
 
 * Node 18+
 * Docker
+* Ambiente linux (WSL, por exemplo)
 
-### 1. Banco
+### 1. Instruções gerais
 
 ```bash
-docker compose up -d
+Seguir o passo a passo na ordem;
+Rodar apenas um comando por vez;
+Utilizar um ambiente Linux (WSL, por exemplo);
+Clonar o repositório
 ```
 
 ### 2. Backend
@@ -15,6 +19,7 @@ docker compose up -d
 cd backend
 npm install
 Adicionar arquivo ".env" na raiz -> colocar DATABASE_URL="postgresql://postgres:postgres@localhost:5432/engsoft"
+docker compose up -d
 npx prisma migrate dev
 npx prisma generate
 npm run start:dev
