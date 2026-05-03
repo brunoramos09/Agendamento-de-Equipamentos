@@ -22,7 +22,7 @@ Adicionar arquivo ".env" na raiz -> colocar DATABASE_URL="postgresql://postgres:
 docker compose up -d
 npx prisma migrate dev
 npx prisma generate
-npm run start:dev
+npm run dev
 ```
 
 ### 3. Frontend
