@@ -1,0 +1,355 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.12), transparent 28%),
+    var(--app-background);
+  color: var(--app-text);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px 22px;
+  background: linear-gradient(180deg, var(--app-primary) 0%, #0c1c34 100%);
+  color: #ffffff;
+}
+
+.brandBlock {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.brandKicker,
+.pageKicker,
+.panelKicker,
+.noteLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.brandBlock strong {
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.brandBlock p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.navigation {
+  display: grid;
+  gap: 8px;
+}
+
+.navigationItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.93);
+  text-decoration: none;
+  background: #173357;
+  border: 1px solid transparent;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.navigationItem:hover {
+  transform: translateX(2px);
+  background: #21406d;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.sidebarNote {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.noteLabel {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.sidebarNote p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.content {
+  padding: 28px;
+  display: grid;
+  gap: 20px;
+}
+
+.backBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  color: var(--app-primary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(15, 38, 74, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.backButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(15, 38, 74, 0.1);
+  border-color: color-mix(in srgb, var(--app-primary) 28%, var(--app-border));
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.titleBlock h1 {
+  margin: 4px 0 6px;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.titleBlock p {
+  margin: 0;
+  max-width: 720px;
+  color: var(--app-muted);
+  line-height: 1.6;
+}
+
+.actionGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+}
+
+.actionSecondary {
+  background: var(--app-surface);
+  color: var(--app-primary);
+  border: 1px solid var(--app-border);
+}
+
+.actionPrimary {
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-strong));
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 38, 74, 0.18);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.metricCard,
+.panel {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 22px;
+  box-shadow: 0 12px 30px rgba(15, 38, 74, 0.06);
+}
+
+.metricCard {
+  padding: 18px 18px 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.metricLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.metricValue {
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.metricCard p,
+.featuredText,
+.recentItem p,
+.placeholderPanel p {
+  margin: 0;
+  color: var(--app-muted);
+  line-height: 1.6;
+}
+
+.panelGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+  gap: 16px;
+}
+
+.panel {
+  padding: 22px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panelHeader h2 {
+  margin: 6px 0 0;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.panelKicker {
+  color: var(--app-accent);
+}
+
+.bulletList {
+  margin: 18px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+  color: var(--app-text);
+}
+
+.bulletList li {
+  line-height: 1.5;
+}
+
+.recentPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.recentList {
+  display: grid;
+  gap: 12px;
+}
+
+.recentItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--app-surface-alt);
+  border: 1px solid var(--app-border);
+}
+
+.recentItem strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.recentMeta {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.recentMeta span {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.recentMeta strong {
+  font-size: 13px;
+  color: var(--app-primary);
+}
+
+.placeholderPanel {
+  grid-column: 1 / -1;
+  min-height: 180px;
+}
+
+@media (max-width: 1120px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    padding-bottom: 22px;
+  }
+
+  .metricsGrid,
+  .panelGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .content {
+    padding: 18px;
+  }
+
+  .topbar {
+    align-items: stretch;
+  }
+
+  .actionGroup {
+    width: 100%;
+  }
+
+  .actionButton {
+    width: 100%;
+  }
+
+  .recentItem {
+    flex-direction: column;
+  }
+
+  .recentMeta {
+    justify-items: start;
+    text-align: left;
+  }
+}
