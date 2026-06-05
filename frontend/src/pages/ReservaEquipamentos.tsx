@@ -1,15 +1,15 @@
 import { AppTemplate } from "./AppTemplate";
 
 const equipamentosTheme = {
-  background: "#f3f7f4",
+  background: "#fcfbec",
   surface: "#ffffff",
-  surfaceAlt: "#f8fbf8",
-  border: "#d6e5d8",
-  text: "#10231a",
-  muted: "#617066",
-  primary: "#1f6f43",
-  primaryStrong: "#14532d",
-  accent: "#38a169",
+  surfaceAlt: "#fffef4",
+  border: "#e8e4a0",
+  text: "#3e3a12",
+  muted: "#757148",
+  primary: "#bab51f",
+  primaryStrong: "#8f8a18",
+  accent: "#e0d84a",
 };
 
 export function ReservaEquipamentos() {
