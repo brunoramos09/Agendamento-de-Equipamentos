@@ -3,8 +3,16 @@
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   background:
-    radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.12), transparent 28%),
+    radial-gradient(
+      circle at top left,
+      rgba(96, 165, 250, 0.14),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(15, 118, 110, 0.12),
+      transparent 28%
+    ),
     var(--app-background);
   color: var(--app-text);
 }
@@ -62,7 +70,10 @@
   text-decoration: none;
   background: #173357;
   border: 1px solid transparent;
-  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .navigationItem:hover {
@@ -94,6 +105,7 @@
   padding: 28px;
   display: grid;
   gap: 20px;
+  align-content: start;
 }
 
 .backBar {
@@ -115,7 +127,10 @@
   font-size: 14px;
   font-weight: 700;
   box-shadow: 0 8px 18px rgba(15, 38, 74, 0.06);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .backButton:hover {
@@ -161,7 +176,10 @@
   border-radius: 14px;
   text-decoration: none;
   font-weight: 700;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
 .actionButton:hover {
@@ -175,7 +193,11 @@
 }
 
 .actionPrimary {
-  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-strong));
+  background: linear-gradient(
+    135deg,
+    var(--app-primary),
+    var(--app-primary-strong)
+  );
   color: #ffffff;
   box-shadow: 0 10px 24px rgba(15, 38, 74, 0.18);
 }

@@ -15,12 +15,7 @@ const equipamentosTheme = {
 export function ReservaEquipamentos() {
   return (
     <AppTemplate
-      appName="Sistema de Reserva de Equipamentos"
-      appSubtitle="Reserva e gerenciamento de equipamentos"
       appDescription="Interface para consultar equipamentos disponíveis, realizar reservas e acompanhar solicitações."
-      brandLabel="Reserva de Equipamentos"
-      backLinkLabel="Voltar ao portal"
-      backLinkHref="/home"
       primaryAction={{ label: "Nova reserva", href: "#nova-reserva" }}
       secondaryAction={{ label: "Ver equipamentos", href: "#equipamentos" }}
       featuredTitle="Fluxo principal de reserva"
