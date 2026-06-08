@@ -1,17 +1,20 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
-  Patch,
+  ParseIntPipe,
   Post,
-  Res,
+  Delete,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+
 import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
-import { UpdateEquipmentDto } from './dto/update-equipment.dto';
-import { Response } from 'express';
 
 @Controller('equipments')
 export class EquipmentController {
@@ -22,28 +25,28 @@ export class EquipmentController {
     return this.equipmentService.findAll();
   }
 
-  @Get(':id/report')
-  async generateReport(@Param('id') id: string, @Res() res: Response) {
-    return this.equipmentService.generateReport(Number(id), res);
-  }
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.equipmentService.findOne(Number(id));
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.equipmentService.findOne(id);
   }
 
   @Post()
-  create(@Body() body: CreateEquipmentDto) {
-    return this.equipmentService.create(body);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() data: UpdateEquipmentDto) {
-    return this.equipmentService.update(Number(id), data);
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: './uploads/equipments',
+        filename: (req, file, cb) => {
+          cb(null, `${Date.now()}-${file.originalname}`);
+        },
+      }),
+    }),
+  )
+  create(@Body() body: CreateEquipmentDto, @UploadedFile() photo: any) {
+    return this.equipmentService.create(body, photo);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.equipmentService.remove(Number(id));
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.equipmentService.remove(id);
   }
 }
