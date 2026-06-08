@@ -74,7 +74,7 @@ const defaultNavigation: NavigationItem[] = [
   { label: "Visão Geral", href: "/reserva-equipamentos" },
   { label: "Equipamentos", href: "/reserva-equipamentos/equipamentos" },
   { label: "Reservas", href: "/reserva-equipamentos/reservas" },
-  { label: "Relatórios", href: "/reserva-equipamentos/relatorios" },
+  { label: "Salas", href: "/reserva-equipamentos/salas" },
 ];
 
 const defaultMetrics: MetricCard[] = [
