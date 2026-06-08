@@ -1,18 +1,28 @@
 import {
+  IsArray,
   IsDateString,
   IsInt,
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CreateReservationDto {
+class ReservationEquipmentDto {
   @IsInt()
   @Min(1)
   equipmentId!: number;
 
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  subdivisionsQuantity?: number;
+}
+
+export class CreateReservationDto {
   @IsString()
-  requester!: string;
+  user!: string;
 
   @IsDateString()
   startDate!: string;
@@ -22,5 +32,10 @@ export class CreateReservationDto {
 
   @IsOptional()
   @IsString()
-  notes?: string;
+  observations?: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReservationEquipmentDto)
+  equipments!: ReservationEquipmentDto[];
 }

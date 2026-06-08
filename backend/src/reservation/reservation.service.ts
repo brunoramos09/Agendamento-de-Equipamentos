@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import {
   BadRequestException,
   Injectable,
@@ -18,7 +18,11 @@ export class ReservationService {
   findAll() {
     return this.prisma.reservation.findMany({
       include: {
-        equipment: true,
+        equipments: {
+          include: {
+            equipment: true,
+          },
+        },
       },
       orderBy: {
         id: 'asc',
@@ -30,7 +34,11 @@ export class ReservationService {
     const reservation = await this.prisma.reservation.findUnique({
       where: { id },
       include: {
-        equipment: true,
+        equipments: {
+          include: {
+            equipment: true,
+          },
+        },
       },
     });
 
@@ -42,15 +50,8 @@ export class ReservationService {
   }
 
   async create(data: CreateReservationDto) {
-    const equipment = await this.prisma.equipment.findUnique({
-      where: { id: data.equipmentId },
-    });
-
-    if (!equipment) {
-      throw new NotFoundException('Equipamento não encontrado');
-    }
-
     const startDate = new Date(data.startDate);
+
     const endDate = new Date(data.endDate);
 
     if (endDate <= startDate) {
@@ -59,16 +60,41 @@ export class ReservationService {
       );
     }
 
+    for (const item of data.equipments) {
+      const equipment = await this.prisma.equipment.findUnique({
+        where: {
+          id: item.equipmentId,
+        },
+      });
+
+      if (!equipment) {
+        throw new NotFoundException(
+          `Equipamento ${item.equipmentId} não encontrado`,
+        );
+      }
+    }
+
     return this.prisma.reservation.create({
       data: {
-        equipmentId: data.equipmentId,
-        requester: data.requester,
+        user: data.user,
         startDate,
         endDate,
-        notes: data.notes,
+        observations: data.observations,
+
+        equipments: {
+          create: data.equipments.map((item) => ({
+            equipmentId: item.equipmentId,
+            subdivisionsQuantity: item.subdivisionsQuantity,
+          })),
+        },
       },
+
       include: {
-        equipment: true,
+        equipments: {
+          include: {
+            equipment: true,
+          },
+        },
       },
     });
   }
@@ -76,36 +102,74 @@ export class ReservationService {
   async update(id: number, data: UpdateReservationDto) {
     await this.findOne(id);
 
-    if (data.equipmentId) {
-      const equipment = await this.prisma.equipment.findUnique({
-        where: { id: data.equipmentId },
-      });
+    const updateData: any = {};
 
-      if (!equipment) {
-        throw new NotFoundException('Equipamento não encontrado');
-      }
+    if (data.user !== undefined) {
+      updateData.user = data.user;
     }
 
-    const startDate = data.startDate ? new Date(data.startDate) : undefined;
-    const endDate = data.endDate ? new Date(data.endDate) : undefined;
+    if (data.observations !== undefined) {
+      updateData.observations = data.observations;
+    }
 
-    if (startDate && endDate && endDate <= startDate) {
+    if (data.startDate) {
+      updateData.startDate = new Date(data.startDate);
+    }
+
+    if (data.endDate) {
+      updateData.endDate = new Date(data.endDate);
+    }
+
+    if (
+      updateData.startDate &&
+      updateData.endDate &&
+      updateData.endDate <= updateData.startDate
+    ) {
       throw new BadRequestException(
         'A data final deve ser maior que a data inicial',
       );
     }
 
+    if (data.equipments) {
+      for (const item of data.equipments) {
+        const equipment = await this.prisma.equipment.findUnique({
+          where: {
+            id: item.equipmentId,
+          },
+        });
+
+        if (!equipment) {
+          throw new NotFoundException(
+            `Equipamento ${item.equipmentId} não encontrado`,
+          );
+        }
+      }
+
+      await this.prisma.reservationEquipment.deleteMany({
+        where: {
+          reservationId: id,
+        },
+      });
+
+      updateData.equipments = {
+        create: data.equipments.map((item) => ({
+          equipmentId: item.equipmentId,
+          subdivisionsQuantity: item.subdivisionsQuantity,
+        })),
+      };
+    }
+
     return this.prisma.reservation.update({
       where: { id },
-      data: {
-        equipmentId: data.equipmentId,
-        requester: data.requester,
-        startDate,
-        endDate,
-        notes: data.notes,
-      },
+
+      data: updateData,
+
       include: {
-        equipment: true,
+        equipments: {
+          include: {
+            equipment: true,
+          },
+        },
       },
     });
   }

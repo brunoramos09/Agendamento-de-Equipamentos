@@ -7,36 +7,15 @@ datasource db {
   provider = "postgresql"
 }
 
-model Equipment {
-  id            Int @id @default(autoincrement())
-  name          String
-  description   String?
-  notes         String?
-
-  roomId        Int
-  room          Room @relation(fields: [roomId], references: [id])
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  reservations Reservation[]
-}
-
-model Reservation {
-id              Int @id @default(autoincrement())
-  equipmentId   Int
-  requester     String
-  startDate     DateTime
-  endDate       DateTime
-  notes         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  equipment  Equipment @relation(fields: [equipmentId], references: [id])
+enum EquipmentStatus {
+  DISPONIVEL
+  MANUTENCAO
+  INATIVO
 }
 
 model Room {
   id            Int @id @default(autoincrement())
+
   name          String
   building      String
   floor         Int
@@ -45,5 +24,57 @@ model Room {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  equipments Equipment[]
+  equipments    Equipment[]
+}
+
+model Equipment {
+  id                    Int @id @default(autoincrement())
+
+  name                  String
+  serialNumber          String?
+  photo                 String?
+  responsibleEmployee   String?
+  observations          String?
+  instructions          String?
+  attachedDocuments     String[]
+
+  subdivisions          Int?
+  status                EquipmentStatus @default(DISPONIVEL)
+
+  roomId                Int
+  room                  Room @relation(fields: [roomId], references: [id])
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  reservations          ReservationEquipment[]
+}
+
+model Reservation {
+  id              Int @id @default(autoincrement())
+
+  user            String
+  startDate       DateTime
+  endDate         DateTime
+  returnedAt      DateTime?
+  observations    String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  equipments      ReservationEquipment[]
+}
+
+model ReservationEquipment {
+  id                    Int @id @default(autoincrement())
+
+  reservationId         Int
+  equipmentId           Int
+
+  subdivisionsQuantity  Int?
+
+  reservation           Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  equipment             Equipment @relation(fields: [equipmentId], references: [id])
+
+  @@unique([reservationId, equipmentId])
 }
