@@ -5,6 +5,9 @@ import equipamentosTheme from "../styles/theme/equipamentosTheme";
 import { listarSalas, excluirSala } from "../services/salasService";
 import type Room from "../interfaces/sala";
 
+// import { toast } from "sonner";
+import { notify } from "../utils/notifications";
+
 export default function Salas() {
   const [salas, setSalas] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +35,7 @@ export default function Salas() {
     }
   }
 
+  
   async function confirmarExclusao() {
     if (!salaExcluir) return;
 
@@ -40,12 +44,15 @@ export default function Salas() {
 
       await excluirSala(salaExcluir.id);
 
+      notify.deleted(salaExcluir.name);
+
       setSalas((atuais) => atuais.filter((sala) => sala.id !== salaExcluir.id));
 
       setSalaExcluir(null);
     } catch (error) {
       console.error(error);
-      alert("Não foi possível excluir a sala.");
+      
+      notify.error("Não foi possível excluir a sala.");
     } finally {
       setExcluindo(false);
     }
