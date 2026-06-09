@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/immutability */
 import { useEffect, useState } from "react";
-import AppTemplate from "./AppTemplate";
-import equipamentosTheme from "../styles/theme/equipamentosTheme";
-import { listarSalas, excluirSala } from "../services/salasService";
-import type Room from "../interfaces/sala";
+import AppTemplate from "../AppTemplate";
+import equipamentosTheme from "../../styles/theme/equipamentosTheme";
+import { listarSalas, excluirSala } from "../../services/salasService";
+import type Room from "../../interfaces/sala";
 
 // import { toast } from "sonner";
-import { notify } from "../utils/notifications";
+import { notify } from "../../utils/notifications";
 
 export default function Salas() {
   const [salas, setSalas] = useState<Room[]>([]);
@@ -35,7 +35,6 @@ export default function Salas() {
     }
   }
 
-  
   async function confirmarExclusao() {
     if (!salaExcluir) return;
 
@@ -51,7 +50,7 @@ export default function Salas() {
       setSalaExcluir(null);
     } catch (error) {
       console.error(error);
-      
+
       notify.error("Não foi possível excluir a sala.");
     } finally {
       setExcluindo(false);
@@ -184,6 +183,9 @@ export default function Salas() {
                       }}
                     >
                       <button
+                        onClick={() =>
+                          (window.location.href = `/reserva-equipamentos/salas/editar/${sala.id}`)
+                        }
                         style={{
                           padding: "6px 10px",
                           background: "#171717",

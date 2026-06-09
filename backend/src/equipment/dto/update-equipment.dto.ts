@@ -1,4 +1,5 @@
 import { IsArray, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export enum EquipmentStatus {
   DISPONIVEL = 'DISPONIVEL',
@@ -12,6 +13,7 @@ export class UpdateEquipmentDto {
   name?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   roomId?: number;
 
@@ -40,6 +42,7 @@ export class UpdateEquipmentDto {
   attachedDocuments?: string[];
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   subdivisions?: number;
 

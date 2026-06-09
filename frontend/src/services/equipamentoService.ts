@@ -26,3 +26,26 @@ export async function criarEquipamento(formData: FormData) {
 
   return response.json();
 }
+
+export async function buscarEquipamentoPorId(id: number) {
+  const response = await fetch(`http://localhost:3000/equipments/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Erro ao buscar equipamento");
+  }
+
+  return response.json();
+}
+
+export async function atualizarEquipamento(id: number, formData: FormData) {
+  const response = await fetch(`http://localhost:3000/equipments/${id}`, {
+    method: "PATCH",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao atualizar equipamento");
+  }
+
+  return response.json();
+}

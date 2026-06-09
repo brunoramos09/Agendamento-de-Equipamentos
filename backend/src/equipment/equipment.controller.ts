@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Body,
   Controller,
@@ -5,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Patch,
   Delete,
   UploadedFile,
   UseInterceptors,
@@ -15,6 +18,7 @@ import { diskStorage } from 'multer';
 
 import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
+import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 
 @Controller('equipments')
 export class EquipmentController {
@@ -48,5 +52,28 @@ export class EquipmentController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.equipmentService.remove(id);
+  }
+
+  @Patch(':id')
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: './uploads/equipments',
+        filename: (req, file, cb) => {
+          cb(null, `${Date.now()}-${file.originalname}`);
+        },
+      }),
+    }),
+  )
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateEquipmentDto,
+    @UploadedFile() photo?: any,
+  ) {
+    if (photo) {
+      body.photo = photo.filename;
+    }
+
+    return this.equipmentService.update(id, body);
   }
 }

@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/immutability */
 import { useEffect, useState } from "react";
-import AppTemplate from "./AppTemplate";
-import equipamentosTheme from "../styles/theme/equipamentosTheme";
+import AppTemplate from "../AppTemplate";
+import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import {
   listarEquipamentos,
   excluirEquipamento,
-} from "../services/equipamentoService";
-import type Equipment from "../interfaces/equipamento";
+} from "../../services/equipamentoService";
+import type Equipment from "../../interfaces/equipamento";
 
-import { notify } from "../utils/notifications";
+import { notify } from "../../utils/notifications";
 
 const statusLabels: Record<string, string> = {
   DISPONIVEL: "Disponível",
@@ -279,6 +279,9 @@ export default function Equipamentos() {
                       }}
                     >
                       <button
+                        onClick={() =>
+                          (window.location.href = `/reserva-equipamentos/equipamentos/editar/${equipamento.id}`)
+                        }
                         style={{
                           padding: "6px 10px",
                           background: "#171717",
