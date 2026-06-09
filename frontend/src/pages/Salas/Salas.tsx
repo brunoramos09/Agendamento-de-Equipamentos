@@ -69,7 +69,6 @@ export default function Salas() {
     <AppTemplate
       hideDefaultContent={true}
       theme={equipamentosTheme}
-      appName="Sistema de Agendamento de Equipamentos"
       appSubtitle="Gerenciamento de Salas"
       appDescription="Consulte, cadastre e acompanhe as salas disponíveis."
       primaryAction={{

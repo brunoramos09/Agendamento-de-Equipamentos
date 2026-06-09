@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import {
   BadRequestException,
@@ -15,7 +14,7 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 export class ReservationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  async findAll() {
     return this.prisma.reservation.findMany({
       include: {
         equipments: {
@@ -25,7 +24,7 @@ export class ReservationService {
         },
       },
       orderBy: {
-        id: 'asc',
+        startDate: 'desc',
       },
     });
   }
@@ -43,24 +42,28 @@ export class ReservationService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('Reserva não encontrada');
+      throw new NotFoundException(`Reserva ${id} não encontrada`);
     }
 
     return reservation;
   }
 
-  async create(data: CreateReservationDto) {
-    const startDate = new Date(data.startDate);
-
-    const endDate = new Date(data.endDate);
-
-    if (endDate <= startDate) {
+  private async validateReservationConflicts(
+    equipments: {
+      equipmentId: number;
+      subdivisionsQuantity?: number;
+    }[],
+    startDate: Date,
+    endDate: Date,
+    reservationId?: number,
+  ) {
+    if (!equipments || equipments.length === 0) {
       throw new BadRequestException(
-        'A data final deve ser maior que a data inicial',
+        'A reserva deve possuir pelo menos um equipamento',
       );
     }
 
-    for (const item of data.equipments) {
+    for (const item of equipments) {
       const equipment = await this.prisma.equipment.findUnique({
         where: {
           id: item.equipmentId,
@@ -72,23 +75,74 @@ export class ReservationService {
           `Equipamento ${item.equipmentId} não encontrado`,
         );
       }
+
+      const conflict = await this.prisma.reservationEquipment.findFirst({
+        where: {
+          equipmentId: item.equipmentId,
+
+          reservation: {
+            returnedAt: null,
+
+            ...(reservationId
+              ? {
+                  id: {
+                    not: reservationId,
+                  },
+                }
+              : {}),
+
+            startDate: {
+              lte: endDate,
+            },
+
+            endDate: {
+              gte: startDate,
+            },
+          },
+        },
+        include: {
+          reservation: true,
+        },
+      });
+
+      if (conflict) {
+        throw new BadRequestException(
+          `O equipamento "${equipment.name}" já está reservado neste período`,
+        );
+      }
     }
+  }
+
+  async create(dto: CreateReservationDto) {
+    const startDate = new Date(dto.startDate);
+    const endDate = new Date(dto.endDate);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      throw new BadRequestException('Datas inválidas');
+    }
+
+    if (endDate <= startDate) {
+      throw new BadRequestException(
+        'A data final deve ser maior que a data inicial',
+      );
+    }
+
+    await this.validateReservationConflicts(dto.equipments, startDate, endDate);
 
     return this.prisma.reservation.create({
       data: {
-        user: data.user,
+        user: dto.user,
         startDate,
         endDate,
-        observations: data.observations,
+        observations: dto.observations,
 
         equipments: {
-          create: data.equipments.map((item) => ({
-            equipmentId: item.equipmentId,
-            subdivisionsQuantity: item.subdivisionsQuantity,
+          create: dto.equipments.map((e) => ({
+            equipmentId: e.equipmentId,
+            subdivisionsQuantity: e.subdivisionsQuantity,
           })),
         },
       },
-
       include: {
         equipments: {
           include: {
@@ -100,7 +154,23 @@ export class ReservationService {
   }
 
   async update(id: number, data: UpdateReservationDto) {
-    await this.findOne(id);
+    const reservation = await this.findOne(id);
+
+    const startDate = data.startDate
+      ? new Date(data.startDate)
+      : reservation.startDate;
+
+    const endDate = data.endDate ? new Date(data.endDate) : reservation.endDate;
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      throw new BadRequestException('Datas inválidas');
+    }
+
+    if (endDate <= startDate) {
+      throw new BadRequestException(
+        'A data final deve ser maior que a data inicial',
+      );
+    }
 
     const updateData: any = {};
 
@@ -112,58 +182,54 @@ export class ReservationService {
       updateData.observations = data.observations;
     }
 
-    if (data.startDate) {
-      updateData.startDate = new Date(data.startDate);
+    if (data.startDate !== undefined) {
+      updateData.startDate = startDate;
     }
 
-    if (data.endDate) {
-      updateData.endDate = new Date(data.endDate);
+    if (data.endDate !== undefined) {
+      updateData.endDate = endDate;
     }
 
-    if (
-      updateData.startDate &&
-      updateData.endDate &&
-      updateData.endDate <= updateData.startDate
-    ) {
-      throw new BadRequestException(
-        'A data final deve ser maior que a data inicial',
+    if (data.equipments !== undefined) {
+      await this.validateReservationConflicts(
+        data.equipments,
+        startDate,
+        endDate,
+        id,
       );
-    }
 
-    if (data.equipments) {
-      for (const item of data.equipments) {
-        const equipment = await this.prisma.equipment.findUnique({
+      return this.prisma.$transaction(async (tx) => {
+        await tx.reservationEquipment.deleteMany({
           where: {
-            id: item.equipmentId,
+            reservationId: id,
           },
         });
 
-        if (!equipment) {
-          throw new NotFoundException(
-            `Equipamento ${item.equipmentId} não encontrado`,
-          );
-        }
-      }
-
-      await this.prisma.reservationEquipment.deleteMany({
-        where: {
-          reservationId: id,
-        },
+        return tx.reservation.update({
+          where: { id },
+          data: {
+            ...updateData,
+            equipments: {
+              create: data.equipments!.map((item) => ({
+                equipmentId: item.equipmentId,
+                subdivisionsQuantity: item.subdivisionsQuantity,
+              })),
+            },
+          },
+          include: {
+            equipments: {
+              include: {
+                equipment: true,
+              },
+            },
+          },
+        });
       });
-
-      updateData.equipments = {
-        create: data.equipments.map((item) => ({
-          equipmentId: item.equipmentId,
-          subdivisionsQuantity: item.subdivisionsQuantity,
-        })),
-      };
     }
 
     return this.prisma.reservation.update({
       where: { id },
-
       data: updateData,
-
       include: {
         equipments: {
           include: {
@@ -179,6 +245,21 @@ export class ReservationService {
 
     return this.prisma.reservation.delete({
       where: { id },
+    });
+  }
+
+  async returnReservation(id: number) {
+    const reservation = await this.findOne(id);
+
+    if (reservation.returnedAt) {
+      throw new BadRequestException('Esta reserva já foi devolvida');
+    }
+
+    return this.prisma.reservation.update({
+      where: { id },
+      data: {
+        returnedAt: new Date(),
+      },
     });
   }
 }

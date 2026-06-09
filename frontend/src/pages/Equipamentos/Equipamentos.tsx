@@ -89,7 +89,6 @@ export default function Equipamentos() {
     <AppTemplate
       hideDefaultContent={true}
       theme={equipamentosTheme}
-      appName="Sistema de Agendamento de Equipamentos"
       appSubtitle="Gerenciamento de Equipamentos"
       appDescription="Consulte, cadastre e acompanhe os equipamentos disponíveis para reserva."
       primaryAction={{

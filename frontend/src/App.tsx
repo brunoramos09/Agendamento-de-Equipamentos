@@ -7,6 +7,8 @@ import EquipamentosCriar from "./pages/Equipamentos/EquipamentosCriar";
 import EditarSala from "./pages/Salas/SalasEditar";
 import EditarEquipamento from "./pages/Equipamentos/EquipamentosEditar";
 import { Toaster } from "sonner";
+import Reservas from "./pages/Reservas.tsx/Reservas";
+import ReservasCriar from "./pages/Reservas.tsx/ReservasCriar";
 
 function App() {
   return (
@@ -37,6 +39,11 @@ function App() {
           <Route
             path="/reserva-equipamentos/salas/editar/:id"
             element={<EditarSala />}
+          />
+          <Route path="/reserva-equipamentos/reservas" element={<Reservas />} />
+          <Route
+            path="/reserva-equipamentos/reservas/criar"
+            element={<ReservasCriar />}
           />
         </Routes>
       </BrowserRouter>

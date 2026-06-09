@@ -1,25 +1,27 @@
 import { toast } from "sonner";
 
 export const notify = {
-    created: (entity: string) =>
-        toast.success(`${entity} criado(a) com sucesso!`),
+  created: (entity: string) =>
+    toast.success(`${entity} criado(a) com sucesso!`),
 
-    updated: (entity: string) =>
-        toast.success(`${entity} atualizado(a) com sucesso!`),
+  returned: (entity: number) =>
+    toast.success(`${entity} devolvido(a) com sucesso!`),
 
-    deleted: (entity: string) =>
-        toast.success(`${entity} excluído(a) com sucesso!`),
+  updated: (entity: string) =>
+    toast.success(`${entity} atualizado(a) com sucesso!`),
 
-    error: (message: string) =>
-        toast.error(message),
+  deleted: (entity: string) =>
+    toast.success(`${entity} excluído(a) com sucesso!`),
 
-    warning: (message: string, description?: string) =>
-        toast.warning(message, {
-            description,
-        }),
+  error: (message: string) => toast.error(message),
 
-    info: (message: string, description?: string) =>
-        toast.info(message, {
-            description,
-        }),
+  warning: (message: string, description?: string) =>
+    toast.warning(message, {
+      description,
+    }),
+
+  info: (message: string, description?: string) =>
+    toast.info(message, {
+      description,
+    }),
 };

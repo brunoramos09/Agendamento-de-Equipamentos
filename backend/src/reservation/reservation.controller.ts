@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -21,8 +22,8 @@ export class ReservationController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservationService.findOne(Number(id));
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.reservationService.findOne(id);
   }
 
   @Post()
@@ -31,12 +32,20 @@ export class ReservationController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() data: UpdateReservationDto) {
-    return this.reservationService.update(Number(id), data);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateReservationDto,
+  ) {
+    return this.reservationService.update(id, data);
+  }
+
+  @Patch(':id/return')
+  returnReservation(@Param('id', ParseIntPipe) id: number) {
+    return this.reservationService.returnReservation(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reservationService.remove(Number(id));
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.reservationService.remove(id);
   }
 }
