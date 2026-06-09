@@ -7,6 +7,8 @@ import { criarEquipamento } from "../services/equipamentoService";
 import { listarSalas } from "../services/salasService";
 import type Room from "../interfaces/sala";
 
+import { notify } from "../utils/notifications";
+
 export default function CriarEquipamento() {
   const navigate = useNavigate();
 
@@ -83,10 +85,11 @@ export default function CriarEquipamento() {
 
       await criarEquipamento(formData);
 
+      notify.created("Equipamento: " + equipamento.name + " | ");
       navigate("/reserva-equipamentos/equipamentos");
     } catch (error) {
       console.error(error);
-      alert("Erro ao criar equipamento.");
+      notify.error("Erro ao criar equipamento.");
     } finally {
       setSalvando(false);
     }

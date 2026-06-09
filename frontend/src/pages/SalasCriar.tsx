@@ -4,6 +4,8 @@ import AppTemplate from "./AppTemplate";
 import equipamentosTheme from "../styles/theme/equipamentosTheme";
 import { criarSala } from "../services/salasService";
 
+import { notify } from "../utils/notifications";
+
 export default function CriarSala() {
   const navigate = useNavigate();
 
@@ -19,15 +21,19 @@ export default function CriarSala() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    
     try {
       setSalvando(true);
 
       await criarSala(sala);
 
+      notify.created(sala.name);
+
       navigate("/reserva-equipamentos/salas");
     } catch (error) {
       console.error(error);
-      alert("Erro ao criar sala.");
+
+      notify.error("Erro ao criar sala.");
     } finally {
       setSalvando(false);
     }

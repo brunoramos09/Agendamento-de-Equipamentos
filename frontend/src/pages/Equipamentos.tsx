@@ -8,6 +8,8 @@ import {
 } from "../services/equipamentoService";
 import type Equipment from "../interfaces/equipamento";
 
+import { notify } from "../utils/notifications";
+
 const statusLabels: Record<string, string> = {
   DISPONIVEL: "Disponível",
   MANUTENCAO: "Manutenção",
@@ -55,6 +57,8 @@ export default function Equipamentos() {
 
       await excluirEquipamento(equipamentoExcluir.id);
 
+      notify.deleted(equipamentoExcluir.name);
+
       setEquipamentos((atuais) =>
         atuais.filter((e) => e.id !== equipamentoExcluir.id),
       );
@@ -62,7 +66,7 @@ export default function Equipamentos() {
       setEquipamentoExcluir(null);
     } catch (error) {
       console.error(error);
-      alert("Não foi possível excluir o equipamento.");
+      notify.error("Não foi possível excluir o equipamento.");
     } finally {
       setExcluindo(false);
     }
