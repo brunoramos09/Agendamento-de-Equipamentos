@@ -4,8 +4,6 @@ import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import { listarSalas, excluirSala } from "../../services/salasService";
 import type Room from "../../interfaces/sala";
-
-// import { toast } from "sonner";
 import { notify } from "../../utils/notifications";
 
 export default function Salas() {
@@ -21,10 +19,10 @@ export default function Salas() {
   }, []);
 
   async function carregarSalas() {
-    setLoading(true);
-    setErro("");
-
     try {
+      setLoading(true);
+      setErro("");
+
       const dados = await listarSalas();
       setSalas(dados);
     } catch (error) {
@@ -43,14 +41,12 @@ export default function Salas() {
 
       await excluirSala(salaExcluir.id);
 
-      notify.deleted(salaExcluir.name);
-
       setSalas((atuais) => atuais.filter((sala) => sala.id !== salaExcluir.id));
 
+      notify.deleted(salaExcluir.name);
       setSalaExcluir(null);
     } catch (error) {
       console.error(error);
-
       notify.error("Não foi possível excluir a sala.");
     } finally {
       setExcluindo(false);
@@ -83,17 +79,17 @@ export default function Salas() {
       <header
         style={{
           display: "flex",
-          alignItems: "flex-start",
           justifyContent: "space-between",
-          gap: "12px",
-          marginBottom: "14px",
+          gap: "16px",
+          alignItems: "center",
+          marginBottom: "18px",
         }}
       >
         <div>
           <span
             style={{
               fontSize: "11px",
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "var(--app-accent)",
@@ -105,8 +101,8 @@ export default function Salas() {
           <h2
             style={{
               margin: "6px 0 0",
-              fontSize: "22px",
-              letterSpacing: "-0.03em",
+              fontSize: "24px",
+              color: "#111827",
             }}
           >
             Lista de Salas
@@ -114,7 +110,7 @@ export default function Salas() {
         </div>
       </header>
 
-      <div style={{ marginBottom: "16px" }}>
+      <div style={{ marginBottom: "18px" }}>
         <input
           type="text"
           placeholder="Pesquisar por nome, prédio, andar ou campus..."
@@ -122,110 +118,114 @@ export default function Salas() {
           onChange={(e) => setPesquisa(e.target.value)}
           style={{
             width: "100%",
-            maxWidth: "450px",
-            padding: "10px 14px",
-            border: "1px solid #d4d4d4",
-            borderRadius: "10px",
-            fontSize: "14px",
-            background: "#ffffff",
+            maxWidth: "520px",
+            padding: "12px 14px",
+            border: "1px solid #d1d5db",
+            borderRadius: "12px",
             outline: "none",
+            fontSize: "14px",
           }}
         />
       </div>
 
-      {loading && <p>Carregando...</p>}
+      {loading && <p>Carregando salas...</p>}
 
-      {erro && <p>{erro}</p>}
-
-      {!loading && !erro && salas.length === 0 && (
-        <p>Nenhuma sala cadastrada.</p>
+      {erro && (
+        <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>
       )}
 
-      {!loading && !erro && salas.length > 0 && salasFiltradas.length === 0 && (
-        <p>Nenhuma sala encontrada.</p>
+      {!loading && !erro && salasFiltradas.length === 0 && (
+        <p style={{ color: "#6b7280" }}>Nenhuma sala encontrada.</p>
       )}
 
       {!loading && !erro && salasFiltradas.length > 0 && (
-        <div style={{ width: "100%", overflowX: "auto" }}>
+        <div
+          style={{
+            width: "100%",
+            overflowX: "auto",
+            border: "1px solid #e5e7eb",
+            borderRadius: "14px",
+          }}
+        >
           <table
             style={{
               width: "100%",
               borderCollapse: "collapse",
+              minWidth: "650px",
             }}
           >
             <thead>
-              <tr>
-                <th style={{ textAlign: "left", padding: "12px" }}>ID</th>
-                <th style={{ textAlign: "left", padding: "12px" }}>Nome</th>
-                <th style={{ textAlign: "left", padding: "12px" }}>Prédio</th>
-                <th style={{ textAlign: "left", padding: "12px" }}>Andar</th>
-                <th style={{ textAlign: "left", padding: "12px" }}>Campus</th>
-                <th style={{ textAlign: "center", padding: "12px" }}>Ações</th>
+              <tr
+                style={{
+                  background: "#f9fafb",
+                  borderBottom: "1px solid #e5e7eb",
+                }}
+              >
+                {["ID", "Nome", "Prédio", "Andar", "Campus", "Ações"].map(
+                  (titulo) => (
+                    <th
+                      key={titulo}
+                      style={{
+                        textAlign: titulo === "Ações" ? "center" : "left",
+                        padding: "14px 12px",
+                        fontSize: "12px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        color: "#374151",
+                      }}
+                    >
+                      {titulo}
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
 
             <tbody>
               {salasFiltradas.map((sala) => (
-                <tr key={sala.id}>
-                  <td style={{ padding: "12px" }}>{sala.id}</td>
-                  <td style={{ padding: "12px" }}>{sala.name}</td>
-                  <td style={{ padding: "12px" }}>{sala.building}</td>
-                  <td style={{ padding: "12px" }}>{sala.floor}</td>
-                  <td style={{ padding: "12px" }}>{sala.campus}</td>
+                <tr
+                  key={sala.id}
+                  style={{ borderBottom: "1px solid #f3f4f6" }}
+                >
+                  <td style={{ padding: "14px 12px", fontWeight: 700 }}>
+                    {sala.id}
+                  </td>
 
-                  <td style={{ padding: "12px" }}>
+                  <td style={{ padding: "14px 12px" }}>{sala.name}</td>
+
+                  <td style={{ padding: "14px 12px" }}>{sala.building ?? "-"}</td>
+
+                  <td style={{ padding: "14px 12px" }}>{sala.floor ?? "-"}</td>
+
+                  <td style={{ padding: "14px 12px" }}>{sala.campus ?? "-"}</td>
+
+                  <td style={{ padding: "14px 12px" }}>
                     <div
                       style={{
                         display: "flex",
+                        gap: "8px",
                         justifyContent: "center",
-                        gap: "6px",
+                        flexWrap: "wrap",
                       }}
                     >
                       <button
+                        type="button"
                         onClick={() =>
                           (window.location.href = `/reserva-equipamentos/salas/editar/${sala.id}`)
                         }
-                        style={{
-                          padding: "6px 10px",
-                          background: "#171717",
-                          color: "#ffffff",
-                          border: "none",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                        }}
+                        style={buttonStyle}
                       >
                         Editar
                       </button>
 
-                      <button
-                        style={{
-                          padding: "6px 10px",
-                          background: "#ffffff",
-                          color: "#171717",
-                          border: "1px solid #d4d4d4",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                        }}
-                      >
+                      <button type="button" style={buttonStyle}>
                         Relatório
                       </button>
 
                       <button
+                        type="button"
                         onClick={() => setSalaExcluir(sala)}
-                        style={{
-                          padding: "6px 10px",
-                          background: "#ffffff",
-                          color: "#171717",
-                          border: "1px solid #d4d4d4",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                        }}
+                        style={{ ...buttonStyle, background: "#7f1d1d" }}
                       >
                         Excluir
                       </button>
@@ -239,82 +239,42 @@ export default function Salas() {
       )}
 
       {salaExcluir && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.55)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "24px",
-              width: "100%",
-              maxWidth: "420px",
-              boxShadow: "0 20px 40px rgba(0,0,0,.2)",
-            }}
-          >
-            <h3 style={{ margin: "0 0 12px" }}>Confirmar exclusão</h3>
+        <div style={modalOverlayStyle}>
+          <div style={{ ...modalStyle, maxWidth: "460px" }}>
+            <h2 style={{ margin: "0 0 10px" }}>Excluir sala</h2>
 
-            <p
-              style={{
-                marginBottom: "20px",
-                color: "#525252",
-              }}
-            >
-              Deseja realmente excluir a sala?
+            <p style={{ color: "#4b5563", lineHeight: 1.5 }}>
+              Tem certeza que deseja excluir a sala{" "}
+              <strong>{salaExcluir.name}</strong>? Essa ação não poderá ser
+              desfeita.
             </p>
-
-            <div
-              style={{
-                marginBottom: "20px",
-                padding: "12px",
-                background: "#f5f5f5",
-                borderRadius: "8px",
-                fontWeight: 600,
-              }}
-            >
-              {salaExcluir.name}
-            </div>
 
             <div
               style={{
                 display: "flex",
                 justifyContent: "flex-end",
-                gap: "8px",
+                gap: "10px",
+                marginTop: "22px",
               }}
             >
               <button
+                type="button"
                 onClick={() => setSalaExcluir(null)}
                 disabled={excluindo}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: "8px",
-                  border: "1px solid #d4d4d4",
-                  background: "#fff",
-                  cursor: "pointer",
-                }}
+                style={{ ...buttonStyle, background: "#6b7280" }}
               >
                 Cancelar
               </button>
 
               <button
+                type="button"
                 onClick={confirmarExclusao}
                 disabled={excluindo}
                 style={{
-                  padding: "8px 14px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: "#dc2626",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontWeight: 600,
+                  ...buttonStyle,
+                  background: "#7f1d1d",
+                  opacity: excluindo ? 0.7 : 1,
+                  cursor: excluindo ? "not-allowed" : "pointer",
                 }}
               >
                 {excluindo ? "Excluindo..." : "Excluir"}
@@ -326,3 +286,37 @@ export default function Salas() {
     </AppTemplate>
   );
 }
+
+const buttonStyle: React.CSSProperties = {
+  border: "none",
+  background: "#111827",
+  color: "#fff",
+  padding: "8px 12px",
+  borderRadius: "9px",
+  fontSize: "13px",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const modalOverlayStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,.55)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 9999,
+  padding: "20px",
+};
+
+const modalStyle: React.CSSProperties = {
+  background: "#fff",
+  padding: "24px",
+  borderRadius: "16px",
+  width: "100%",
+  maxWidth: "650px",
+  maxHeight: "85vh",
+  overflowY: "auto",
+  boxShadow: "0 20px 40px rgba(0,0,0,.25)",
+};
+
