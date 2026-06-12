@@ -46,8 +46,8 @@ export type AppTemplateProps = {
   brandLabel?: string;
   navigation?: NavigationItem[];
   metrics?: MetricCard[];
-  primaryAction?: ActionLink;
-  secondaryAction?: ActionLink;
+  primaryAction?: ActionLink | null;
+  secondaryAction?: ActionLink | null;
   featuredTitle?: string;
   featuredDescription?: string;
   featuredBullets?: string[];
@@ -185,18 +185,22 @@ export function AppTemplate(props: Readonly<AppTemplateProps>) {
           </div>
 
           <div className={styles.actionGroup}>
-            <a
-              href={secondaryAction.href}
-              className={`${styles.actionButton} ${styles.actionSecondary}`}
-            >
-              {secondaryAction.label}
-            </a>
-            <a
-              href={primaryAction.href}
-              className={`${styles.actionButton} ${styles.actionPrimary}`}
-            >
-              {primaryAction.label}
-            </a>
+            {secondaryAction && (
+              <a
+                href={secondaryAction.href}
+                className={`${styles.actionButton} ${styles.actionSecondary}`}
+              >
+                {secondaryAction.label}
+              </a>
+            )}
+            {primaryAction && (
+              <a
+                href={primaryAction.href}
+                className={`${styles.actionButton} ${styles.actionPrimary}`}
+              >
+                {primaryAction.label}
+              </a>
+            )}
           </div>
         </header>
 

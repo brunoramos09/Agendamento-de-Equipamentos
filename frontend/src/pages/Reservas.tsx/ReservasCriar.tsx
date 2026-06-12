@@ -9,9 +9,13 @@ import type Equipment from "../../interfaces/equipamento";
 import { listarEquipamentos } from "../../services/equipamentoService";
 import { criarReserva } from "../../services/reservaService";
 
+import { useNavigate } from "react-router-dom";
+
 import { notify } from "../../utils/notifications";
 
 export default function CriarReserva() {
+  const navigate = useNavigate();
+
   const [salvando, setSalvando] = useState(false);
 
   const [equipamentos, setEquipamentos] = useState<Equipment[]>([]);
@@ -106,9 +110,9 @@ export default function CriarReserva() {
         equipments: reserva.equipments,
       });
 
-      notify.created("Reserva criada com sucesso.");
+      notify.created("Reserva");
 
-      window.location.href = "/reserva-equipamentos/reservas";
+      navigate("/reserva-equipamentos/reservas");
     } catch (error: any) {
       console.error(error);
 
@@ -122,6 +126,8 @@ export default function CriarReserva() {
     <AppTemplate
       hideDefaultContent={true}
       theme={equipamentosTheme}
+      primaryAction={null}
+      secondaryAction={null}
       appName="Sistema de Agendamento de Equipamentos"
       appSubtitle="Nova Reserva"
       appDescription="Cadastre uma nova reserva de equipamentos."
@@ -345,7 +351,7 @@ export default function CriarReserva() {
           >
             <button
               onClick={() =>
-                (window.location.href = "/reserva-equipamentos/reservas")
+                navigate("/reserva-equipamentos/reservas")
               }
               style={{
                 padding: "10px 16px",

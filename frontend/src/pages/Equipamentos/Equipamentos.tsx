@@ -7,36 +7,38 @@ import {
   excluirEquipamento,
 } from "../../services/equipamentoService";
 import type Equipment from "../../interfaces/equipamento";
-
 import { notify } from "../../utils/notifications";
 
 const statusLabels: Record<string, string> = {
-  DISPONIVEL: "Disponível",
-  MANUTENCAO: "Manutenção",
-  INATIVO: "Inativo",
+  DISPONIVEL: "DISPONÍVEL",
+  MANUTENCAO: "MANUTENÇÃO",
+  INATIVO: "INATIVO",
 };
+
+function getStatusStyle(status: string) {
+  if (status === "DISPONIVEL") return { bg: "#dcfce7", color: "#166534" };
+  if (status === "MANUTENCAO") return { bg: "#fef3c7", color: "#92400e" };
+  return { bg: "#fee2e2", color: "#991b1b" };
+}
 
 export default function Equipamentos() {
   const [equipamentos, setEquipamentos] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [pesquisa, setPesquisa] = useState("");
-  const [equipamentoExcluir, setEquipamentoExcluir] =
-    useState<Equipment | null>(null);
+  const [equipamentoInfo, setEquipamentoInfo] = useState<Equipment | null>(null);
+  const [equipamentoExcluir, setEquipamentoExcluir] = useState<Equipment | null>(null);
   const [excluindo, setExcluindo] = useState(false);
-  const [equipamentoInfo, setEquipamentoInfo] = useState<Equipment | null>(
-    null,
-  );
 
   useEffect(() => {
     carregarEquipamentos();
   }, []);
 
   async function carregarEquipamentos() {
-    setLoading(true);
-    setErro("");
-
     try {
+      setLoading(true);
+      setErro("");
+
       const dados: Equipment[] = await listarEquipamentos();
       setEquipamentos(dados);
     } catch (error) {
@@ -48,21 +50,18 @@ export default function Equipamentos() {
   }
 
   async function confirmarExclusao() {
-    if (!equipamentoExcluir) {
-      return;
-    }
+    if (!equipamentoExcluir) return;
 
     try {
       setExcluindo(true);
 
       await excluirEquipamento(equipamentoExcluir.id);
 
-      notify.deleted(equipamentoExcluir.name);
-
       setEquipamentos((atuais) =>
         atuais.filter((e) => e.id !== equipamentoExcluir.id),
       );
 
+      notify.deleted(equipamentoExcluir.name);
       setEquipamentoExcluir(null);
     } catch (error) {
       console.error(error);
@@ -103,17 +102,17 @@ export default function Equipamentos() {
       <header
         style={{
           display: "flex",
-          alignItems: "flex-start",
           justifyContent: "space-between",
-          gap: "12px",
-          marginBottom: "14px",
+          gap: "16px",
+          alignItems: "center",
+          marginBottom: "18px",
         }}
       >
         <div>
           <span
             style={{
               fontSize: "11px",
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "var(--app-accent)",
@@ -125,19 +124,16 @@ export default function Equipamentos() {
           <h2
             style={{
               margin: "6px 0 0",
-              fontSize: "22px",
-              letterSpacing: "-0.03em",
+              fontSize: "24px",
+              color: "#111827",
             }}
           >
             Lista de Equipamentos
           </h2>
         </div>
       </header>
-      <div
-        style={{
-          marginBottom: "16px",
-        }}
-      >
+
+      <div style={{ marginBottom: "18px" }}>
         <input
           type="text"
           placeholder="Pesquisar por nome, patrimônio, sala ou status..."
@@ -145,194 +141,181 @@ export default function Equipamentos() {
           onChange={(e) => setPesquisa(e.target.value)}
           style={{
             width: "100%",
-            maxWidth: "450px",
-            padding: "10px 14px",
-            border: "1px solid #d4d4d4",
-            borderRadius: "10px",
-            fontSize: "14px",
-            background: "#ffffff",
+            maxWidth: "520px",
+            padding: "12px 14px",
+            border: "1px solid #d1d5db",
+            borderRadius: "12px",
             outline: "none",
+            fontSize: "14px",
           }}
         />
       </div>
-      {loading && <p>Carregando...</p>}
-      {erro && <p>{erro}</p>}
-      {!loading && !erro && equipamentos.length === 0 && (
-        <p>Nenhum equipamento cadastrado.</p>
+
+      {loading && <p>Carregando equipamentos...</p>}
+
+      {erro && (
+        <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>
       )}
-      {!loading &&
-        !erro &&
-        equipamentos.length > 0 &&
-        equipamentosFiltrados.length === 0 && (
-          <p>Nenhum equipamento encontrado.</p>
-        )}
+
+      {!loading && !erro && equipamentosFiltrados.length === 0 && (
+        <p style={{ color: "#6b7280" }}>Nenhum equipamento encontrado.</p>
+      )}
+
       {!loading && !erro && equipamentosFiltrados.length > 0 && (
-        <div style={{ width: "100%", overflowX: "auto" }}>
+        <div
+          style={{
+            width: "100%",
+            overflowX: "auto",
+            border: "1px solid #e5e7eb",
+            borderRadius: "14px",
+          }}
+        >
           <table
             style={{
               width: "100%",
               borderCollapse: "collapse",
+              minWidth: "750px",
             }}
           >
             <thead>
-              <tr>
-                <th style={{ textAlign: "left", padding: "12px" }}>ID</th>
-
-                <th style={{ textAlign: "left", padding: "12px" }}>Nome</th>
-
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "12px",
-                    minWidth: "160px",
-                  }}
-                >
-                  Patrimônio
-                </th>
-
-                <th style={{ textAlign: "left", padding: "12px" }}>Sala</th>
-
-                <th style={{ textAlign: "left", padding: "12px" }}>Status</th>
-
-                <th style={{ textAlign: "center", padding: "12px" }}>Ações</th>
+              <tr
+                style={{
+                  background: "#f9fafb",
+                  borderBottom: "1px solid #e5e7eb",
+                }}
+              >
+                {["ID", "Nome", "Patrimônio", "Sala", "Status", "Ações"].map(
+                  (titulo) => (
+                    <th
+                      key={titulo}
+                      style={{
+                        textAlign: titulo === "Ações" ? "center" : "left",
+                        padding: "14px 12px",
+                        fontSize: "12px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        color: "#374151",
+                      }}
+                    >
+                      {titulo}
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
 
             <tbody>
-              {equipamentosFiltrados.map((equipamento) => (
-                <tr key={equipamento.id}>
-                  <td style={{ padding: "12px" }}>{equipamento.id}</td>
+              {equipamentosFiltrados.map((equipamento) => {
+                const { bg, color } = getStatusStyle(equipamento.status);
 
-                  <td style={{ padding: "12px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <span>{equipamento.name}</span>
+                return (
+                  <tr
+                    key={equipamento.id}
+                    style={{ borderBottom: "1px solid #f3f4f6" }}
+                  >
+                    <td style={{ padding: "14px 12px", fontWeight: 700 }}>
+                      {equipamento.id}
+                    </td>
 
-                      <button
-                        onClick={() => setEquipamentoInfo(equipamento)}
+                    <td style={{ padding: "14px 12px" }}>
+                      <div
                         style={{
-                          width: "20px",
-                          height: "20px",
-                          borderRadius: "50%",
-                          border: "1px solid #d4d4d4",
-                          background: "#fff",
-                          color: "#171717",
-                          fontSize: "12px",
-                          fontWeight: 700,
-                          cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <span>{equipamento.name}</span>
+
+                        <button
+                          type="button"
+                          onClick={() => setEquipamentoInfo(equipamento)}
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            borderRadius: "50%",
+                            border: "1px solid #d1d5db",
+                            background: "#fff",
+                            color: "#374151",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 0,
+                            flexShrink: 0,
+                          }}
+                        >
+                          i
+                        </button>
+                      </div>
+                    </td>
+
+                    <td style={{ padding: "14px 12px" }}>
+                      {equipamento.serialNumber ?? "-"}
+                    </td>
+
+                    <td style={{ padding: "14px 12px" }}>
+                      {equipamento.room?.name ?? "-"}
+                    </td>
+
+                    <td style={{ padding: "14px 12px" }}>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          padding: "5px 10px",
+                          borderRadius: "999px",
+                          fontSize: "12px",
+                          fontWeight: 800,
+                          background: bg,
+                          color,
+                        }}
+                      >
+                        {statusLabels[equipamento.status] ?? equipamento.status}
+                      </span>
+                    </td>
+
+                    <td style={{ padding: "14px 12px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
                           justifyContent: "center",
-                          padding: 0,
+                          flexWrap: "wrap",
                         }}
                       >
-                        i
-                      </button>
-                    </div>
-                  </td>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            (window.location.href = `/reserva-equipamentos/equipamentos/editar/${equipamento.id}`)
+                          }
+                          style={buttonStyle}
+                        >
+                          Editar
+                        </button>
 
-                  <td style={{ padding: "12px" }}>
-                    {equipamento.serialNumber ?? "-"}
-                  </td>
+                        <button type="button" style={buttonStyle}>
+                          Relatório
+                        </button>
 
-                  <td style={{ padding: "12px" }}>
-                    {equipamento.room?.name ?? "-"}
-                  </td>
-
-                  <td style={{ padding: "12px" }}>
-                    <span
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: "999px",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        background:
-                          equipamento.status === "DISPONIVEL"
-                            ? "#dcfce7"
-                            : equipamento.status === "MANUTENCAO"
-                              ? "#fef3c7"
-                              : "#fee2e2",
-                        color:
-                          equipamento.status === "DISPONIVEL"
-                            ? "#166534"
-                            : equipamento.status === "MANUTENCAO"
-                              ? "#92400e"
-                              : "#991b1b",
-                      }}
-                    >
-                      {statusLabels[equipamento.status] ?? equipamento.status}
-                    </span>
-                  </td>
-
-                  <td style={{ padding: "12px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      <button
-                        onClick={() =>
-                          (window.location.href = `/reserva-equipamentos/equipamentos/editar/${equipamento.id}`)
-                        }
-                        style={{
-                          padding: "6px 10px",
-                          background: "#171717",
-                          color: "#ffffff",
-                          border: "none",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                        }}
-                      >
-                        Editar
-                      </button>
-
-                      <button
-                        style={{
-                          padding: "6px 10px",
-                          background: "#ffffff",
-                          color: "#171717",
-                          border: "1px solid #d4d4d4",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                        }}
-                      >
-                        Relatório
-                      </button>
-
-                      <button
-                        onClick={() => setEquipamentoExcluir(equipamento)}
-                        style={{
-                          padding: "6px 10px",
-                          background: "#ffffff",
-                          color: "#171717",
-                          border: "1px solid #d4d4d4",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                        }}
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        <button
+                          type="button"
+                          onClick={() => setEquipamentoExcluir(equipamento)}
+                          style={{ ...buttonStyle, background: "#7f1d1d" }}
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
+
       {equipamentoInfo && (
         <div
           style={{
@@ -411,15 +394,9 @@ export default function Equipamentos() {
               }}
             >
               <button
+                type="button"
                 onClick={() => setEquipamentoInfo(null)}
-                style={{
-                  padding: "10px 16px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: "#171717",
-                  color: "#fff",
-                  cursor: "pointer",
-                }}
+                style={buttonStyle}
               >
                 Fechar
               </button>
@@ -427,89 +404,44 @@ export default function Equipamentos() {
           </div>
         </div>
       )}
+
       {equipamentoExcluir && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.55)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "24px",
-              width: "100%",
-              maxWidth: "420px",
-              boxShadow: "0 20px 40px rgba(0,0,0,.2)",
-            }}
-          >
-            <h3
-              style={{
-                margin: "0 0 12px",
-              }}
-            >
-              Confirmar exclusão
-            </h3>
+        <div style={modalOverlayStyle}>
+          <div style={{ ...modalStyle, maxWidth: "460px" }}>
+            <h2 style={{ margin: "0 0 10px" }}>Excluir equipamento</h2>
 
-            <p
-              style={{
-                marginBottom: "20px",
-                color: "#525252",
-              }}
-            >
-              Deseja realmente excluir o equipamento?
+            <p style={{ color: "#4b5563", lineHeight: 1.5 }}>
+              Tem certeza que deseja excluir o equipamento{" "}
+              <strong>{equipamentoExcluir.name}</strong>? Essa ação não poderá
+              ser desfeita.
             </p>
-
-            <div
-              style={{
-                marginBottom: "20px",
-                padding: "12px",
-                background: "#f5f5f5",
-                borderRadius: "8px",
-                fontWeight: 600,
-              }}
-            >
-              {equipamentoExcluir.name}
-            </div>
 
             <div
               style={{
                 display: "flex",
                 justifyContent: "flex-end",
-                gap: "8px",
+                gap: "10px",
+                marginTop: "22px",
               }}
             >
               <button
+                type="button"
                 onClick={() => setEquipamentoExcluir(null)}
                 disabled={excluindo}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: "8px",
-                  border: "1px solid #d4d4d4",
-                  background: "#fff",
-                  cursor: "pointer",
-                }}
+                style={{ ...buttonStyle, background: "#6b7280" }}
               >
                 Cancelar
               </button>
 
               <button
+                type="button"
                 onClick={confirmarExclusao}
                 disabled={excluindo}
                 style={{
-                  padding: "8px 14px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: "#dc2626",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontWeight: 600,
+                  ...buttonStyle,
+                  background: "#7f1d1d",
+                  opacity: excluindo ? 0.7 : 1,
+                  cursor: excluindo ? "not-allowed" : "pointer",
                 }}
               >
                 {excluindo ? "Excluindo..." : "Excluir"}
@@ -521,3 +453,36 @@ export default function Equipamentos() {
     </AppTemplate>
   );
 }
+
+const buttonStyle: React.CSSProperties = {
+  border: "none",
+  background: "#111827",
+  color: "#fff",
+  padding: "8px 12px",
+  borderRadius: "9px",
+  fontSize: "13px",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const modalOverlayStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,.55)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 9999,
+  padding: "20px",
+};
+
+const modalStyle: React.CSSProperties = {
+  background: "#fff",
+  padding: "24px",
+  borderRadius: "16px",
+  width: "100%",
+  maxWidth: "650px",
+  maxHeight: "85vh",
+  overflowY: "auto",
+  boxShadow: "0 20px 40px rgba(0,0,0,.25)",
+};

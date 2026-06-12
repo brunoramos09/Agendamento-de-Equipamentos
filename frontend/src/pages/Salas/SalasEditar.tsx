@@ -120,7 +120,12 @@ export default function EditarSala() {
   }
 
   return (
-    <AppTemplate hideDefaultContent theme={equipamentosTheme}>
+    <AppTemplate 
+      hideDefaultContent 
+      theme={equipamentosTheme}
+      primaryAction={null}
+      secondaryAction={null}  
+    >
       <SalaForm
         sala={sala}
         setSala={setSala}
