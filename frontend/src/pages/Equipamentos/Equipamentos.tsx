@@ -5,6 +5,7 @@ import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import {
   listarEquipamentos,
   excluirEquipamento,
+  gerarRelatorioEquipamento,
 } from "../../services/equipamentoService";
 import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
@@ -29,6 +30,8 @@ export default function Equipamentos() {
   const [equipamentoInfo, setEquipamentoInfo] = useState<Equipment | null>(null);
   const [equipamentoExcluir, setEquipamentoExcluir] = useState<Equipment | null>(null);
   const [excluindo, setExcluindo] = useState(false);
+  const [relatorioUrl, setRelatorioUrl] = useState<string | null>(null);
+  const [relatorioId, setRelatorioId] = useState<number | null>(null);
 
   useEffect(() => {
     carregarEquipamentos();
@@ -47,6 +50,42 @@ export default function Equipamentos() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleGerarRelatorio(id: number) {
+    try {
+      const blob = await gerarRelatorioEquipamento(id);
+      const url = window.URL.createObjectURL(blob);
+      setRelatorioUrl(url);
+      setRelatorioId(id);
+    } catch (error) {
+      console.error(error);
+      notify.error("Erro ao gerar relatório.");
+    }
+  }
+
+  function handleDownloadRelatorio() {
+    if (!relatorioUrl || !relatorioId) return;
+    try {
+      const a = document.createElement("a");
+      a.href = relatorioUrl;
+      a.download = `relatorio-equipamento-${relatorioId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      notify.generated("Download do relatório feito com sucesso!");
+    } catch (error) {
+      console.error(error);
+      notify.error("Erro ao baixar relatório.");
+    }
+  }
+
+  function handleFecharRelatorio() {
+    if (relatorioUrl) {
+      window.URL.revokeObjectURL(relatorioUrl);
+    }
+    setRelatorioUrl(null);
+    setRelatorioId(null);
   }
 
   async function confirmarExclusao() {
@@ -295,7 +334,11 @@ export default function Equipamentos() {
                           Editar
                         </button>
 
-                        <button type="button" style={buttonStyle}>
+                        <button
+                          type="button"
+                          onClick={() => handleGerarRelatorio(equipamento.id)}
+                          style={buttonStyle}
+                        >
                           Relatório
                         </button>
 
@@ -407,7 +450,7 @@ export default function Equipamentos() {
 
       {equipamentoExcluir && (
         <div style={modalOverlayStyle}>
-          <div style={{ ...modalStyle, maxWidth: "460px" }}>
+          <div style={{ ...ExcluirmodalStyle, maxWidth: "460px" }}>
             <h2 style={{ margin: "0 0 10px" }}>Excluir equipamento</h2>
 
             <p style={{ color: "#4b5563", lineHeight: 1.5 }}>
@@ -450,9 +493,68 @@ export default function Equipamentos() {
           </div>
         </div>
       )}
+
+      {relatorioUrl && (
+        <div style={modalOverlayStyle}>
+          <div
+            style={{
+              ...RelatoriomodalStyle,
+              maxWidth: "90%",
+              width: "1000px",
+              height: "90vh",
+              display: "flex",
+              flexDirection: "column",
+              padding: "20px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "15px",
+              }}
+            >
+              <h2 style={{ margin: 0 }}>Visualização do Relatório</h2>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  type="button"
+                  onClick={handleDownloadRelatorio}
+                  style={{ ...buttonStyle, background: "#166534" }}
+                >
+                  Download PDF
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFecharRelatorio}
+                  style={{ ...buttonStyle, background: "#6b7280" }}
+                >
+                  Voltar
+                </button>
+              </div>
+            </div>
+
+            <div style={{ flex: 1, width: "100%", background: "#f3f4f6", borderRadius: "8px", overflow: "hidden" }}>
+              <iframe
+                src={`${relatorioUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+                title="Relatório de Equipamento"
+                style={{ width: "100%", height: "100%", border: "none" }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </AppTemplate>
   );
 }
+
+const ExcluirmodalStyle: React.CSSProperties = {
+  background: "#fff",
+  borderRadius: "16px",
+  width: "100%",
+  padding: "24px",
+  boxShadow: "0 20px 40px rgba(0,0,0,.2)",
+};
 
 const buttonStyle: React.CSSProperties = {
   border: "none",
@@ -476,7 +578,7 @@ const modalOverlayStyle: React.CSSProperties = {
   padding: "20px",
 };
 
-const modalStyle: React.CSSProperties = {
+const RelatoriomodalStyle: React.CSSProperties = {
   background: "#fff",
   padding: "24px",
   borderRadius: "16px",
