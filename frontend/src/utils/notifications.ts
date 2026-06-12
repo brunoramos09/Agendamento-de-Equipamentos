@@ -4,6 +4,9 @@ export const notify = {
   created: (entity: string) =>
     toast.success(`${entity} criado(a) com sucesso!`),
 
+  generated: (message: string) =>
+    toast.success(message),
+
   returned: (entity: number) =>
     toast.success(`${entity} devolvido(a) com sucesso!`),
 

@@ -49,3 +49,13 @@ export async function atualizarEquipamento(id: number, formData: FormData) {
 
   return response.json();
 }
+
+export async function gerarRelatorioEquipamento(id: number) {
+  const response = await fetch(`http://localhost:3000/equipments/${id}/report`);
+
+  if (!response.ok) {
+    throw new Error("Erro ao gerar relatório");
+  }
+
+  return response.blob();
+}

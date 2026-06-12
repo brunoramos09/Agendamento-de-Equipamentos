@@ -11,7 +11,9 @@ import {
   Delete,
   UploadedFile,
   UseInterceptors,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -75,5 +77,10 @@ export class EquipmentController {
     }
 
     return this.equipmentService.update(id, body);
+  }
+
+  @Get(':id/report')
+  async generateReport(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    await this.equipmentService.generateReport(id, res);
   }
 }
