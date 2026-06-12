@@ -126,6 +126,8 @@ export default function CriarReserva() {
     <AppTemplate
       hideDefaultContent={true}
       theme={equipamentosTheme}
+      primaryAction={null}
+      secondaryAction={null}
       appName="Sistema de Agendamento de Equipamentos"
       appSubtitle="Nova Reserva"
       appDescription="Cadastre uma nova reserva de equipamentos."

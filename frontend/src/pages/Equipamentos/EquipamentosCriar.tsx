@@ -99,7 +99,12 @@ export default function CriarEquipamento() {
   }
 
   return (
-    <AppTemplate hideDefaultContent theme={equipamentosTheme}>
+    <AppTemplate 
+      hideDefaultContent 
+      theme={equipamentosTheme}
+      primaryAction={null}
+      secondaryAction={null}
+    >
       <EquipamentoForm
         titulo="Novo Equipamento"
         equipamento={equipamento}

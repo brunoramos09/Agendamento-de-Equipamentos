@@ -40,7 +40,12 @@ export default function CriarSala() {
   }
 
   return (
-    <AppTemplate hideDefaultContent theme={equipamentosTheme}>
+    <AppTemplate 
+      hideDefaultContent 
+      theme={equipamentosTheme}
+      primaryAction={null}
+      secondaryAction={null}  
+    >
       <SalaForm
         sala={sala}
         setSala={setSala}
