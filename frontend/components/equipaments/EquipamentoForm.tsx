@@ -162,7 +162,7 @@ export default function EquipamentoForm({
                   ...equipamento,
                   status: e.target.value as
                     | "DISPONIVEL"
-                    | "MANUTENCAO"
+                    //| "MANUTENCAO"
                     | "INATIVO",
                 })
               }
