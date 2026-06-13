@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/immutability */
 import { useEffect, useState } from "react";
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
@@ -24,7 +23,7 @@ function getStatusStyle(status: string) {
 }
 
 type FiltroStatus = "TODOS" | "DISPONIVEL" | "MANUTENCAO" | "INATIVO";
- 
+
 const filtroOptions: { value: FiltroStatus; label: string }[] = [
   { value: "TODOS", label: "Todos" },
   { value: "DISPONIVEL", label: "Disponíveis" },
@@ -37,16 +36,21 @@ export default function Equipamentos() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [pesquisa, setPesquisa] = useState("");
-  const [equipamentoInfo, setEquipamentoInfo] = useState<Equipment | null>(null);
-  const [equipamentoExcluir, setEquipamentoExcluir] = useState<Equipment | null>(null);
+  const [equipamentoInfo, setEquipamentoInfo] = useState<Equipment | null>(
+    null,
+  );
+  const [equipamentoExcluir, setEquipamentoExcluir] =
+    useState<Equipment | null>(null);
   const [excluindo, setExcluindo] = useState(false);
   const [relatorioUrl, setRelatorioUrl] = useState<string | null>(null);
   const [relatorioId, setRelatorioId] = useState<number | null>(null);
-  const [equipamentoManutencao, setEquipamentoManutencao] = useState<Equipment | null>(null);
+  const [equipamentoManutencao, setEquipamentoManutencao] =
+    useState<Equipment | null>(null);
   const [responsavelManutencao, setResponsavelManutencao] = useState("");
   const [obsManutencao, setObsManutencao] = useState("");
   const [enviandoManutencao, setEnviandoManutencao] = useState(false);
-  const [equipamentoFinalizarManutencao, setEquipamentoFinalizarManutencao] = useState<Equipment | null>(null);
+  const [equipamentoFinalizarManutencao, setEquipamentoFinalizarManutencao] =
+    useState<Equipment | null>(null);
   const [finalizando, setFinalizando] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODOS");
 
@@ -117,13 +121,19 @@ export default function Equipamentos() {
         maintenanceResponsiblePerson: responsavelManutencao,
         maintenanceObservations: obsManutencao,
       };
-    
+
       const formData = new FormData();
       formData.append("status", payload.status);
-      formData.append("maintenanceResponsiblePerson", payload.maintenanceResponsiblePerson);
-      formData.append("maintenanceObservations", payload.maintenanceObservations);
+      formData.append(
+        "maintenanceResponsiblePerson",
+        payload.maintenanceResponsiblePerson,
+      );
+      formData.append(
+        "maintenanceObservations",
+        payload.maintenanceObservations,
+      );
       await atualizarEquipamento(equipamentoManutencao.id, formData);
-      
+
       notify.info(`${equipamentoManutencao.name} enviado para manutenção!`);
       setEquipamentoManutencao(null);
       setResponsavelManutencao("");
@@ -145,7 +155,9 @@ export default function Equipamentos() {
       const formData = new FormData();
       formData.append("status", "DISPONIVEL");
       await atualizarEquipamento(equipamentoFinalizarManutencao.id, formData);
-      notify.success(`Manutenção de ${equipamentoFinalizarManutencao.name} finalizada!`);
+      notify.success(
+        `Manutenção de ${equipamentoFinalizarManutencao.name} finalizada!`,
+      );
       setEquipamentoFinalizarManutencao(null);
       carregarEquipamentos();
     } catch (error) {
@@ -178,23 +190,22 @@ export default function Equipamentos() {
     }
   }
 
-  const equipamentosFiltrados = equipamentos.filter((equipamento) =>
-  {
+  const equipamentosFiltrados = equipamentos.filter((equipamento) => {
     const passaFiltroStatus =
       filtroStatus === "TODOS" || equipamento.status === filtroStatus;
 
-      const passaPesquisa = [
-        equipamento.name,
-        equipamento.serialNumber,
-        equipamento.room?.name,
-        equipamento.status,
-      ]
-        .filter(Boolean)
-        .some((valor) =>
-          valor!.toString().toLowerCase().includes(pesquisa.toLowerCase()),
-        );
-      
-      return passaFiltroStatus && passaPesquisa;
+    const passaPesquisa = [
+      equipamento.name,
+      equipamento.serialNumber,
+      equipamento.room?.name,
+      equipamento.status,
+    ]
+      .filter(Boolean)
+      .some((valor) =>
+        valor!.toString().toLowerCase().includes(pesquisa.toLowerCase()),
+      );
+
+    return passaFiltroStatus && passaPesquisa;
   });
 
   return (
@@ -252,7 +263,7 @@ export default function Equipamentos() {
               opcao.value === "TODOS"
                 ? { bg: "#111827", color: "#fff" }
                 : getStatusStyle(opcao.value);
- 
+
             return (
               <button
                 key={opcao.value}
@@ -262,8 +273,16 @@ export default function Equipamentos() {
                   padding: "7px 14px",
                   borderRadius: "999px",
                   border: ativo ? "none" : "1px solid #d1d5db",
-                  background: ativo ? (opcao.value === "TODOS" ? bg : bg) : "#fff",
-                  color: ativo ? (opcao.value === "TODOS" ? color : color) : "#374151",
+                  background: ativo
+                    ? opcao.value === "TODOS"
+                      ? bg
+                      : bg
+                    : "#fff",
+                  color: ativo
+                    ? opcao.value === "TODOS"
+                      ? color
+                      : color
+                    : "#374151",
                   fontSize: "13px",
                   fontWeight: ativo ? 700 : 500,
                   cursor: "pointer",
@@ -297,9 +316,7 @@ export default function Equipamentos() {
 
       {loading && <p>Carregando equipamentos...</p>}
 
-      {erro && (
-        <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>
-      )}
+      {erro && <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>}
 
       {!loading && !erro && equipamentosFiltrados.length === 0 && (
         <p style={{ color: "#6b7280" }}>Nenhum equipamento encontrado.</p>
@@ -343,7 +360,7 @@ export default function Equipamentos() {
                     >
                       {titulo}
                     </th>
-                  )
+                  ),
                 )}
               </tr>
             </thead>
@@ -450,7 +467,9 @@ export default function Equipamentos() {
                         {equipamento.status === "DISPONIVEL" && (
                           <button
                             type="button"
-                            onClick={() => setEquipamentoManutencao(equipamento)}
+                            onClick={() =>
+                              setEquipamentoManutencao(equipamento)
+                            }
                             style={{ ...buttonStyle, background: "#92400e" }}
                           >
                             Manutenção
@@ -460,7 +479,9 @@ export default function Equipamentos() {
                         {equipamento.status === "MANUTENCAO" && (
                           <button
                             type="button"
-                            onClick={() => setEquipamentoFinalizarManutencao(equipamento)}
+                            onClick={() =>
+                              setEquipamentoFinalizarManutencao(equipamento)
+                            }
                             style={{ ...buttonStyle, background: "#166534" }}
                           >
                             Finalizar
@@ -627,9 +648,18 @@ export default function Equipamentos() {
               Equipamento: <strong>{equipamentoManutencao.name}</strong>
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+            >
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 600, marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    marginBottom: "5px",
+                  }}
+                >
                   Responsável
                 </label>
                 <input
@@ -642,7 +672,14 @@ export default function Equipamentos() {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 600, marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    marginBottom: "5px",
+                  }}
+                >
                   Observações
                 </label>
                 <textarea
@@ -654,7 +691,14 @@ export default function Equipamentos() {
               </div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "25px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                marginTop: "25px",
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setEquipamentoManutencao(null)}
@@ -667,7 +711,11 @@ export default function Equipamentos() {
                 type="button"
                 onClick={handleIniciarManutencao}
                 disabled={enviandoManutencao}
-                style={{ ...buttonStyle, background: "#92400e", opacity: enviandoManutencao ? 0.7 : 1 }}
+                style={{
+                  ...buttonStyle,
+                  background: "#92400e",
+                  opacity: enviandoManutencao ? 0.7 : 1,
+                }}
               >
                 {enviandoManutencao ? "Processando..." : "Confirmar Manutenção"}
               </button>
@@ -676,14 +724,15 @@ export default function Equipamentos() {
         </div>
       )}
 
-       {equipamentoFinalizarManutencao && (
+      {equipamentoFinalizarManutencao && (
         <div style={modalOverlayStyle}>
           <div style={{ ...finalizarManutencaoModalStyle, maxWidth: "460px" }}>
             <h2 style={{ margin: "0 0 10px" }}>Finalizar manutenção</h2>
 
             <p style={{ color: "#4b5563", lineHeight: 1.5 }}>
               Deseja finalizar a manutenção do equipamento{" "}
-              <strong>{equipamentoFinalizarManutencao.name}</strong>? O status será alterado para <strong>DISPONÍVEL</strong>.
+              <strong>{equipamentoFinalizarManutencao.name}</strong>? O status
+              será alterado para <strong>DISPONÍVEL</strong>.
             </p>
 
             <div
@@ -761,7 +810,15 @@ export default function Equipamentos() {
               </div>
             </div>
 
-            <div style={{ flex: 1, width: "100%", background: "#f3f4f6", borderRadius: "8px", overflow: "hidden" }}>
+            <div
+              style={{
+                flex: 1,
+                width: "100%",
+                background: "#f3f4f6",
+                borderRadius: "8px",
+                overflow: "hidden",
+              }}
+            >
               <iframe
                 src={`${relatorioUrl}#toolbar=0&navpanes=0&scrollbar=1`}
                 title="Relatório de Equipamento"
@@ -841,4 +898,3 @@ const finalizarManutencaoModalStyle: React.CSSProperties = {
   padding: "24px",
   boxShadow: "0 20px 40px rgba(0,0,0,.2)",
 };
-

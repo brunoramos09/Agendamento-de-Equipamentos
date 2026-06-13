@@ -1,5 +1,7 @@
+import { API_URL } from "./api";
+
 export async function listarEquipamentos() {
-  const response = await fetch("http://localhost:3000/equipments");
+  const response = await fetch(`${API_URL}/equipments`);
 
   if (!response.ok) {
     throw new Error("Erro ao buscar equipamentos");
@@ -9,7 +11,7 @@ export async function listarEquipamentos() {
 }
 
 export async function excluirEquipamento(id: number) {
-  const response = await fetch(`http://localhost:3000/equipments/${id}`, {
+  const response = await fetch(`${API_URL}/equipments/${id}`, {
     method: "DELETE",
   });
 
@@ -19,7 +21,7 @@ export async function excluirEquipamento(id: number) {
 }
 
 export async function criarEquipamento(formData: FormData) {
-  const response = await fetch("http://localhost:3000/equipments", {
+  const response = await fetch(`${API_URL}/equipments`, {
     method: "POST",
     body: formData,
   });
@@ -28,7 +30,7 @@ export async function criarEquipamento(formData: FormData) {
 }
 
 export async function buscarEquipamentoPorId(id: number) {
-  const response = await fetch(`http://localhost:3000/equipments/${id}`);
+  const response = await fetch(`${API_URL}/equipments/${id}`);
 
   if (!response.ok) {
     throw new Error("Erro ao buscar equipamento");
@@ -38,7 +40,7 @@ export async function buscarEquipamentoPorId(id: number) {
 }
 
 export async function atualizarEquipamento(id: number, formData: FormData) {
-  const response = await fetch(`http://localhost:3000/equipments/${id}`, {
+  const response = await fetch(`${API_URL}/equipments/${id}`, {
     method: "PATCH",
     body: formData,
   });
@@ -51,7 +53,7 @@ export async function atualizarEquipamento(id: number, formData: FormData) {
 }
 
 export async function gerarRelatorioEquipamento(id: number) {
-  const response = await fetch(`http://localhost:3000/equipments/${id}/report`);
+  const response = await fetch(`${API_URL}/equipments/${id}/report`);
 
   if (!response.ok) {
     throw new Error("Erro ao gerar relatório");
