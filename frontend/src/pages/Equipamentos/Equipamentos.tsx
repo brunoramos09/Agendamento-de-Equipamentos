@@ -408,10 +408,23 @@ export default function Equipamentos() {
 
                           <button
                             type="button"
-                            onClick={() =>
-                              setEquipamentoManutencao(equipamento)
-                            }
-                            style={{ ...buttonStyle, background: "#92400e" }}
+                            onClick={() => setEquipamentoInfo(equipamento)}
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              borderRadius: "50%",
+                              border: "1px solid #d1d5db",
+                              background: "#fff",
+                              color: "#374151",
+                              fontSize: "12px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: 0,
+                              flexShrink: 0,
+                            }}
                           >
                             i
                           </button>
@@ -455,9 +468,9 @@ export default function Equipamentos() {
                           <button
                             type="button"
                             onClick={() =>
-                              setEquipamentoFinalizarManutencao(equipamento)
+                              (window.location.href = `/reserva-equipamentos/equipamentos/editar/${equipamento.id}`)
                             }
-                            style={{ ...buttonStyle, background: "#166534" }}
+                            style={buttonStyle}
                           >
                             Editar
                           </button>
