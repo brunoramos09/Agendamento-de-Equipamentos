@@ -39,4 +39,12 @@ export class CreateEquipmentDto {
   @IsOptional()
   @IsEnum(EquipmentStatus)
   status?: EquipmentStatus;
+
+  @IsOptional()
+  @IsString()
+  maintenanceResponsiblePerson?: string;
+
+  @IsOptional()
+  @IsString()
+  maintenanceObservations?: string;
 }

@@ -6,6 +6,7 @@ import { ReservationModule } from './reservation/reservation.module';
 import { RoomModule } from './room/room.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { diskStorage } from 'multer';
         },
       }),
     }),
+    MaintenanceModule,
   ],
 })
 export class AppModule {}

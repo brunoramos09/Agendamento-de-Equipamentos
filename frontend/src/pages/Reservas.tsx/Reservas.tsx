@@ -12,6 +12,15 @@ import {
 
 import { notify } from "../../utils/notifications";
 
+type FiltroStatus = "TODAS" | "ATIVA" | "ATRASADA" | "DEVOLVIDA";
+ 
+const filtroOptions: { value: FiltroStatus; label: string; bg: string; color: string }[] = [
+  { value: "TODAS",     label: "Todas",     bg: "#111827", color: "#fff"     },
+  { value: "ATIVA",     label: "Ativas",    bg: "#dcfce7", color: "#166534"  },
+  { value: "ATRASADA",  label: "Atrasadas", bg: "#fee2e2", color: "#991b1b"  },
+  { value: "DEVOLVIDA", label: "Devolvidas",bg: "#dbeafe", color: "#1d4ed8"  },
+];
+
 export default function Reservas() {
   const [reservas, setReservas] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +34,8 @@ export default function Reservas() {
 
   const [excluindo, setExcluindo] = useState(false);
   const [devolvendoId, setDevolvendoId] = useState<number | null>(null);
+
+  const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODAS");
 
   useEffect(() => {
     carregarReservas();
@@ -91,30 +102,19 @@ export default function Reservas() {
 
   function getStatus(reserva: Reservation) {
     if (reserva.returnedAt) {
-      return {
-        label: "DEVOLVIDA",
-        bg: "#dbeafe",
-        color: "#1d4ed8",
-      };
+      return { label: "DEVOLVIDA", bg: "#dbeafe", color: "#1d4ed8", key: "DEVOLVIDA" as FiltroStatus };
     }
-
     if (new Date(reserva.endDate) < new Date()) {
-      return {
-        label: "ATRASADA",
-        bg: "#fee2e2",
-        color: "#991b1b",
-      };
+      return { label: "ATRASADA", bg: "#fee2e2", color: "#991b1b", key: "ATRASADA" as FiltroStatus };
     }
-
-    return {
-      label: "ATIVA",
-      bg: "#dcfce7",
-      color: "#166534",
-    };
+    return { label: "ATIVA", bg: "#dcfce7", color: "#166534", key: "ATIVA" as FiltroStatus };
   }
 
-  const reservasFiltradas = reservas.filter((reserva) =>
-    [
+  const reservasFiltradas = reservas.filter((reserva) => {
+    const passaFiltroStatus =
+      filtroStatus === "TODAS" || getStatus(reserva).key === filtroStatus;
+ 
+    const passaPesquisa = [
       reserva.user,
       reserva.observations,
       reserva.id?.toString(),
@@ -126,8 +126,10 @@ export default function Reservas() {
       .filter(Boolean)
       .some((valor) =>
         valor!.toString().toLowerCase().includes(pesquisa.toLowerCase()),
-      ),
-  );
+      );
+ 
+    return passaFiltroStatus && passaPesquisa;
+  });
 
   return (
     <AppTemplate
@@ -175,6 +177,33 @@ export default function Reservas() {
           >
             Lista de Reservas
           </h2>
+        </div>
+
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {filtroOptions.map((opcao) => {
+            const ativo = filtroStatus === opcao.value;
+ 
+            return (
+              <button
+                key={opcao.value}
+                type="button"
+                onClick={() => setFiltroStatus(opcao.value)}
+                style={{
+                  padding: "7px 14px",
+                  borderRadius: "999px",
+                  border: ativo ? "none" : "1px solid #d1d5db",
+                  background: ativo ? opcao.bg : "#fff",
+                  color: ativo ? opcao.color : "#374151",
+                  fontSize: "13px",
+                  fontWeight: ativo ? 700 : 500,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                {opcao.label}
+              </button>
+            );
+          })}
         </div>
       </header>
 

@@ -2,6 +2,22 @@ import type { CSSProperties } from "react";
 import type Room from "../../src/interfaces/sala";
 import type { EquipamentoFormData } from "./types";
 
+type StatusOption = {
+  value: "DISPONIVEL" | "MANUTENCAO" | "INATIVO";
+  label: string;
+};
+
+const allStatusOptions: StatusOption[] = [
+  { value: "DISPONIVEL", label: "Disponível" },
+  { value: "MANUTENCAO", label: "Manutenção" },
+  { value: "INATIVO", label: "Inativo" },
+];
+
+const editStatusOptions: StatusOption[] = [
+  { value: "DISPONIVEL", label: "Disponível" },
+  { value: "INATIVO", label: "Inativo" },
+];
+
 interface Props {
   titulo: string;
   equipamento: EquipamentoFormData;
@@ -11,7 +27,11 @@ interface Props {
   salvando: boolean;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
+  statusOptions?: StatusOption[];
+  statusDisabled?: boolean;
 }
+
+export { allStatusOptions, editStatusOptions };
 
 export default function EquipamentoForm({
   titulo,
@@ -22,6 +42,8 @@ export default function EquipamentoForm({
   salvando,
   onSubmit,
   onCancel,
+  statusOptions = allStatusOptions,
+  statusDisabled = false,
 }: Props) {
   return (
     <div
@@ -134,6 +156,7 @@ export default function EquipamentoForm({
 
             <select
               value={equipamento.status}
+              disabled={statusDisabled}
               onChange={(e) =>
                 setEquipamento({
                   ...equipamento,
@@ -143,11 +166,20 @@ export default function EquipamentoForm({
                     | "INATIVO",
                 })
               }
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                ...(statusDisabled && {
+                  background: "#f3f4f6",
+                  color: "#6b7280",
+                  cursor: "not-allowed",
+                }),
+             }}
             >
-              <option value="DISPONIVEL">Disponível</option>
-              <option value="MANUTENCAO">Manutenção</option>
-              <option value="INATIVO">Inativo</option>
+              {statusOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </div>
 
