@@ -11,6 +11,8 @@ import {
 import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
 
+const ITENS_POR_PAGINA = 8;
+
 const statusLabels: Record<string, string> = {
   DISPONIVEL: "DISPONÍVEL",
   MANUTENCAO: "MANUTENÇÃO",
@@ -49,10 +51,15 @@ export default function Equipamentos() {
   const [equipamentoFinalizarManutencao, setEquipamentoFinalizarManutencao] = useState<Equipment | null>(null);
   const [finalizando, setFinalizando] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODOS");
+  const [pagina, setPagina] = useState(1);
 
   useEffect(() => {
     carregarEquipamentos();
   }, []);
+
+  useEffect(() => {
+    setPagina(1);
+  }, [filtroStatus, pesquisa]);
 
   async function carregarEquipamentos() {
     try {
@@ -197,6 +204,10 @@ export default function Equipamentos() {
       return passaFiltroStatus && passaPesquisa;
   });
 
+  const totalPaginas = Math.ceil(equipamentosFiltrados.length / ITENS_POR_PAGINA);
+  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
+  const equipamentosPagina = equipamentosFiltrados.slice(inicio, inicio + ITENS_POR_PAGINA);
+
   return (
     <AppTemplate
       hideDefaultContent={true}
@@ -306,50 +317,51 @@ export default function Equipamentos() {
       )}
 
       {!loading && !erro && equipamentosFiltrados.length > 0 && (
-        <div
-          style={{
-            width: "100%",
-            overflowX: "auto",
-            border: "1px solid #e5e7eb",
-            borderRadius: "14px",
-          }}
-        >
-          <table
+        <>
+          <div
             style={{
               width: "100%",
-              borderCollapse: "collapse",
-              minWidth: "750px",
+              overflowX: "auto",
+              border: "1px solid #e5e7eb",
+              borderRadius: "14px",
             }}
           >
-            <thead>
-              <tr
-                style={{
-                  background: "#f9fafb",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {["ID", "Nome", "Patrimônio", "Sala", "Status", "Ações"].map(
-                  (titulo) => (
-                    <th
-                      key={titulo}
-                      style={{
-                        textAlign: titulo === "Ações" ? "center" : "left",
-                        padding: "14px 12px",
-                        fontSize: "12px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                        color: "#374151",
-                      }}
-                    >
-                      {titulo}
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
-
-            <tbody>
-              {equipamentosFiltrados.map((equipamento) => {
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                minWidth: "750px",
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    background: "#f9fafb",
+                    borderBottom: "1px solid #e5e7eb",
+                  }}
+                >
+                  {["ID", "Nome", "Patrimônio", "Sala", "Status", "Ações"].map(
+                    (titulo) => (
+                      <th
+                        key={titulo}
+                        style={{
+                          textAlign: titulo === "Ações" ? "center" : "left",
+                          padding: "14px 12px",
+                          fontSize: "12px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          color: "#374151",
+                        }}
+                      >
+                        {titulo}
+                      </th>
+                    )
+                  )}
+                </tr>
+              </thead>
+              
+              <tbody>
+                {equipamentosPagina.map((equipamento) => {
                 const { bg, color } = getStatusStyle(equipamento.status);
 
                 return (
@@ -482,7 +494,72 @@ export default function Equipamentos() {
             </tbody>
           </table>
         </div>
+
+        {totalPaginas > 1 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: "16px",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <span style={{ fontSize: "13px", color: "#6b7280" }}>
+              Exibindo {inicio + 1}–{Math.min(inicio + ITENS_POR_PAGINA, equipamentosFiltrados.length)} de {equipamentosFiltrados.length} equipamento{equipamentosFiltrados.length !== 1 ? "s" : ""}
+            </span>
+
+            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => setPagina((p) => p - 1)}
+                disabled={pagina === 1}
+                style={{
+                  ...paginaBtnStyle,
+                  opacity: pagina === 1 ? 0.4 : 1,
+                  cursor: pagina === 1 ? "not-allowed" : "pointer",
+                }}
+              >
+                ← Anterior
+              </button>
+
+              {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setPagina(num)}
+                  style={{
+                    ...paginaBtnStyle,
+                    background: num === pagina ? "#111827" : "#fff",
+                    color: num === pagina ? "#fff" : "#374151",
+                    border: num === pagina ? "none" : "1px solid #d1d5db",
+                    fontWeight: num === pagina ? 700 : 500,
+                    minWidth: "36px",
+                  }}
+                >
+                  {num}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setPagina((p) => p + 1)}
+                disabled={pagina === totalPaginas}
+                style={{
+                  ...paginaBtnStyle,
+                  opacity: pagina === totalPaginas ? 0.4 : 1,
+                  cursor: pagina === totalPaginas ? "not-allowed" : "pointer",
+                }}
+              >
+                Próxima →
+              </button>
+            </div>
+          </div>
+        )}
+      </>
       )}
+      
 
       {equipamentoInfo && (
         <div
@@ -791,6 +868,16 @@ const buttonStyle: React.CSSProperties = {
   borderRadius: "9px",
   fontSize: "13px",
   fontWeight: 700,
+  cursor: "pointer",
+};
+
+const paginaBtnStyle: React.CSSProperties = {
+  border: "1px solid #d1d5db",
+  background: "#fff",
+  color: "#374151",
+  padding: "7px 12px",
+  borderRadius: "9px",
+  fontSize: "13px",
   cursor: "pointer",
 };
 

@@ -6,6 +6,8 @@ import { listarSalas, excluirSala } from "../../services/salasService";
 import type Room from "../../interfaces/sala";
 import { notify } from "../../utils/notifications";
 
+const ITENS_POR_PAGINA = 8;
+
 export default function Salas() {
   const [salas, setSalas] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
@@ -13,10 +15,15 @@ export default function Salas() {
   const [pesquisa, setPesquisa] = useState("");
   const [salaExcluir, setSalaExcluir] = useState<Room | null>(null);
   const [excluindo, setExcluindo] = useState(false);
+  const [pagina, setPagina] = useState(1);
 
   useEffect(() => {
     carregarSalas();
   }, []);
+
+  useEffect(() => {
+    setPagina(1);
+  }, [pesquisa]);
 
   async function carregarSalas() {
     try {
@@ -60,6 +67,10 @@ export default function Salas() {
         valor.toString().toLowerCase().includes(pesquisa.toLowerCase()),
       ),
   );
+
+  const totalPaginas = Math.ceil(salasFiltradas.length / ITENS_POR_PAGINA);
+  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
+  const salasPagina = salasFiltradas.slice(inicio, inicio + ITENS_POR_PAGINA);
 
   return (
     <AppTemplate
@@ -139,6 +150,7 @@ export default function Salas() {
       )}
 
       {!loading && !erro && salasFiltradas.length > 0 && (
+        <>
         <div
           style={{
             width: "100%",
@@ -182,60 +194,125 @@ export default function Salas() {
             </thead>
 
             <tbody>
-              {salasFiltradas.map((sala) => (
-                <tr
-                  key={sala.id}
-                  style={{ borderBottom: "1px solid #f3f4f6" }}
+                {salasPagina.map((sala) => (
+                  <tr
+                    key={sala.id}
+                    style={{ borderBottom: "1px solid #f3f4f6" }}
+                  >
+                    <td style={{ padding: "14px 12px", fontWeight: 700 }}>
+                      {sala.id}
+                    </td>
+
+                    <td style={{ padding: "14px 12px" }}>{sala.name}</td>
+
+                    <td style={{ padding: "14px 12px" }}>{sala.building ?? "-"}</td>
+
+                    <td style={{ padding: "14px 12px" }}>{sala.floor ?? "-"}</td>
+
+                    <td style={{ padding: "14px 12px" }}>{sala.campus ?? "-"}</td>
+
+                    <td style={{ padding: "14px 12px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          justifyContent: "center",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() =>
+                            (window.location.href = `/reserva-equipamentos/salas/editar/${sala.id}`)
+                          }
+                          style={buttonStyle}
+                        >
+                          Editar
+                        </button>
+
+                        <button type="button" style={buttonStyle}>
+                          Relatório
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setSalaExcluir(sala)}
+                          style={{ ...buttonStyle, background: "#7f1d1d" }}
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginação */}
+          {totalPaginas > 1 && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: "16px",
+                flexWrap: "wrap",
+                gap: "12px",
+              }}
+            >
+              <span style={{ fontSize: "13px", color: "#6b7280" }}>
+                Exibindo {inicio + 1}–{Math.min(inicio + ITENS_POR_PAGINA, salasFiltradas.length)} de {salasFiltradas.length} sala{salasFiltradas.length !== 1 ? "s" : ""}
+              </span>
+
+              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                <button
+                  type="button"
+                  onClick={() => setPagina((p) => p - 1)}
+                  disabled={pagina === 1}
+                  style={{
+                    ...paginaBtnStyle,
+                    opacity: pagina === 1 ? 0.4 : 1,
+                    cursor: pagina === 1 ? "not-allowed" : "pointer",
+                  }}
                 >
-                  <td style={{ padding: "14px 12px", fontWeight: 700 }}>
-                    {sala.id}
-                  </td>
+                  ← Anterior
+                </button>
 
-                  <td style={{ padding: "14px 12px" }}>{sala.name}</td>
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setPagina(num)}
+                    style={{
+                      ...paginaBtnStyle,
+                      background: num === pagina ? "#111827" : "#fff",
+                      color: num === pagina ? "#fff" : "#374151",
+                      border: num === pagina ? "none" : "1px solid #d1d5db",
+                      fontWeight: num === pagina ? 700 : 500,
+                      minWidth: "36px",
+                    }}
+                  >
+                    {num}
+                  </button>
+                ))}
 
-                  <td style={{ padding: "14px 12px" }}>{sala.building ?? "-"}</td>
-
-                  <td style={{ padding: "14px 12px" }}>{sala.floor ?? "-"}</td>
-
-                  <td style={{ padding: "14px 12px" }}>{sala.campus ?? "-"}</td>
-
-                  <td style={{ padding: "14px 12px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "8px",
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          (window.location.href = `/reserva-equipamentos/salas/editar/${sala.id}`)
-                        }
-                        style={buttonStyle}
-                      >
-                        Editar
-                      </button>
-
-                      <button type="button" style={buttonStyle}>
-                        Relatório
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setSalaExcluir(sala)}
-                        style={{ ...buttonStyle, background: "#7f1d1d" }}
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                <button
+                  type="button"
+                  onClick={() => setPagina((p) => p + 1)}
+                  disabled={pagina === totalPaginas}
+                  style={{
+                    ...paginaBtnStyle,
+                    opacity: pagina === totalPaginas ? 0.4 : 1,
+                    cursor: pagina === totalPaginas ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Próxima →
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {salaExcluir && (
@@ -318,5 +395,15 @@ const modalStyle: React.CSSProperties = {
   maxHeight: "85vh",
   overflowY: "auto",
   boxShadow: "0 20px 40px rgba(0,0,0,.25)",
+};
+
+const paginaBtnStyle: React.CSSProperties = {
+  border: "1px solid #d1d5db",
+  background: "#fff",
+  color: "#374151",
+  padding: "7px 12px",
+  borderRadius: "9px",
+  fontSize: "13px",
+  cursor: "pointer",
 };
 

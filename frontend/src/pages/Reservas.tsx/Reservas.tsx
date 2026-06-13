@@ -12,6 +12,8 @@ import {
 
 import { notify } from "../../utils/notifications";
 
+const ITENS_POR_PAGINA = 8;
+
 type FiltroStatus = "TODAS" | "ATIVA" | "ATRASADA" | "DEVOLVIDA";
  
 const filtroOptions: { value: FiltroStatus; label: string; bg: string; color: string }[] = [
@@ -36,10 +38,15 @@ export default function Reservas() {
   const [devolvendoId, setDevolvendoId] = useState<number | null>(null);
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODAS");
+  const [pagina, setPagina] = useState(1);
 
   useEffect(() => {
     carregarReservas();
   }, []);
+
+  useEffect(() => {
+    setPagina(1);
+  }, [filtroStatus, pesquisa]);
 
   async function carregarReservas() {
     try {
@@ -130,6 +137,10 @@ export default function Reservas() {
  
     return passaFiltroStatus && passaPesquisa;
   });
+
+  const totalPaginas = Math.ceil(reservasFiltradas.length / ITENS_POR_PAGINA);
+  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
+  const reservasPagina = reservasFiltradas.slice(inicio, inicio + ITENS_POR_PAGINA);
 
   return (
     <AppTemplate
@@ -253,154 +264,219 @@ export default function Reservas() {
       )}
 
       {!loading && !erro && reservasFiltradas.length > 0 && (
-        <div
-          style={{
-            width: "100%",
-            overflowX: "auto",
-            border: "1px solid #e5e7eb",
-            borderRadius: "14px",
-          }}
-        >
-          <table
+        <>
+          <div
             style={{
               width: "100%",
-              borderCollapse: "collapse",
-              minWidth: "850px",
+              overflowX: "auto",
+              border: "1px solid #e5e7eb",
+              borderRadius: "14px",
             }}
           >
-            <thead>
-              <tr
-                style={{
-                  background: "#f9fafb",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {[
-                  "ID",
-                  "Usuário",
-                  "Início",
-                  "Fim",
-                  "Equipamentos",
-                  "Status",
-                  "Ações",
-                ].map((titulo) => (
-                  <th
-                    key={titulo}
-                    style={{
-                      textAlign: titulo === "Ações" ? "center" : "left",
-                      padding: "14px 12px",
-                      fontSize: "12px",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em",
-                      color: "#374151",
-                    }}
-                  >
-                    {titulo}
-                  </th>
-                ))}
-              </tr>
-            </thead>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                minWidth: "850px",
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    background: "#f9fafb",
+                    borderBottom: "1px solid #e5e7eb",
+                  }}
+                >
+                  {[
+                    "ID",
+                    "Usuário",
+                    "Início",
+                    "Fim",
+                    "Equipamentos",
+                    "Status",
+                    "Ações",
+                  ].map((titulo) => (
+                    <th
+                      key={titulo}
+                      style={{
+                        textAlign: titulo === "Ações" ? "center" : "left",
+                        padding: "14px 12px",
+                        fontSize: "12px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        color: "#374151",
+                      }}
+                    >
+                      {titulo}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
 
-            <tbody>
-              {reservasFiltradas.map((reserva) => {
-                const status = getStatus(reserva);
+              <tbody>
+                {reservasPagina.map((reserva) => {
+                  const status = getStatus(reserva);
 
-                return (
-                  <tr
-                    key={reserva.id}
-                    style={{
-                      borderBottom: "1px solid #f3f4f6",
-                    }}
-                  >
-                    <td style={{ padding: "14px 12px", fontWeight: 700 }}>
-                      {reserva.id}
-                    </td>
+                  return (
+                    <tr
+                      key={reserva.id}
+                      style={{
+                        borderBottom: "1px solid #f3f4f6",
+                      }}
+                    >
+                      <td style={{ padding: "14px 12px", fontWeight: 700 }}>
+                        {reserva.id}
+                      </td>
 
-                    <td style={{ padding: "14px 12px" }}>{reserva.user}</td>
+                      <td style={{ padding: "14px 12px" }}>{reserva.user}</td>
 
-                    <td style={{ padding: "14px 12px" }}>
-                      {formatarData(reserva.startDate)}
-                    </td>
+                      <td style={{ padding: "14px 12px" }}>
+                        {formatarData(reserva.startDate)}
+                      </td>
 
-                    <td style={{ padding: "14px 12px" }}>
-                      {formatarData(reserva.endDate)}
-                    </td>
+                      <td style={{ padding: "14px 12px" }}>
+                        {formatarData(reserva.endDate)}
+                      </td>
 
-                    <td style={{ padding: "14px 12px" }}>
-                      {reserva.equipments?.length ?? 0}
-                    </td>
+                      <td style={{ padding: "14px 12px" }}>
+                        {reserva.equipments?.length ?? 0}
+                      </td>
 
-                    <td style={{ padding: "14px 12px" }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          padding: "5px 10px",
-                          borderRadius: "999px",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          background: status.bg,
-                          color: status.color,
-                        }}
-                      >
-                        {status.label}
-                      </span>
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          justifyContent: "center",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setReservaInfo(reserva)}
-                          style={buttonStyle}
-                        >
-                          Info
-                        </button>
-
-                        {!reserva.returnedAt && (
-                          <button
-                            type="button"
-                            onClick={() => devolver(reserva.id)}
-                            disabled={devolvendoId === reserva.id}
-                            style={{
-                              ...buttonStyle,
-                              opacity: devolvendoId === reserva.id ? 0.7 : 1,
-                              cursor:
-                                devolvendoId === reserva.id
-                                  ? "not-allowed"
-                                  : "pointer",
-                            }}
-                          >
-                            {devolvendoId === reserva.id
-                              ? "Devolvendo..."
-                              : "Devolver"}
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => setReservaExcluir(reserva)}
+                      <td style={{ padding: "14px 12px" }}>
+                        <span
                           style={{
-                            ...buttonStyle,
-                            background: "#7f1d1d",
+                            display: "inline-flex",
+                            padding: "5px 10px",
+                            borderRadius: "999px",
+                            fontSize: "12px",
+                            fontWeight: 800,
+                            background: status.bg,
+                            color: status.color,
                           }}
                         >
-                          Excluir
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                          {status.label}
+                        </span>
+                      </td>
+
+                      <td style={{ padding: "14px 12px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            justifyContent: "center",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setReservaInfo(reserva)}
+                            style={buttonStyle}
+                          >
+                            Info
+                          </button>
+
+                          {!reserva.returnedAt && (
+                            <button
+                              type="button"
+                              onClick={() => devolver(reserva.id)}
+                              disabled={devolvendoId === reserva.id}
+                              style={{
+                                ...buttonStyle,
+                                opacity: devolvendoId === reserva.id ? 0.7 : 1,
+                                cursor:
+                                  devolvendoId === reserva.id
+                                    ? "not-allowed"
+                                    : "pointer",
+                              }}
+                            >
+                              {devolvendoId === reserva.id
+                                ? "Devolvendo..."
+                                : "Devolver"}
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => setReservaExcluir(reserva)}
+                            style={{
+                              ...buttonStyle,
+                              background: "#7f1d1d",
+                            }}
+                          >
+                            Excluir
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPaginas > 1 && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: "16px",
+                flexWrap: "wrap",
+                gap: "12px",
+              }}
+            >
+              <span style={{ fontSize: "13px", color: "#6b7280" }}>
+                Exibindo {inicio + 1}–{Math.min(inicio + ITENS_POR_PAGINA, reservasFiltradas.length)} de {reservasFiltradas.length} reserva{reservasFiltradas.length !== 1 ? "s" : ""}
+              </span>
+
+              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                <button
+                  type="button"
+                  onClick={() => setPagina((p) => p - 1)}
+                  disabled={pagina === 1}
+                  style={{
+                    ...paginaBtnStyle,
+                    opacity: pagina === 1 ? 0.4 : 1,
+                    cursor: pagina === 1 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  ← Anterior
+                </button>
+
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setPagina(num)}
+                    style={{
+                      ...paginaBtnStyle,
+                      background: num === pagina ? "#111827" : "#fff",
+                      color: num === pagina ? "#fff" : "#374151",
+                      border: num === pagina ? "none" : "1px solid #d1d5db",
+                      fontWeight: num === pagina ? 700 : 500,
+                      minWidth: "36px",
+                    }}
+                  >
+                    {num}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => setPagina((p) => p + 1)}
+                  disabled={pagina === totalPaginas}
+                  style={{
+                    ...paginaBtnStyle,
+                    opacity: pagina === totalPaginas ? 0.4 : 1,
+                    cursor: pagina === totalPaginas ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Próxima →
+                </button>
+              </div>
+            </div>
+          )}
+      </>
       )}
 
       {reservaInfo && (
@@ -555,4 +631,14 @@ const infoGridStyle: React.CSSProperties = {
   gridTemplateColumns: "150px 1fr",
   gap: "10px 14px",
   fontSize: "14px",
+};
+
+const paginaBtnStyle: React.CSSProperties = {
+  border: "1px solid #d1d5db",
+  background: "#fff",
+  color: "#374151",
+  padding: "7px 12px",
+  borderRadius: "9px",
+  fontSize: "13px",
+  cursor: "pointer",
 };

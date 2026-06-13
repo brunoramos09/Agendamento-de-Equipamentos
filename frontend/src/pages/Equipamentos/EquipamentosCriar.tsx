@@ -6,7 +6,7 @@ import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import { criarEquipamento } from "../../services/equipamentoService";
 import { listarSalas } from "../../services/salasService";
 import type Room from "../../interfaces/sala";
-import EquipamentoForm from "../../../components/equipaments/EquipamentoForm";
+import EquipamentoForm, { editStatusOptions } from "../../../components/equipaments/EquipamentoForm";
 import type { EquipamentoFormData } from "../../../components/equipaments/types";
 
 import { notify } from "../../utils/notifications";
@@ -113,6 +113,7 @@ export default function CriarEquipamento() {
         carregandoSalas={carregandoSalas}
         salvando={salvando}
         onSubmit={handleSubmit}
+        statusOptions={editStatusOptions}
         onCancel={() => navigate("/reserva-equipamentos/equipamentos")}
       />
     </AppTemplate>
