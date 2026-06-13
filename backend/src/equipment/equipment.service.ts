@@ -211,7 +211,10 @@ export class EquipmentService {
     const diasTotaisExistencia = tempoTotalExistencia / (1000 * 60 * 60 * 24);
     const taxaUtilizacao =
       diasTotaisExistencia > 0
-        ? ((totalDiasReservados / diasTotaisExistencia) * 100).toFixed(1)
+        ? Math.min(
+            (totalDiasReservados / diasTotaisExistencia) * 100,
+            100
+        ).toFixed(1)
         : 0;
 
     doc.text(`Total de Reservas (Histórico): ${totalReservas}`);
