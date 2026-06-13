@@ -52,11 +52,47 @@ export class EquipmentService {
   }
 
   async update(id: number, data: UpdateEquipmentDto) {
-    await this.findOne(id);
+    const currentEquipment = await this.findOne(id);
+
+    if (data.status && data.status !== currentEquipment.status) {
+      if (data.status === 'MANUTENCAO') {
+        await this.prisma.maintenance.create({
+          data: {
+            equipmentId: id,
+            startDate: new Date(),
+            responsiblePerson: (data as any)['maintenanceResponsiblePerson'],
+            observations: (data as any)['maintenanceObservations'],
+          },
+        });
+      }
+      
+      if (currentEquipment.status === 'MANUTENCAO' && data.status === 'DISPONIVEL') {
+        const openMaintenance = await this.prisma.maintenance.findFirst({
+          where: {
+            equipmentId: id,
+            endDate: null,
+          },
+          orderBy: { startDate: 'desc' },
+        });
+
+        if (openMaintenance) {
+          await this.prisma.maintenance.update({
+            where: { id: openMaintenance.id },
+            data: { endDate: new Date() },
+          });
+        }
+      }
+    }
+
+    const {
+      maintenanceResponsiblePerson,
+      maintenanceObservations,
+      ...equipmentData
+    } = data as any;
 
     return this.prisma.equipment.update({
       where: { id },
-      data,
+      data: equipmentData,
     });
   }
 
@@ -73,6 +109,7 @@ export class EquipmentService {
       where: { id },
       include: {
         room: true,
+        maintenances: true,
         reservations: {
           include: {
             reservation: true,
@@ -141,6 +178,72 @@ export class EquipmentService {
           : '-'
       }`,
     );
+
+    doc.moveDown(2);
+
+    doc.fontSize(16).text('Métricas de Utilização e Manutenção', {
+      underline: true,
+    });
+
+    doc.moveDown(0.5);
+    doc.fontSize(12);
+
+    const totalReservas = equipment.reservations.length;
+    const agora = new Date();
+    const reservasFuturas = equipment.reservations.filter(
+      (r) => new Date(r.reservation.startDate) >= agora,
+    ).length;
+
+    let totalDiasReservados = 0;
+    equipment.reservations.forEach((r) => {
+      const inicio = new Date(r.reservation.startDate);
+      const fim = new Date(r.reservation.endDate);
+      const diffTime = Math.abs(fim.getTime() - inicio.getTime());
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      totalDiasReservados += diffDays;
+    });
+
+    const tempoMedioReserva =
+      totalReservas > 0 ? (totalDiasReservados / totalReservas).toFixed(1) : 0;
+
+    const dataCriacao = new Date(equipment.createdAt);
+    const tempoTotalExistencia = Math.abs(agora.getTime() - dataCriacao.getTime());
+    const diasTotaisExistencia = tempoTotalExistencia / (1000 * 60 * 60 * 24);
+    const taxaUtilizacao =
+      diasTotaisExistencia > 0
+        ? ((totalDiasReservados / diasTotaisExistencia) * 100).toFixed(1)
+        : 0;
+
+    doc.text(`Total de Reservas (Histórico): ${totalReservas}`);
+    doc.text(`Reservas Agendadas (Atual/Futuras): ${reservasFuturas}`);
+    doc.text(`Tempo Médio de Reserva: ${tempoMedioReserva} dias`);
+    doc.text(`Taxa de Utilização Total: ${taxaUtilizacao}%`);
+    doc.text(`Quantidade de Manutenções Realizadas: ${equipment.maintenances.length}`);
+
+    doc.moveDown(2);
+
+    doc.fontSize(16).text('Histórico de Manutenções', {
+      underline: true,
+    });
+
+    doc.moveDown(0.5);
+    doc.fontSize(12);
+
+    if (equipment.maintenances.length === 0) {
+      doc.text('Nenhuma manutenção registrada.');
+    } else {
+      equipment.maintenances.forEach((m, index) => {
+        doc.text(`${index + 1}. Início: ${m.startDate.toLocaleString('pt-BR')}`);
+        doc.text(
+          `   Fim: ${
+            m.endDate ? m.endDate.toLocaleString('pt-BR') : 'Em andamento'
+          }`,
+        );
+        if (m.responsiblePerson) doc.text(`   Responsável: ${m.responsiblePerson}`);
+        if (m.observations) doc.text(`   Observações: ${m.observations}`);
+        doc.moveDown(0.5);
+      });
+    }
 
     doc.moveDown(2);
 

@@ -15,10 +15,14 @@ import { listarSalas } from "../../services/salasService";
 
 import type Room from "../../interfaces/sala";
 
-import EquipamentoForm from "../../../components/equipaments/EquipamentoForm";
+import EquipamentoForm, { editStatusOptions } from "../../../components/equipaments/EquipamentoForm";
 import type { EquipamentoFormData } from "../../../components/equipaments/types";
 
 import { notify } from "../../utils/notifications";
+
+const manutencaoStatusOptions = [
+  { value: "MANUTENCAO" as const, label: "Manutenção (encerre a manutenção para alterar o status)" },
+];
 
 export default function EditarEquipamento() {
   const navigate = useNavigate();
@@ -150,6 +154,12 @@ export default function EditarEquipamento() {
         salvando={salvando}
         onSubmit={handleSubmit}
         onCancel={() => navigate("/reserva-equipamentos/equipamentos")}
+        statusOptions={
+          equipamento.status === "MANUTENCAO"
+            ? manutencaoStatusOptions
+            : editStatusOptions
+        }
+        statusDisabled={equipamento.status === "MANUTENCAO"}
       />
     </AppTemplate>
   );
