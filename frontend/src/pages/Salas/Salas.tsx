@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/immutability */
 import { useEffect, useState } from "react";
 import AppTemplate from "../AppTemplate";
@@ -141,9 +142,7 @@ export default function Salas() {
 
       {loading && <p>Carregando salas...</p>}
 
-      {erro && (
-        <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>
-      )}
+      {erro && <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>}
 
       {!loading && !erro && salasFiltradas.length === 0 && (
         <p style={{ color: "#6b7280" }}>Nenhuma sala encontrada.</p>
@@ -151,49 +150,49 @@ export default function Salas() {
 
       {!loading && !erro && salasFiltradas.length > 0 && (
         <>
-        <div
-          style={{
-            width: "100%",
-            overflowX: "auto",
-            border: "1px solid #e5e7eb",
-            borderRadius: "14px",
-          }}
-        >
-          <table
+          <div
             style={{
               width: "100%",
-              borderCollapse: "collapse",
-              minWidth: "650px",
+              overflowX: "auto",
+              border: "1px solid #e5e7eb",
+              borderRadius: "14px",
             }}
           >
-            <thead>
-              <tr
-                style={{
-                  background: "#f9fafb",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                {["ID", "Nome", "Prédio", "Andar", "Campus", "Ações"].map(
-                  (titulo) => (
-                    <th
-                      key={titulo}
-                      style={{
-                        textAlign: titulo === "Ações" ? "center" : "left",
-                        padding: "14px 12px",
-                        fontSize: "12px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                        color: "#374151",
-                      }}
-                    >
-                      {titulo}
-                    </th>
-                  ),
-                )}
-              </tr>
-            </thead>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                minWidth: "650px",
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    background: "#f9fafb",
+                    borderBottom: "1px solid #e5e7eb",
+                  }}
+                >
+                  {["ID", "Nome", "Prédio", "Andar", "Campus", "Ações"].map(
+                    (titulo) => (
+                      <th
+                        key={titulo}
+                        style={{
+                          textAlign: titulo === "Ações" ? "center" : "left",
+                          padding: "14px 12px",
+                          fontSize: "12px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          color: "#374151",
+                        }}
+                      >
+                        {titulo}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
 
-            <tbody>
+              <tbody>
                 {salasPagina.map((sala) => (
                   <tr
                     key={sala.id}
@@ -205,11 +204,17 @@ export default function Salas() {
 
                     <td style={{ padding: "14px 12px" }}>{sala.name}</td>
 
-                    <td style={{ padding: "14px 12px" }}>{sala.building ?? "-"}</td>
+                    <td style={{ padding: "14px 12px" }}>
+                      {sala.building ?? "-"}
+                    </td>
 
-                    <td style={{ padding: "14px 12px" }}>{sala.floor ?? "-"}</td>
+                    <td style={{ padding: "14px 12px" }}>
+                      {sala.floor ?? "-"}
+                    </td>
 
-                    <td style={{ padding: "14px 12px" }}>{sala.campus ?? "-"}</td>
+                    <td style={{ padding: "14px 12px" }}>
+                      {sala.campus ?? "-"}
+                    </td>
 
                     <td style={{ padding: "14px 12px" }}>
                       <div
@@ -262,10 +267,15 @@ export default function Salas() {
               }}
             >
               <span style={{ fontSize: "13px", color: "#6b7280" }}>
-                Exibindo {inicio + 1}–{Math.min(inicio + ITENS_POR_PAGINA, salasFiltradas.length)} de {salasFiltradas.length} sala{salasFiltradas.length !== 1 ? "s" : ""}
+                Exibindo {inicio + 1}–
+                {Math.min(inicio + ITENS_POR_PAGINA, salasFiltradas.length)} de{" "}
+                {salasFiltradas.length} sala
+                {salasFiltradas.length !== 1 ? "s" : ""}
               </span>
 
-              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <div
+                style={{ display: "flex", gap: "6px", alignItems: "center" }}
+              >
                 <button
                   type="button"
                   onClick={() => setPagina((p) => p - 1)}
@@ -279,23 +289,25 @@ export default function Salas() {
                   ← Anterior
                 </button>
 
-                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => setPagina(num)}
-                    style={{
-                      ...paginaBtnStyle,
-                      background: num === pagina ? "#111827" : "#fff",
-                      color: num === pagina ? "#fff" : "#374151",
-                      border: num === pagina ? "none" : "1px solid #d1d5db",
-                      fontWeight: num === pagina ? 700 : 500,
-                      minWidth: "36px",
-                    }}
-                  >
-                    {num}
-                  </button>
-                ))}
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(
+                  (num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setPagina(num)}
+                      style={{
+                        ...paginaBtnStyle,
+                        background: num === pagina ? "#111827" : "#fff",
+                        color: num === pagina ? "#fff" : "#374151",
+                        border: num === pagina ? "none" : "1px solid #d1d5db",
+                        fontWeight: num === pagina ? 700 : 500,
+                        minWidth: "36px",
+                      }}
+                    >
+                      {num}
+                    </button>
+                  ),
+                )}
 
                 <button
                   type="button"
@@ -406,4 +418,3 @@ const paginaBtnStyle: React.CSSProperties = {
   fontSize: "13px",
   cursor: "pointer",
 };
-

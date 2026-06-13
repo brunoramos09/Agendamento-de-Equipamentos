@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
@@ -215,9 +216,14 @@ export default function Equipamentos() {
     return passaFiltroStatus && passaPesquisa;
   });
 
-  const totalPaginas = Math.ceil(equipamentosFiltrados.length / ITENS_POR_PAGINA);
+  const totalPaginas = Math.ceil(
+    equipamentosFiltrados.length / ITENS_POR_PAGINA,
+  );
   const inicio = (pagina - 1) * ITENS_POR_PAGINA;
-  const equipamentosPagina = equipamentosFiltrados.slice(inicio, inicio + ITENS_POR_PAGINA);
+  const equipamentosPagina = equipamentosFiltrados.slice(
+    inicio,
+    inicio + ITENS_POR_PAGINA,
+  );
 
   return (
     <AppTemplate
@@ -372,111 +378,34 @@ export default function Equipamentos() {
                       >
                         {titulo}
                       </th>
-                    )
+                    ),
                   )}
                 </tr>
               </thead>
-              
+
               <tbody>
                 {equipamentosPagina.map((equipamento) => {
-                const { bg, color } = getStatusStyle(equipamento.status);
+                  const { bg, color } = getStatusStyle(equipamento.status);
 
-                return (
-                  <tr
-                    key={equipamento.id}
-                    style={{ borderBottom: "1px solid #f3f4f6" }}
-                  >
-                    <td style={{ padding: "14px 12px", fontWeight: 700 }}>
-                      {equipamento.id}
-                    </td>
+                  return (
+                    <tr
+                      key={equipamento.id}
+                      style={{ borderBottom: "1px solid #f3f4f6" }}
+                    >
+                      <td style={{ padding: "14px 12px", fontWeight: 700 }}>
+                        {equipamento.id}
+                      </td>
 
-                    <td style={{ padding: "14px 12px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        <span>{equipamento.name}</span>
-
-                        <button
-                          type="button"
-                          onClick={() => setEquipamentoInfo(equipamento)}
+                      <td style={{ padding: "14px 12px" }}>
+                        <div
                           style={{
-                            width: "20px",
-                            height: "20px",
-                            borderRadius: "50%",
-                            border: "1px solid #d1d5db",
-                            background: "#fff",
-                            color: "#374151",
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            cursor: "pointer",
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            padding: 0,
-                            flexShrink: 0,
+                            gap: "8px",
                           }}
                         >
-                          i
-                        </button>
-                      </div>
-                    </td>
+                          <span>{equipamento.name}</span>
 
-                    <td style={{ padding: "14px 12px" }}>
-                      {equipamento.serialNumber ?? "-"}
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      {equipamento.room?.name ?? "-"}
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          padding: "5px 10px",
-                          borderRadius: "999px",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          background: bg,
-                          color,
-                        }}
-                      >
-                        {statusLabels[equipamento.status] ?? equipamento.status}
-                      </span>
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          justifyContent: "center",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() =>
-                            (window.location.href = `/reserva-equipamentos/equipamentos/editar/${equipamento.id}`)
-                          }
-                          style={buttonStyle}
-                        >
-                          Editar
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleGerarRelatorio(equipamento.id)}
-                          style={buttonStyle}
-                        >
-                          Relatório
-                        </button>
-
-                        {equipamento.status === "DISPONIVEL" && (
                           <button
                             type="button"
                             onClick={() =>
@@ -484,11 +413,45 @@ export default function Equipamentos() {
                             }
                             style={{ ...buttonStyle, background: "#92400e" }}
                           >
-                            Manutenção
+                            i
                           </button>
-                        )}
+                        </div>
+                      </td>
 
-                        {equipamento.status === "MANUTENCAO" && (
+                      <td style={{ padding: "14px 12px" }}>
+                        {equipamento.serialNumber ?? "-"}
+                      </td>
+
+                      <td style={{ padding: "14px 12px" }}>
+                        {equipamento.room?.name ?? "-"}
+                      </td>
+
+                      <td style={{ padding: "14px 12px" }}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            padding: "5px 10px",
+                            borderRadius: "999px",
+                            fontSize: "12px",
+                            fontWeight: 800,
+                            background: bg,
+                            color,
+                          }}
+                        >
+                          {statusLabels[equipamento.status] ??
+                            equipamento.status}
+                        </span>
+                      </td>
+
+                      <td style={{ padding: "14px 12px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            justifyContent: "center",
+                            flexWrap: "wrap",
+                          }}
+                        >
                           <button
                             type="button"
                             onClick={() =>
@@ -496,91 +459,131 @@ export default function Equipamentos() {
                             }
                             style={{ ...buttonStyle, background: "#166534" }}
                           >
-                            Finalizar
+                            Editar
                           </button>
-                        )}
 
-                        <button
-                          type="button"
-                          onClick={() => setEquipamentoExcluir(equipamento)}
-                          style={{ ...buttonStyle, background: "#7f1d1d" }}
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                          <button
+                            type="button"
+                            onClick={() => handleGerarRelatorio(equipamento.id)}
+                            style={buttonStyle}
+                          >
+                            Relatório
+                          </button>
 
-        {totalPaginas > 1 && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: "16px",
-              flexWrap: "wrap",
-              gap: "12px",
-            }}
-          >
-            <span style={{ fontSize: "13px", color: "#6b7280" }}>
-              Exibindo {inicio + 1}–{Math.min(inicio + ITENS_POR_PAGINA, equipamentosFiltrados.length)} de {equipamentosFiltrados.length} equipamento{equipamentosFiltrados.length !== 1 ? "s" : ""}
-            </span>
+                          {equipamento.status === "DISPONIVEL" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEquipamentoManutencao(equipamento)
+                              }
+                              style={{ ...buttonStyle, background: "#92400e" }}
+                            >
+                              Manutenção
+                            </button>
+                          )}
 
-            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-              <button
-                type="button"
-                onClick={() => setPagina((p) => p - 1)}
-                disabled={pagina === 1}
-                style={{
-                  ...paginaBtnStyle,
-                  opacity: pagina === 1 ? 0.4 : 1,
-                  cursor: pagina === 1 ? "not-allowed" : "pointer",
-                }}
+                          {equipamento.status === "MANUTENCAO" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEquipamentoFinalizarManutencao(equipamento)
+                              }
+                              style={{ ...buttonStyle, background: "#166534" }}
+                            >
+                              Finalizar
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => setEquipamentoExcluir(equipamento)}
+                            style={{ ...buttonStyle, background: "#7f1d1d" }}
+                          >
+                            Excluir
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPaginas > 1 && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: "16px",
+                flexWrap: "wrap",
+                gap: "12px",
+              }}
+            >
+              <span style={{ fontSize: "13px", color: "#6b7280" }}>
+                Exibindo {inicio + 1}–
+                {Math.min(
+                  inicio + ITENS_POR_PAGINA,
+                  equipamentosFiltrados.length,
+                )}{" "}
+                de {equipamentosFiltrados.length} equipamento
+                {equipamentosFiltrados.length !== 1 ? "s" : ""}
+              </span>
+
+              <div
+                style={{ display: "flex", gap: "6px", alignItems: "center" }}
               >
-                ← Anterior
-              </button>
-
-              {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
                 <button
-                  key={num}
                   type="button"
-                  onClick={() => setPagina(num)}
+                  onClick={() => setPagina((p) => p - 1)}
+                  disabled={pagina === 1}
                   style={{
                     ...paginaBtnStyle,
-                    background: num === pagina ? "#111827" : "#fff",
-                    color: num === pagina ? "#fff" : "#374151",
-                    border: num === pagina ? "none" : "1px solid #d1d5db",
-                    fontWeight: num === pagina ? 700 : 500,
-                    minWidth: "36px",
+                    opacity: pagina === 1 ? 0.4 : 1,
+                    cursor: pagina === 1 ? "not-allowed" : "pointer",
                   }}
                 >
-                  {num}
+                  ← Anterior
                 </button>
-              ))}
 
-              <button
-                type="button"
-                onClick={() => setPagina((p) => p + 1)}
-                disabled={pagina === totalPaginas}
-                style={{
-                  ...paginaBtnStyle,
-                  opacity: pagina === totalPaginas ? 0.4 : 1,
-                  cursor: pagina === totalPaginas ? "not-allowed" : "pointer",
-                }}
-              >
-                Próxima →
-              </button>
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(
+                  (num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setPagina(num)}
+                      style={{
+                        ...paginaBtnStyle,
+                        background: num === pagina ? "#111827" : "#fff",
+                        color: num === pagina ? "#fff" : "#374151",
+                        border: num === pagina ? "none" : "1px solid #d1d5db",
+                        fontWeight: num === pagina ? 700 : 500,
+                        minWidth: "36px",
+                      }}
+                    >
+                      {num}
+                    </button>
+                  ),
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setPagina((p) => p + 1)}
+                  disabled={pagina === totalPaginas}
+                  style={{
+                    ...paginaBtnStyle,
+                    opacity: pagina === totalPaginas ? 0.4 : 1,
+                    cursor: pagina === totalPaginas ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Próxima →
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </>
+          )}
+        </>
       )}
-      
 
       {equipamentoInfo && (
         <div

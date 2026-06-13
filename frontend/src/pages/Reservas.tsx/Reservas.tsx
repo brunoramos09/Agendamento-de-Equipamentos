@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
@@ -15,12 +16,17 @@ import { notify } from "../../utils/notifications";
 const ITENS_POR_PAGINA = 8;
 
 type FiltroStatus = "TODAS" | "ATIVA" | "ATRASADA" | "DEVOLVIDA";
- 
-const filtroOptions: { value: FiltroStatus; label: string; bg: string; color: string }[] = [
-  { value: "TODAS",     label: "Todas",     bg: "#111827", color: "#fff"     },
-  { value: "ATIVA",     label: "Ativas",    bg: "#dcfce7", color: "#166534"  },
-  { value: "ATRASADA",  label: "Atrasadas", bg: "#fee2e2", color: "#991b1b"  },
-  { value: "DEVOLVIDA", label: "Devolvidas",bg: "#dbeafe", color: "#1d4ed8"  },
+
+const filtroOptions: {
+  value: FiltroStatus;
+  label: string;
+  bg: string;
+  color: string;
+}[] = [
+  { value: "TODAS", label: "Todas", bg: "#111827", color: "#fff" },
+  { value: "ATIVA", label: "Ativas", bg: "#dcfce7", color: "#166534" },
+  { value: "ATRASADA", label: "Atrasadas", bg: "#fee2e2", color: "#991b1b" },
+  { value: "DEVOLVIDA", label: "Devolvidas", bg: "#dbeafe", color: "#1d4ed8" },
 ];
 
 export default function Reservas() {
@@ -109,18 +115,33 @@ export default function Reservas() {
 
   function getStatus(reserva: Reservation) {
     if (reserva.returnedAt) {
-      return { label: "DEVOLVIDA", bg: "#dbeafe", color: "#1d4ed8", key: "DEVOLVIDA" as FiltroStatus };
+      return {
+        label: "DEVOLVIDA",
+        bg: "#dbeafe",
+        color: "#1d4ed8",
+        key: "DEVOLVIDA" as FiltroStatus,
+      };
     }
     if (new Date(reserva.endDate) < new Date()) {
-      return { label: "ATRASADA", bg: "#fee2e2", color: "#991b1b", key: "ATRASADA" as FiltroStatus };
+      return {
+        label: "ATRASADA",
+        bg: "#fee2e2",
+        color: "#991b1b",
+        key: "ATRASADA" as FiltroStatus,
+      };
     }
-    return { label: "ATIVA", bg: "#dcfce7", color: "#166534", key: "ATIVA" as FiltroStatus };
+    return {
+      label: "ATIVA",
+      bg: "#dcfce7",
+      color: "#166534",
+      key: "ATIVA" as FiltroStatus,
+    };
   }
 
   const reservasFiltradas = reservas.filter((reserva) => {
     const passaFiltroStatus =
       filtroStatus === "TODAS" || getStatus(reserva).key === filtroStatus;
- 
+
     const passaPesquisa = [
       reserva.user,
       reserva.observations,
@@ -134,13 +155,16 @@ export default function Reservas() {
       .some((valor) =>
         valor!.toString().toLowerCase().includes(pesquisa.toLowerCase()),
       );
- 
+
     return passaFiltroStatus && passaPesquisa;
   });
 
   const totalPaginas = Math.ceil(reservasFiltradas.length / ITENS_POR_PAGINA);
   const inicio = (pagina - 1) * ITENS_POR_PAGINA;
-  const reservasPagina = reservasFiltradas.slice(inicio, inicio + ITENS_POR_PAGINA);
+  const reservasPagina = reservasFiltradas.slice(
+    inicio,
+    inicio + ITENS_POR_PAGINA,
+  );
 
   return (
     <AppTemplate
@@ -193,7 +217,7 @@ export default function Reservas() {
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           {filtroOptions.map((opcao) => {
             const ativo = filtroStatus === opcao.value;
- 
+
             return (
               <button
                 key={opcao.value}
@@ -426,10 +450,15 @@ export default function Reservas() {
               }}
             >
               <span style={{ fontSize: "13px", color: "#6b7280" }}>
-                Exibindo {inicio + 1}–{Math.min(inicio + ITENS_POR_PAGINA, reservasFiltradas.length)} de {reservasFiltradas.length} reserva{reservasFiltradas.length !== 1 ? "s" : ""}
+                Exibindo {inicio + 1}–
+                {Math.min(inicio + ITENS_POR_PAGINA, reservasFiltradas.length)}{" "}
+                de {reservasFiltradas.length} reserva
+                {reservasFiltradas.length !== 1 ? "s" : ""}
               </span>
 
-              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <div
+                style={{ display: "flex", gap: "6px", alignItems: "center" }}
+              >
                 <button
                   type="button"
                   onClick={() => setPagina((p) => p - 1)}
@@ -443,23 +472,25 @@ export default function Reservas() {
                   ← Anterior
                 </button>
 
-                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => setPagina(num)}
-                    style={{
-                      ...paginaBtnStyle,
-                      background: num === pagina ? "#111827" : "#fff",
-                      color: num === pagina ? "#fff" : "#374151",
-                      border: num === pagina ? "none" : "1px solid #d1d5db",
-                      fontWeight: num === pagina ? 700 : 500,
-                      minWidth: "36px",
-                    }}
-                  >
-                    {num}
-                  </button>
-                ))}
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(
+                  (num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setPagina(num)}
+                      style={{
+                        ...paginaBtnStyle,
+                        background: num === pagina ? "#111827" : "#fff",
+                        color: num === pagina ? "#fff" : "#374151",
+                        border: num === pagina ? "none" : "1px solid #d1d5db",
+                        fontWeight: num === pagina ? 700 : 500,
+                        minWidth: "36px",
+                      }}
+                    >
+                      {num}
+                    </button>
+                  ),
+                )}
 
                 <button
                   type="button"
@@ -476,7 +507,7 @@ export default function Reservas() {
               </div>
             </div>
           )}
-      </>
+        </>
       )}
 
       {reservaInfo && (
