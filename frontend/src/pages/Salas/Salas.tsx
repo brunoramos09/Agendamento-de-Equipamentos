@@ -6,6 +6,7 @@ import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import { listarSalas, excluirSala } from "../../services/salasService";
 import type Room from "../../interfaces/sala";
 import { notify } from "../../utils/notifications";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const ITENS_POR_PAGINA = 8;
 
@@ -17,6 +18,8 @@ export default function Salas() {
   const [salaExcluir, setSalaExcluir] = useState<Room | null>(null);
   const [excluindo, setExcluindo] = useState(false);
   const [pagina, setPagina] = useState(1);
+
+  usePageTitle("Salas");
 
   useEffect(() => {
     carregarSalas();

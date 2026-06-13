@@ -10,6 +10,7 @@ import {
 } from "../../services/equipamentoService";
 import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const ITENS_POR_PAGINA = 8;
 
@@ -57,6 +58,8 @@ export default function Equipamentos() {
   const [finalizando, setFinalizando] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODOS");
   const [pagina, setPagina] = useState(1);
+
+  usePageTitle("Equipamentos");
 
   useEffect(() => {
     carregarEquipamentos();

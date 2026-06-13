@@ -15,13 +15,19 @@ import { listarSalas } from "../../services/salasService";
 
 import type Room from "../../interfaces/sala";
 
-import EquipamentoForm, { editStatusOptions } from "../../../components/equipaments/EquipamentoForm";
+import EquipamentoForm, {
+  editStatusOptions,
+} from "../../../components/equipaments/EquipamentoForm";
 import type { EquipamentoFormData } from "../../../components/equipaments/types";
 
 import { notify } from "../../utils/notifications";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const manutencaoStatusOptions = [
-  { value: "MANUTENCAO" as const, label: "Manutenção (encerre a manutenção para alterar o status)" },
+  {
+    value: "MANUTENCAO" as const,
+    label: "Manutenção (encerre a manutenção para alterar o status)",
+  },
 ];
 
 export default function EditarEquipamento() {
@@ -44,6 +50,8 @@ export default function EditarEquipamento() {
     status: "DISPONIVEL",
     photo: null,
   });
+
+  usePageTitle("Equipamentos: Editar");
 
   useEffect(() => {
     carregarDados();
@@ -139,8 +147,8 @@ export default function EditarEquipamento() {
   }
 
   return (
-    <AppTemplate 
-      hideDefaultContent 
+    <AppTemplate
+      hideDefaultContent
       theme={equipamentosTheme}
       primaryAction={null}
       secondaryAction={null}

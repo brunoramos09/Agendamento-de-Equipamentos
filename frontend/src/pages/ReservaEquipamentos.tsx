@@ -5,6 +5,7 @@ import { listarEquipamentos } from "../services/equipamentoService";
 import { listarReservas } from "../services/reservaService";
 import type Equipment from "../interfaces/equipamento";
 import type Reservation from "../interfaces/reserva";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 type MetricCard = {
   label: string;
@@ -71,6 +72,8 @@ export function ReservaEquipamentos() {
   const [metrics, setMetrics] = useState<MetricCard[]>(defaultMetrics);
   const [recentItems, setRecentItems] =
     useState<RecentItem[]>(defaultRecentItems);
+
+  usePageTitle("Visão Geral");
 
   useEffect(() => {
     async function fetchDados() {

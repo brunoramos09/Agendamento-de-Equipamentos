@@ -12,6 +12,7 @@ import {
 } from "../../services/reservaService";
 
 import { notify } from "../../utils/notifications";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const ITENS_POR_PAGINA = 8;
 
@@ -45,6 +46,8 @@ export default function Reservas() {
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODAS");
   const [pagina, setPagina] = useState(1);
+
+  usePageTitle("Reservas");
 
   useEffect(() => {
     carregarReservas();

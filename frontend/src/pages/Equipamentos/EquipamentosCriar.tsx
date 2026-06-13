@@ -6,10 +6,13 @@ import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import { criarEquipamento } from "../../services/equipamentoService";
 import { listarSalas } from "../../services/salasService";
 import type Room from "../../interfaces/sala";
-import EquipamentoForm, { editStatusOptions } from "../../../components/equipaments/EquipamentoForm";
+import EquipamentoForm, {
+  editStatusOptions,
+} from "../../../components/equipaments/EquipamentoForm";
 import type { EquipamentoFormData } from "../../../components/equipaments/types";
 
 import { notify } from "../../utils/notifications";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 export default function CriarEquipamento() {
   const navigate = useNavigate();
@@ -28,6 +31,8 @@ export default function CriarEquipamento() {
     status: "DISPONIVEL",
     photo: null,
   });
+
+  usePageTitle("Equipamentos: Novo");
 
   useEffect(() => {
     carregarSalas();
@@ -99,8 +104,8 @@ export default function CriarEquipamento() {
   }
 
   return (
-    <AppTemplate 
-      hideDefaultContent 
+    <AppTemplate
+      hideDefaultContent
       theme={equipamentosTheme}
       primaryAction={null}
       secondaryAction={null}
