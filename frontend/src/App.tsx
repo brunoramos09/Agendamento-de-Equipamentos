@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ReservaEquipamentos from "./pages/ReservaEquipamentos";
 import Equipamentos from "./pages/Equipamentos/Equipamentos";
 import Salas from "./pages/Salas/Salas";
@@ -14,8 +13,12 @@ import ReservasCriar from "./pages/Reservas.tsx/ReservasCriar";
 function App() {
   return (
     <>
-      <BrowserRouter basename={(import.meta as any).env?.VITE_BASE_PATH || "/"}>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
+          <Route
+            path="/"
+            element={<Navigate to="/reserva-equipamentos" replace />}
+          />
           <Route
             path="/reserva-equipamentos"
             element={<ReservaEquipamentos />}

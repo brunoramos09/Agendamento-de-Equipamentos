@@ -11,8 +11,10 @@ import {
 import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import { API_URL } from "../../services/api";
 
 const ITENS_POR_PAGINA = 8;
+const filesUrl = API_URL.replace(/\/api$/, "");
 
 const statusLabels: Record<string, string> = {
   DISPONIVEL: "DISPONÍVEL",
@@ -637,7 +639,7 @@ export default function Equipamentos() {
                 }}
               >
                 <img
-                  src={`http://localhost:3000/uploads/equipments/${equipamentoInfo.photo}`}
+                  src={`${filesUrl}/uploads/equipments/${equipamentoInfo.photo}`}
                   alt={equipamentoInfo.name}
                   style={{
                     width: "auto",
