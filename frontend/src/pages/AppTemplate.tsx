@@ -113,7 +113,7 @@ export function AppTemplate(props: Readonly<AppTemplateProps>) {
     backLinkLabel = "Voltar ao menu do portal",
     backLinkHref = "/home",
     appName = "Sistema de Reserva de Equipamentos",
-    appSubtitle = "Modelo de interface padrao",
+    appSubtitle = "Visão Geral",
     appDescription = "Este template serve como base visual para as aplicacoes do portal, sem incluir login ou regras de autenticacao.",
     brandLabel = "Reserva de Equipamentos",
     navigation = defaultNavigation,

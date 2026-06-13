@@ -29,20 +29,48 @@ function diasAtraso(endDate: string) {
 }
 
 const defaultMetrics: MetricCard[] = [
-  { label: "Equipamentos totais", value: "—", hint: "Total de equipamentos cadastrados" },
-  { label: "Equipamentos disponíveis", value: "—", hint: "Com status disponível" },
-  { label: "Reservas ativas", value: "—", hint: "Em andamento no momento atual" },
+  {
+    label: "Equipamentos totais",
+    value: "—",
+    hint: "Total de equipamentos cadastrados",
+  },
+  {
+    label: "Equipamentos disponíveis",
+    value: "—",
+    hint: "Com status disponível",
+  },
+  {
+    label: "Reservas ativas",
+    value: "—",
+    hint: "Em andamento no momento atual",
+  },
 ];
 
 const defaultRecentItems: RecentItem[] = [
-  { title: "Reservas ativas", description: "Carregando...", meta: "—", status: "—" },
-  { title: "Equipamentos disponíveis", description: "Carregando...", meta: "—", status: "—" },
-  { title: "Reservas atrasadas", description: "Carregando...", meta: "—", status: "—" },
+  {
+    title: "Reservas ativas",
+    description: "Carregando...",
+    meta: "—",
+    status: "—",
+  },
+  {
+    title: "Equipamentos disponíveis",
+    description: "Carregando...",
+    meta: "—",
+    status: "—",
+  },
+  {
+    title: "Reservas atrasadas",
+    description: "Carregando...",
+    meta: "—",
+    status: "—",
+  },
 ];
 
 export function ReservaEquipamentos() {
   const [metrics, setMetrics] = useState<MetricCard[]>(defaultMetrics);
-  const [recentItems, setRecentItems] = useState<RecentItem[]>(defaultRecentItems);
+  const [recentItems, setRecentItems] =
+    useState<RecentItem[]>(defaultRecentItems);
 
   useEffect(() => {
     async function fetchDados() {
@@ -53,7 +81,9 @@ export function ReservaEquipamentos() {
         const now = new Date();
 
         const total = equipamentos.length;
-        const disponiveis = equipamentos.filter((e) => e.status === "DISPONIVEL");
+        const disponiveis = equipamentos.filter(
+          (e) => e.status === "DISPONIVEL",
+        );
         const ativas = reservas.filter(
           (r) => !r.returnedAt && new Date(r.endDate) >= now,
         );
@@ -77,7 +107,10 @@ export function ReservaEquipamentos() {
         ]);
 
         const proximasVencer = [...ativas]
-          .sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime())
+          .sort(
+            (a, b) =>
+              new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
+          )
           .slice(0, 3);
 
         const descricaoAtivas =
@@ -105,13 +138,18 @@ export function ReservaEquipamentos() {
         const descricaoDisponiveis =
           primeirosDisponiveis.length > 0
             ? primeirosDisponiveis
-                .map((e) => (e.room?.name ? `${e.name} (${e.room.name})` : e.name))
+                .map((e) =>
+                  e.room?.name ? `${e.name} (${e.room.name})` : e.name,
+                )
                 .join(", ")
             : "Nenhum equipamento disponível no momento.";
 
         const atrasadas = reservas
           .filter((r) => !r.returnedAt && new Date(r.endDate) < now)
-          .sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime())
+          .sort(
+            (a, b) =>
+              new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
+          )
           .slice(0, 3);
 
         const descricaoAtrasadas =
@@ -161,15 +199,12 @@ export function ReservaEquipamentos() {
     <AppTemplate
       theme={equipamentosTheme}
       metrics={metrics}
-      appDescription="Interface para consultar equipamentos disponíveis, realizar reservas e acompanhar solicitações."
+      appDescription="Visão geral com informações sobre equipamentos e reservas.  "
       primaryAction={{
         label: "Nova reserva",
         href: "/reserva-equipamentos/reservas/criar",
       }}
-      secondaryAction={{
-        label: "Ver equipamentos",
-        href: "/reserva-equipamentos/equipamentos",
-      }}
+      secondaryAction={null}
       featuredTitle="Fluxo principal de reserva"
       featuredDescription="Selecione um equipamento disponível, escolha o período de uso e acompanhe o status da solicitação."
       featuredBullets={[

@@ -83,10 +83,7 @@ export default function Salas() {
         label: "Nova Sala",
         href: "/reserva-equipamentos/salas/criar",
       }}
-      secondaryAction={{
-        label: "Atualizar",
-        href: "/reserva-equipamentos/salas",
-      }}
+      secondaryAction={null}
     >
       <header
         style={{

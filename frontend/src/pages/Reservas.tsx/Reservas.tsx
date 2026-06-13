@@ -176,10 +176,7 @@ export default function Reservas() {
         label: "Nova Reserva",
         href: "/reserva-equipamentos/reservas/criar",
       }}
-      secondaryAction={{
-        label: "Atualizar",
-        href: "/reserva-equipamentos/reservas",
-      }}
+      secondaryAction={null}
     >
       <header
         style={{

@@ -235,10 +235,7 @@ export default function Equipamentos() {
         label: "Novo Equipamento",
         href: "/reserva-equipamentos/equipamentos/criar",
       }}
-      secondaryAction={{
-        label: "Atualizar",
-        href: "/reserva-equipamentos/equipamentos",
-      }}
+      secondaryAction={null}
     >
       <header
         style={{
