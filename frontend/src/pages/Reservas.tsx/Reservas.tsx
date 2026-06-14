@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 
@@ -20,12 +22,19 @@ import ReservaSearch from "../../../components/reservations/ReservaSearch";
 import ReservasHeader from "../../../components/reservations/ReservasHeader";
 import ReservasPagination from "../../../components/reservations/ReservasPagination";
 import ReservasTable from "../../../components/reservations/ReservasTable";
+
 import {
   filtrarReservas,
   ITENS_POR_PAGINA,
   paginarReservas,
   type FiltroStatus,
 } from "../../utils/reservaUtils";
+
+type ModalDevolucao = {
+  reserva: Reservation;
+  hadIssue: boolean;
+  returnObservations: string;
+};
 
 export default function Reservas() {
   const [reservas, setReservas] = useState<Reservation[]>([]);
@@ -39,7 +48,10 @@ export default function Reservas() {
   );
 
   const [excluindo, setExcluindo] = useState(false);
-  const [devolvendoId, setDevolvendoId] = useState<number | null>(null);
+  const [devolvendo, setDevolvendo] = useState(false);
+
+  const [modalDevolucao, setModalDevolucao] =
+    useState<ModalDevolucao | null>(null);
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODAS");
   const [pagina, setPagina] = useState(1);
@@ -91,19 +103,40 @@ export default function Reservas() {
     }
   }
 
-  async function devolver(id: number) {
+  function abrirModalDevolucao(reserva: Reservation) {
+    setModalDevolucao({
+      reserva,
+      hadIssue: false,
+      returnObservations: "",
+    });
+  }
+
+  async function confirmarDevolucao() {
+    if (!modalDevolucao) return;
+
+    if (modalDevolucao.hadIssue && !modalDevolucao.returnObservations.trim()) {
+      notify.error("Descreva o problema ocorrido antes de confirmar.");
+      return;
+    }
+
     try {
-      setDevolvendoId(id);
+      setDevolvendo(true);
 
-      await devolverReserva(id);
+      await devolverReserva(modalDevolucao.reserva.id, {
+        hadIssue: modalDevolucao.hadIssue,
+        returnObservations: modalDevolucao.hadIssue
+          ? modalDevolucao.returnObservations.trim()
+          : undefined,
+      });
 
-      notify.returned(id);
+      notify.returned(`Reserva #${modalDevolucao.reserva.id}`);
+      setModalDevolucao(null);
       await carregarReservas();
     } catch (error) {
       console.error(error);
       notify.error("Não foi possível registrar a devolução.");
     } finally {
-      setDevolvendoId(null);
+      setDevolvendo(false);
     }
   }
 
@@ -138,16 +171,7 @@ export default function Reservas() {
 
       {loading && <p>Carregando reservas...</p>}
 
-      {erro && (
-        <p
-          style={{
-            color: "#991b1b",
-            fontWeight: 600,
-          }}
-        >
-          {erro}
-        </p>
-      )}
+      {erro && <p style={erroStyle}>{erro}</p>}
 
       {!loading && !erro && reservasFiltradas.length === 0 && (
         <p style={{ color: "#6b7280" }}>Nenhuma reserva encontrada.</p>
@@ -157,9 +181,8 @@ export default function Reservas() {
         <>
           <ReservasTable
             reservas={reservasPagina}
-            devolvendoId={devolvendoId}
             onInfo={setReservaInfo}
-            onDevolver={devolver}
+            onDevolver={abrirModalDevolucao}
             onExcluir={setReservaExcluir}
           />
 
@@ -181,6 +204,83 @@ export default function Reservas() {
         />
       )}
 
+      {modalDevolucao && (
+        <div style={modalOverlayStyle}>
+          <div style={modalStyle}>
+            <h2 style={{ margin: "0 0 6px" }}>Devolver reserva</h2>
+
+            <p style={modalDescriptionStyle}>
+              Reserva <strong>#{modalDevolucao.reserva.id}</strong> ·{" "}
+              {modalDevolucao.reserva.user}
+            </p>
+
+            <label style={checkboxLabelStyle}>
+              <input
+                type="checkbox"
+                checked={modalDevolucao.hadIssue}
+                onChange={(e) =>
+                  setModalDevolucao({
+                    ...modalDevolucao,
+                    hadIssue: e.target.checked,
+                    returnObservations: e.target.checked
+                      ? modalDevolucao.returnObservations
+                      : "",
+                  })
+                }
+                style={checkboxStyle}
+              />
+              Houve algum problema com o equipamento?
+            </label>
+
+            {modalDevolucao.hadIssue && (
+              <div style={{ marginBottom: "20px" }}>
+                <label style={textareaLabelStyle}>
+                  Descreva o problema{" "}
+                  <span style={{ color: "#991b1b" }}>*</span>
+                </label>
+
+                <textarea
+                  rows={4}
+                  placeholder="Descreva o defeito ou problema ocorrido durante o uso..."
+                  value={modalDevolucao.returnObservations}
+                  onChange={(e) =>
+                    setModalDevolucao({
+                      ...modalDevolucao,
+                      returnObservations: e.target.value,
+                    })
+                  }
+                  style={textareaStyle}
+                />
+              </div>
+            )}
+
+            <div style={modalActionsStyle}>
+              <button
+                type="button"
+                onClick={() => setModalDevolucao(null)}
+                disabled={devolvendo}
+                style={{ ...buttonStyle, background: "#6b7280" }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={confirmarDevolucao}
+                disabled={devolvendo}
+                style={{
+                  ...buttonStyle,
+                  opacity: devolvendo ? 0.7 : 1,
+                  cursor: devolvendo ? "not-allowed" : "pointer",
+                }}
+              >
+                {devolvendo ? "Registrando..." : "Confirmar devolução"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {reservaExcluir && (
         <ConfirmarExclusaoReservaModal
           reserva={reservaExcluir}
@@ -192,3 +292,88 @@ export default function Reservas() {
     </AppTemplate>
   );
 }
+
+const erroStyle: CSSProperties = {
+  color: "#991b1b",
+  fontWeight: 600,
+};
+
+const modalOverlayStyle: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,.55)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 9999,
+  padding: "16px",
+};
+
+const modalStyle: CSSProperties = {
+  width: "100%",
+  maxWidth: "500px",
+  background: "#fff",
+  borderRadius: "16px",
+  padding: "24px",
+  boxShadow: "0 20px 40px rgba(0,0,0,.2)",
+};
+
+const modalDescriptionStyle: CSSProperties = {
+  color: "#4b5563",
+  fontSize: "14px",
+  marginBottom: "22px",
+};
+
+const checkboxLabelStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  cursor: "pointer",
+  marginBottom: "18px",
+  fontSize: "14px",
+  fontWeight: 600,
+  color: "#111827",
+};
+
+const checkboxStyle: CSSProperties = {
+  width: "16px",
+  height: "16px",
+  cursor: "pointer",
+};
+
+const textareaLabelStyle: CSSProperties = {
+  display: "block",
+  marginBottom: "8px",
+  fontSize: "13px",
+  fontWeight: 600,
+  color: "#374151",
+};
+
+const textareaStyle: CSSProperties = {
+  width: "100%",
+  padding: "12px 14px",
+  borderRadius: "12px",
+  border: "1px solid #d1d5db",
+  fontSize: "14px",
+  resize: "vertical",
+  boxSizing: "border-box",
+  outline: "none",
+};
+
+const modalActionsStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: "10px",
+  marginTop: "4px",
+};
+
+const buttonStyle: CSSProperties = {
+  border: "none",
+  borderRadius: "10px",
+  padding: "10px 14px",
+  background: "#111827",
+  color: "#fff",
+  fontSize: "14px",
+  fontWeight: 700,
+  cursor: "pointer",
+};

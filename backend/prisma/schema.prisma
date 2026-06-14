@@ -11,6 +11,7 @@ enum EquipmentStatus {
   DISPONIVEL
   MANUTENCAO
   INATIVO
+  AGUARDANDO_REVISAO
 }
 
 model Room {
@@ -55,11 +56,13 @@ model Equipment {
 model Reservation {
   id Int @id @default(autoincrement())
 
-  user         String
-  startDate    DateTime
-  endDate      DateTime
-  returnedAt   DateTime?
-  observations String?
+  user                String
+  startDate           DateTime
+  endDate             DateTime
+  returnedAt          DateTime?
+  observations        String?
+  hadIssue            Boolean @default(false)
+  returnObservations  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

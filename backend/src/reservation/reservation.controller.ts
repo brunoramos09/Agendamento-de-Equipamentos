@@ -11,6 +11,7 @@ import {
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { ReturnReservationDto } from './dto/return-reservation.dto';
 
 @Controller('reservations')
 export class ReservationController {
@@ -40,8 +41,12 @@ export class ReservationController {
   }
 
   @Patch(':id/return')
-  returnReservation(@Param('id', ParseIntPipe) id: number) {
-    return this.reservationService.returnReservation(id);
+  returnReservation(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ReturnReservationDto,
+  ) 
+    {
+    return this.reservationService.returnReservation(id, dto);
   }
 
   @Delete(':id')

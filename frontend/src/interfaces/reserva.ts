@@ -16,6 +16,8 @@ export default interface Reservation {
   endDate: string;
   returnedAt?: string | null;
   observations?: string | null;
+  hadIssue: boolean;
+  returnObservations?: string | null;
 
   createdAt: string;
   updatedAt: string;

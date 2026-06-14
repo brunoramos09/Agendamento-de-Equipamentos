@@ -59,17 +59,24 @@ export async function atualizarReserva(id: number, payload: any) {
   return response.json();
 }
 
-export async function devolverReserva(id: number) {
+export async function devolverReserva(
+  id: number,
+  payload: { hadIssue: boolean; returnObservations?: string } = { hadIssue: false },
+) {
   const response = await fetch(`${API_URL_COMPLETE}/${id}/return`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
   });
-
+ 
   if (!response.ok) {
     const erro = await response.json().catch(() => null);
-
+ 
     throw new Error(erro?.message || "Erro ao devolver reserva.");
   }
-
+ 
   return response.json();
 }
 
