@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import type { CSSProperties } from "react";
 import type Room from "../../src/interfaces/sala";
 import type { EquipamentoFormData } from "./types";
@@ -173,7 +174,7 @@ export default function EquipamentoForm({
                   color: "#6b7280",
                   cursor: "not-allowed",
                 }),
-             }}
+              }}
             >
               {statusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>

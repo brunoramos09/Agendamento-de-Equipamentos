@@ -7,6 +7,7 @@ import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import { buscarSalaPorId, atualizarSala } from "../../services/salasService";
 import { notify } from "../../utils/notifications";
 import SalaForm from "../../../components/rooms/SalaForm";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 type SalaFormData = {
   name: string;
@@ -29,6 +30,8 @@ export default function EditarSala() {
     floor: 0,
     campus: "",
   });
+
+  usePageTitle("Salas: Editar");
 
   useEffect(() => {
     carregarSala();
@@ -120,11 +123,11 @@ export default function EditarSala() {
   }
 
   return (
-    <AppTemplate 
-      hideDefaultContent 
+    <AppTemplate
+      hideDefaultContent
       theme={equipamentosTheme}
       primaryAction={null}
-      secondaryAction={null}  
+      secondaryAction={null}
     >
       <SalaForm
         sala={sala}

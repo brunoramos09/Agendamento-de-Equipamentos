@@ -113,7 +113,7 @@ export function AppTemplate(props: Readonly<AppTemplateProps>) {
     backLinkLabel = "Voltar ao menu do portal",
     backLinkHref = "/home",
     appName = "Sistema de Reserva de Equipamentos",
-    appSubtitle = "Modelo de interface padrao",
+    appSubtitle = "Visão Geral",
     appDescription = "Este template serve como base visual para as aplicacoes do portal, sem incluir login ou regras de autenticacao.",
     brandLabel = "Reserva de Equipamentos",
     navigation = defaultNavigation,
@@ -152,9 +152,9 @@ export function AppTemplate(props: Readonly<AppTemplateProps>) {
     <main className={styles.shell} style={cssVars}>
       <aside className={styles.sidebar}>
         <div className={styles.backBar}>
-          <a className={styles.backButton} href={backLinkHref}>
+          <Link className={styles.backButton} to={backLinkHref}>
             {backLinkLabel}
-          </a>
+          </Link>
         </div>
 
         <div className={styles.brandBlock}>
@@ -186,20 +186,20 @@ export function AppTemplate(props: Readonly<AppTemplateProps>) {
 
           <div className={styles.actionGroup}>
             {secondaryAction && (
-              <a
-                href={secondaryAction.href}
+              <Link
+                to={secondaryAction.href}
                 className={`${styles.actionButton} ${styles.actionSecondary}`}
               >
                 {secondaryAction.label}
-              </a>
+              </Link>
             )}
             {primaryAction && (
-              <a
-                href={primaryAction.href}
+              <Link
+                to={primaryAction.href}
                 className={`${styles.actionButton} ${styles.actionPrimary}`}
               >
                 {primaryAction.label}
-              </a>
+              </Link>
             )}
           </div>
         </header>

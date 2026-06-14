@@ -12,6 +12,7 @@ import { criarReserva } from "../../services/reservaService";
 import { useNavigate } from "react-router-dom";
 
 import { notify } from "../../utils/notifications";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 export default function CriarReserva() {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ export default function CriarReserva() {
     observations: "",
     equipments: [] as { equipmentId: number }[],
   });
+
+  usePageTitle("Reservas: Novo");
 
   useEffect(() => {
     carregarEquipamentos();
@@ -350,9 +353,7 @@ export default function CriarReserva() {
             }}
           >
             <button
-              onClick={() =>
-                navigate("/reserva-equipamentos/reservas")
-              }
+              onClick={() => navigate("/reserva-equipamentos/reservas")}
               style={{
                 padding: "10px 16px",
                 border: "1px solid #d4d4d4",

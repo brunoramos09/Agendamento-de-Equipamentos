@@ -6,6 +6,7 @@ import { criarSala } from "../../services/salasService";
 import SalaForm from "../../../components/rooms/SalaForm";
 
 import { notify } from "../../utils/notifications";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 export default function CriarSala() {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ export default function CriarSala() {
     floor: 0,
     campus: "",
   });
+
+  usePageTitle("Salas: Novo");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,11 +43,11 @@ export default function CriarSala() {
   }
 
   return (
-    <AppTemplate 
-      hideDefaultContent 
+    <AppTemplate
+      hideDefaultContent
       theme={equipamentosTheme}
       primaryAction={null}
-      secondaryAction={null}  
+      secondaryAction={null}
     >
       <SalaForm
         sala={sala}

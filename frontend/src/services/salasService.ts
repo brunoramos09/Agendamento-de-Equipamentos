@@ -1,9 +1,10 @@
 import type Room from "../interfaces/sala";
+import { API_URL } from "./api";
 
-const API_URL = "http://localhost:3000/rooms";
+const API_URL_COMPLETE = `${API_URL}/rooms`;
 
 export async function listarSalas(): Promise<Room[]> {
-  const response = await fetch(API_URL);
+  const response = await fetch(API_URL_COMPLETE);
 
   if (!response.ok) {
     throw new Error("Erro ao listar salas.");
@@ -13,7 +14,7 @@ export async function listarSalas(): Promise<Room[]> {
 }
 
 export async function buscarSalaPorId(id: number): Promise<Room> {
-  const response = await fetch(`${API_URL}/${id}`);
+  const response = await fetch(`${API_URL_COMPLETE}/${id}`);
 
   if (!response.ok) {
     throw new Error("Erro ao buscar sala.");
@@ -25,7 +26,7 @@ export async function buscarSalaPorId(id: number): Promise<Room> {
 export async function criarSala(
   sala: Omit<Room, "id" | "createdAt" | "updatedAt">,
 ): Promise<Room> {
-  const response = await fetch(API_URL, {
+  const response = await fetch(API_URL_COMPLETE, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +45,7 @@ export async function atualizarSala(
   id: number,
   sala: Partial<Omit<Room, "id" | "createdAt" | "updatedAt">>,
 ): Promise<Room> {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_URL_COMPLETE}/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -60,7 +61,7 @@ export async function atualizarSala(
 }
 
 export async function excluirSala(id: number): Promise<void> {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_URL_COMPLETE}/${id}`, {
     method: "DELETE",
   });
 

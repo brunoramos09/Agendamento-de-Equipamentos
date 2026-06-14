@@ -1,33 +1,40 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 
 import type Reservation from "../../interfaces/reserva";
 
 import {
-  listarReservas,
-  excluirReserva,
   devolverReserva,
+  excluirReserva,
+  listarReservas,
 } from "../../services/reservaService";
 
+import { usePageTitle } from "../../hooks/usePageTitle";
 import { notify } from "../../utils/notifications";
 
-const ITENS_POR_PAGINA = 8;
+import ConfirmarExclusaoReservaModal from "../../../components/reservations/ConfirmarExclusaoReservaModal";
+import ReservaInfoModal from "../../../components/reservations/ReservaInfoModal";
+import ReservaSearch from "../../../components/reservations/ReservaSearch";
+import ReservasHeader from "../../../components/reservations/ReservasHeader";
+import ReservasPagination from "../../../components/reservations/ReservasPagination";
+import ReservasTable from "../../../components/reservations/ReservasTable";
 
-type FiltroStatus = "TODAS" | "ATIVA" | "ATRASADA" | "DEVOLVIDA";
- 
+import {
+  filtrarReservas,
+  ITENS_POR_PAGINA,
+  paginarReservas,
+  type FiltroStatus,
+} from "../../utils/reservaUtils";
+
 type ModalDevolucao = {
   reserva: Reservation;
   hadIssue: boolean;
   returnObservations: string;
-}
-
-const filtroOptions: { value: FiltroStatus; label: string; bg: string; color: string }[] = [
-  { value: "TODAS",     label: "Todas",     bg: "#111827", color: "#fff"     },
-  { value: "ATIVA",     label: "Ativas",    bg: "#dcfce7", color: "#166534"  },
-  { value: "ATRASADA",  label: "Atrasadas", bg: "#fee2e2", color: "#991b1b"  },
-  { value: "DEVOLVIDA", label: "Devolvidas",bg: "#dbeafe", color: "#1d4ed8"  },
-];
+};
 
 export default function Reservas() {
   const [reservas, setReservas] = useState<Reservation[]>([]);
@@ -43,10 +50,13 @@ export default function Reservas() {
   const [excluindo, setExcluindo] = useState(false);
   const [devolvendo, setDevolvendo] = useState(false);
 
-  const [modalDevolucao, setModalDevolucao] = useState<ModalDevolucao | null>(null);
+  const [modalDevolucao, setModalDevolucao] =
+    useState<ModalDevolucao | null>(null);
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODAS");
   const [pagina, setPagina] = useState(1);
+
+  usePageTitle("Reservas");
 
   useEffect(() => {
     carregarReservas();
@@ -94,28 +104,32 @@ export default function Reservas() {
   }
 
   function abrirModalDevolucao(reserva: Reservation) {
-    setModalDevolucao({ reserva, hadIssue: false, returnObservations: "" });
+    setModalDevolucao({
+      reserva,
+      hadIssue: false,
+      returnObservations: "",
+    });
   }
 
   async function confirmarDevolucao() {
     if (!modalDevolucao) return;
- 
+
     if (modalDevolucao.hadIssue && !modalDevolucao.returnObservations.trim()) {
       notify.error("Descreva o problema ocorrido antes de confirmar.");
       return;
     }
- 
+
     try {
       setDevolvendo(true);
- 
+
       await devolverReserva(modalDevolucao.reserva.id, {
         hadIssue: modalDevolucao.hadIssue,
         returnObservations: modalDevolucao.hadIssue
           ? modalDevolucao.returnObservations.trim()
           : undefined,
       });
- 
-      notify.returned(modalDevolucao.reserva.id);
+
+      notify.returned(`Reserva #${modalDevolucao.reserva.id}`);
       setModalDevolucao(null);
       await carregarReservas();
     } catch (error) {
@@ -126,46 +140,15 @@ export default function Reservas() {
     }
   }
 
-  function formatarData(data?: string | null) {
-    if (!data) return "-";
+  const reservasFiltradas = useMemo(
+    () => filtrarReservas(reservas, filtroStatus, pesquisa),
+    [reservas, filtroStatus, pesquisa],
+  );
 
-    return new Date(data).toLocaleDateString("pt-BR");
-  }
-
-  function getStatus(reserva: Reservation) {
-    if (reserva.returnedAt) {
-      return { label: "DEVOLVIDA", bg: "#dbeafe", color: "#1d4ed8", key: "DEVOLVIDA" as FiltroStatus };
-    }
-    if (new Date(reserva.endDate) < new Date()) {
-      return { label: "ATRASADA", bg: "#fee2e2", color: "#991b1b", key: "ATRASADA" as FiltroStatus };
-    }
-    return { label: "ATIVA", bg: "#dcfce7", color: "#166534", key: "ATIVA" as FiltroStatus };
-  }
-
-  const reservasFiltradas = reservas.filter((reserva) => {
-    const passaFiltroStatus =
-      filtroStatus === "TODAS" || getStatus(reserva).key === filtroStatus;
- 
-    const passaPesquisa = [
-      reserva.user,
-      reserva.observations,
-      reserva.id?.toString(),
-      reserva.equipments
-        ?.map((item) => item.equipment?.name)
-        .filter(Boolean)
-        .join(" "),
-    ]
-      .filter(Boolean)
-      .some((valor) =>
-        valor!.toString().toLowerCase().includes(pesquisa.toLowerCase()),
-      );
- 
-    return passaFiltroStatus && passaPesquisa;
-  });
-
-  const totalPaginas = Math.ceil(reservasFiltradas.length / ITENS_POR_PAGINA);
-  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
-  const reservasPagina = reservasFiltradas.slice(inicio, inicio + ITENS_POR_PAGINA);
+  const { inicio, totalPaginas, reservasPagina } = useMemo(
+    () => paginarReservas(reservasFiltradas, pagina),
+    [reservasFiltradas, pagina],
+  );
 
   return (
     <AppTemplate
@@ -177,411 +160,61 @@ export default function Reservas() {
         label: "Nova Reserva",
         href: "/reserva-equipamentos/reservas/criar",
       }}
-      secondaryAction={{
-        label: "Atualizar",
-        href: "/reserva-equipamentos/reservas",
-      }}
+      secondaryAction={null}
     >
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: "16px",
-          alignItems: "center",
-          marginBottom: "18px",
-        }}
-      >
-        <div>
-          <span
-            style={{
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--app-accent)",
-            }}
-          >
-            Reservas
-          </span>
+      <ReservasHeader
+        filtroStatus={filtroStatus}
+        onChangeFiltroStatus={setFiltroStatus}
+      />
 
-          <h2
-            style={{
-              margin: "6px 0 0",
-              fontSize: "24px",
-              color: "#111827",
-            }}
-          >
-            Lista de Reservas
-          </h2>
-        </div>
-
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {filtroOptions.map((opcao) => {
-            const ativo = filtroStatus === opcao.value;
- 
-            return (
-              <button
-                key={opcao.value}
-                type="button"
-                onClick={() => setFiltroStatus(opcao.value)}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: "999px",
-                  border: ativo ? "none" : "1px solid #d1d5db",
-                  background: ativo ? opcao.bg : "#fff",
-                  color: ativo ? opcao.color : "#374151",
-                  fontSize: "13px",
-                  fontWeight: ativo ? 700 : 500,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                {opcao.label}
-              </button>
-            );
-          })}
-        </div>
-      </header>
-
-      <div
-        style={{
-          marginBottom: "18px",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Pesquisar por usuário, observação, ID ou equipamento..."
-          value={pesquisa}
-          onChange={(e) => setPesquisa(e.target.value)}
-          style={{
-            width: "100%",
-            maxWidth: "520px",
-            padding: "12px 14px",
-            border: "1px solid #d1d5db",
-            borderRadius: "12px",
-            outline: "none",
-            fontSize: "14px",
-          }}
-        />
-      </div>
+      <ReservaSearch pesquisa={pesquisa} onChangePesquisa={setPesquisa} />
 
       {loading && <p>Carregando reservas...</p>}
 
-      {erro && (
-        <p
-          style={{
-            color: "#991b1b",
-            fontWeight: 600,
-          }}
-        >
-          {erro}
-        </p>
-      )}
+      {erro && <p style={erroStyle}>{erro}</p>}
 
       {!loading && !erro && reservasFiltradas.length === 0 && (
-        <p
-          style={{
-            color: "#6b7280",
-          }}
-        >
-          Nenhuma reserva encontrada.
-        </p>
+        <p style={{ color: "#6b7280" }}>Nenhuma reserva encontrada.</p>
       )}
 
       {!loading && !erro && reservasFiltradas.length > 0 && (
         <>
-          <div
-            style={{
-              width: "100%",
-              overflowX: "auto",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-            }}
-          >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                minWidth: "850px",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: "#f9fafb",
-                    borderBottom: "1px solid #e5e7eb",
-                  }}
-                >
-                  {[
-                    "ID",
-                    "Usuário",
-                    "Início",
-                    "Fim",
-                    "Equipamentos",
-                    "Status",
-                    "Ações",
-                  ].map((titulo) => (
-                    <th
-                      key={titulo}
-                      style={{
-                        textAlign: titulo === "Ações" ? "center" : "left",
-                        padding: "14px 12px",
-                        fontSize: "12px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                        color: "#374151",
-                      }}
-                    >
-                      {titulo}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+          <ReservasTable
+            reservas={reservasPagina}
+            onInfo={setReservaInfo}
+            onDevolver={abrirModalDevolucao}
+            onExcluir={setReservaExcluir}
+          />
 
-              <tbody>
-                {reservasPagina.map((reserva) => {
-                  const status = getStatus(reserva);
-
-                  return (
-                    <tr
-                      key={reserva.id}
-                      style={{
-                        borderBottom: "1px solid #f3f4f6",
-                      }}
-                    >
-                      <td style={{ padding: "14px 12px", fontWeight: 700 }}>
-                        {reserva.id}
-                      </td>
-
-                      <td style={{ padding: "14px 12px" }}>{reserva.user}</td>
-
-                      <td style={{ padding: "14px 12px" }}>
-                        {formatarData(reserva.startDate)}
-                      </td>
-
-                      <td style={{ padding: "14px 12px" }}>
-                        {formatarData(reserva.endDate)}
-                      </td>
-
-                      <td style={{ padding: "14px 12px" }}>
-                        {reserva.equipments?.length ?? 0}
-                      </td>
-
-                      <td style={{ padding: "14px 12px" }}>
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            padding: "5px 10px",
-                            borderRadius: "999px",
-                            fontSize: "12px",
-                            fontWeight: 800,
-                            background: status.bg,
-                            color: status.color,
-                          }}
-                        >
-                          {status.label}
-                        </span>
-                      </td>
-
-                      <td style={{ padding: "14px 12px" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            justifyContent: "center",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => setReservaInfo(reserva)}
-                            style={buttonStyle}
-                          >
-                            Info
-                          </button>
-
-                          {!reserva.returnedAt && (
-                            <button
-                              type="button"
-                              onClick={() => abrirModalDevolucao(reserva)}
-                              style={buttonStyle}
-                            >
-                              Devolver
-                            </button>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => setReservaExcluir(reserva)}
-                            style={{
-                              ...buttonStyle,
-                              background: "#7f1d1d",
-                            }}
-                          >
-                            Excluir
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {totalPaginas > 1 && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginTop: "16px",
-                flexWrap: "wrap",
-                gap: "12px",
-              }}
-            >
-              <span style={{ fontSize: "13px", color: "#6b7280" }}>
-                Exibindo {inicio + 1}–{Math.min(inicio + ITENS_POR_PAGINA, reservasFiltradas.length)} de {reservasFiltradas.length} reserva{reservasFiltradas.length !== 1 ? "s" : ""}
-              </span>
-
-              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                <button
-                  type="button"
-                  onClick={() => setPagina((p) => p - 1)}
-                  disabled={pagina === 1}
-                  style={{
-                    ...paginaBtnStyle,
-                    opacity: pagina === 1 ? 0.4 : 1,
-                    cursor: pagina === 1 ? "not-allowed" : "pointer",
-                  }}
-                >
-                  ← Anterior
-                </button>
-
-                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => setPagina(num)}
-                    style={{
-                      ...paginaBtnStyle,
-                      background: num === pagina ? "#111827" : "#fff",
-                      color: num === pagina ? "#fff" : "#374151",
-                      border: num === pagina ? "none" : "1px solid #d1d5db",
-                      fontWeight: num === pagina ? 700 : 500,
-                      minWidth: "36px",
-                    }}
-                  >
-                    {num}
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  onClick={() => setPagina((p) => p + 1)}
-                  disabled={pagina === totalPaginas}
-                  style={{
-                    ...paginaBtnStyle,
-                    opacity: pagina === totalPaginas ? 0.4 : 1,
-                    cursor: pagina === totalPaginas ? "not-allowed" : "pointer",
-                  }}
-                >
-                  Próxima →
-                </button>
-              </div>
-            </div>
-          )}
-      </>
+          <ReservasPagination
+            pagina={pagina}
+            totalPaginas={totalPaginas}
+            inicio={inicio}
+            totalItens={reservasFiltradas.length}
+            itensPorPagina={ITENS_POR_PAGINA}
+            onChangePagina={setPagina}
+          />
+        </>
       )}
 
       {reservaInfo && (
-        <div style={modalOverlayStyle}>
-          <div style={modalStyle}>
-            <h2 style={{ margin: "0 0 16px" }}>Reserva #{reservaInfo.id}</h2>
-
-            <div style={infoGridStyle}>
-              <strong>Usuário</strong>
-              <span>{reservaInfo.user}</span>
-
-              <strong>Início</strong>
-              <span>{formatarData(reservaInfo.startDate)}</span>
-
-              <strong>Fim</strong>
-              <span>{formatarData(reservaInfo.endDate)}</span>
-
-              <strong>Devolução</strong>
-              <span>{formatarData(reservaInfo.returnedAt)}</span>
-
-              <strong>Observações</strong>
-              <span>{reservaInfo.observations || "-"}</span>
-
-              {reservaInfo.returnedAt && (
-                <>
-                  <strong>Problema relatado</strong>
-                  <span>{reservaInfo.hadIssue ? "Sim" : "Não"}</span>
- 
-                  {reservaInfo.hadIssue && (
-                    <>
-                      <strong>Obs. devolução</strong>
-                      <span>{reservaInfo.returnObservations || "-"}</span>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-
-            <h3 style={{ margin: "20px 0 10px" }}>Equipamentos</h3>
-
-            {reservaInfo.equipments?.length > 0 ? (
-              <ul
-                style={{
-                  margin: 0,
-                  paddingLeft: "20px",
-                }}
-              >
-                {reservaInfo.equipments.map((item) => (
-                  <li key={item.id}>{item.equipment?.name || "-"}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>Nenhum equipamento vinculado.</p>
-            )}
-
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button
-                type="button"
-                onClick={() => setReservaInfo(null)}
-                style={buttonStyle}
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
+        <ReservaInfoModal
+          reserva={reservaInfo}
+          onClose={() => setReservaInfo(null)}
+        />
       )}
 
       {modalDevolucao && (
         <div style={modalOverlayStyle}>
-          <div style={{ ...modalStyle, maxWidth: "500px" }}>
+          <div style={modalStyle}>
             <h2 style={{ margin: "0 0 6px" }}>Devolver reserva</h2>
- 
-            <p style={{ color: "#4b5563", fontSize: "14px", marginBottom: "22px" }}>
+
+            <p style={modalDescriptionStyle}>
               Reserva <strong>#{modalDevolucao.reserva.id}</strong> ·{" "}
               {modalDevolucao.reserva.user}
             </p>
- 
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
-                marginBottom: "18px",
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "#111827",
-              }}
-            >
+
+            <label style={checkboxLabelStyle}>
               <input
                 type="checkbox"
                 checked={modalDevolucao.hadIssue}
@@ -594,26 +227,18 @@ export default function Reservas() {
                       : "",
                   })
                 }
-                style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                style={checkboxStyle}
               />
               Houve algum problema com o equipamento?
             </label>
- 
+
             {modalDevolucao.hadIssue && (
               <div style={{ marginBottom: "20px" }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "8px",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: "#374151",
-                  }}
-                >
+                <label style={textareaLabelStyle}>
                   Descreva o problema{" "}
                   <span style={{ color: "#991b1b" }}>*</span>
                 </label>
- 
+
                 <textarea
                   rows={4}
                   placeholder="Descreva o defeito ou problema ocorrido durante o uso..."
@@ -624,28 +249,12 @@ export default function Reservas() {
                       returnObservations: e.target.value,
                     })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "12px 14px",
-                    borderRadius: "12px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "14px",
-                    resize: "vertical",
-                    boxSizing: "border-box",
-                    outline: "none",
-                  }}
+                  style={textareaStyle}
                 />
               </div>
             )}
- 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "10px",
-                marginTop: "4px",
-              }}
-            >
+
+            <div style={modalActionsStyle}>
               <button
                 type="button"
                 onClick={() => setModalDevolucao(null)}
@@ -654,7 +263,7 @@ export default function Reservas() {
               >
                 Cancelar
               </button>
- 
+
               <button
                 type="button"
                 onClick={confirmarDevolucao}
@@ -673,79 +282,23 @@ export default function Reservas() {
       )}
 
       {reservaExcluir && (
-        <div style={modalOverlayStyle}>
-          <div
-            style={{
-              ...modalStyle,
-              maxWidth: "460px",
-            }}
-          >
-            <h2 style={{ margin: "0 0 10px" }}>Excluir reserva</h2>
-
-            <p
-              style={{
-                color: "#4b5563",
-                lineHeight: 1.5,
-              }}
-            >
-              Tem certeza que deseja excluir a reserva{" "}
-              <strong>#{reservaExcluir.id}</strong>? Essa ação não poderá ser
-              desfeita.
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "10px",
-                marginTop: "22px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setReservaExcluir(null)}
-                disabled={excluindo}
-                style={{
-                  ...buttonStyle,
-                  background: "#6b7280",
-                }}
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="button"
-                onClick={confirmarExclusao}
-                disabled={excluindo}
-                style={{
-                  ...buttonStyle,
-                  background: "#7f1d1d",
-                  opacity: excluindo ? 0.7 : 1,
-                  cursor: excluindo ? "not-allowed" : "pointer",
-                }}
-              >
-                {excluindo ? "Excluindo..." : "Excluir"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmarExclusaoReservaModal
+          reserva={reservaExcluir}
+          excluindo={excluindo}
+          onCancel={() => setReservaExcluir(null)}
+          onConfirm={confirmarExclusao}
+        />
       )}
     </AppTemplate>
   );
 }
 
-const buttonStyle: React.CSSProperties = {
-  border: "none",
-  background: "#111827",
-  color: "#fff",
-  padding: "8px 12px",
-  borderRadius: "9px",
-  fontSize: "13px",
-  fontWeight: 700,
-  cursor: "pointer",
+const erroStyle: CSSProperties = {
+  color: "#991b1b",
+  fontWeight: 600,
 };
 
-const modalOverlayStyle: React.CSSProperties = {
+const modalOverlayStyle: CSSProperties = {
   position: "fixed",
   inset: 0,
   background: "rgba(0,0,0,.55)",
@@ -753,33 +306,74 @@ const modalOverlayStyle: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   zIndex: 9999,
-  padding: "20px",
+  padding: "16px",
 };
 
-const modalStyle: React.CSSProperties = {
-  background: "#fff",
-  padding: "24px",
-  borderRadius: "16px",
+const modalStyle: CSSProperties = {
   width: "100%",
-  maxWidth: "650px",
-  maxHeight: "85vh",
-  overflowY: "auto",
-  boxShadow: "0 20px 40px rgba(0,0,0,.25)",
-};
-
-const infoGridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "150px 1fr",
-  gap: "10px 14px",
-  fontSize: "14px",
-};
-
-const paginaBtnStyle: React.CSSProperties = {
-  border: "1px solid #d1d5db",
+  maxWidth: "500px",
   background: "#fff",
-  color: "#374151",
-  padding: "7px 12px",
-  borderRadius: "9px",
+  borderRadius: "16px",
+  padding: "24px",
+  boxShadow: "0 20px 40px rgba(0,0,0,.2)",
+};
+
+const modalDescriptionStyle: CSSProperties = {
+  color: "#4b5563",
+  fontSize: "14px",
+  marginBottom: "22px",
+};
+
+const checkboxLabelStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  cursor: "pointer",
+  marginBottom: "18px",
+  fontSize: "14px",
+  fontWeight: 600,
+  color: "#111827",
+};
+
+const checkboxStyle: CSSProperties = {
+  width: "16px",
+  height: "16px",
+  cursor: "pointer",
+};
+
+const textareaLabelStyle: CSSProperties = {
+  display: "block",
+  marginBottom: "8px",
   fontSize: "13px",
+  fontWeight: 600,
+  color: "#374151",
+};
+
+const textareaStyle: CSSProperties = {
+  width: "100%",
+  padding: "12px 14px",
+  borderRadius: "12px",
+  border: "1px solid #d1d5db",
+  fontSize: "14px",
+  resize: "vertical",
+  boxSizing: "border-box",
+  outline: "none",
+};
+
+const modalActionsStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: "10px",
+  marginTop: "4px",
+};
+
+const buttonStyle: CSSProperties = {
+  border: "none",
+  borderRadius: "10px",
+  padding: "10px 14px",
+  background: "#111827",
+  color: "#fff",
+  fontSize: "14px",
+  fontWeight: 700,
   cursor: "pointer",
 };

@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/immutability */
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useMemo, useState } from "react";
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import {
@@ -11,45 +11,48 @@ import {
 //import type Equipment, { EquipmentStatus } from "../../interfaces/equipamento";
 import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
+import { usePageTitle } from "../../hooks/usePageTitle";
+import { useNavigate } from "react-router-dom";
 
-const ITENS_POR_PAGINA = 8;
-
-const statusLabels: Record<string, string> = {
-  DISPONIVEL: "DISPONÍVEL",
-  MANUTENCAO: "MANUTENÇÃO",
-  INATIVO: "INATIVO",
-  AGUARDANDO_REVISAO: "AGUARDANDO REVISÃO",
-};
-
-function getStatusStyle(status: string) {
-  if (status === "DISPONIVEL") return { bg: "#dcfce7", color: "#166534" };
-  if (status === "MANUTENCAO") return { bg: "#fef3c7", color: "#92400e" };
-  if (status === "AGUARDANDO_REVISAO") return { bg: "#ede9fe", color: "#6d28d9" };
-  return { bg: "#fee2e2", color: "#991b1b" };
-}
-
-//type FiltroStatus = EquipmentStatus | "TODOS";
-type FiltroStatus = "TODOS" | "DISPONIVEL" | "MANUTENCAO" | "INATIVO" | "AGUARDANDO_REVISAO";
- 
-const filtroOptions: { value: FiltroStatus; label: string }[] = [
-  { value: "TODOS", label: "Todos" },
-  { value: "DISPONIVEL", label: "Disponíveis" },
-  { value: "MANUTENCAO", label: "Em manutenção" },
-  { value: "AGUARDANDO_REVISAO", label: "Aguardando revisão" },
-  { value: "INATIVO", label: "Inativos" },
-];
+import BuscaEquipamentos from "../../../components/equipaments/BuscaEquipamentos";
+import ConfirmarExclusaoModal from "../../../components/equipaments/ConfirmarExclusaoModal";
+import EquipamentosHeader from "../../../components/equipaments/EquipamentosHeader";
+import EquipamentosTable from "../../../components/equipaments/EquipamentosTable";
+import FinalizarManutencaoModal from "../../../components/equipaments/FinalizarManutencaoModal";
+import InfoEquipamentoModal from "../../../components/equipaments/InfoEquipamentoModal";
+import ManutencaoModal from "../../../components/equipaments/ManutencaoModal";
+import Paginacao from "../../../components/equipaments/Paginacao";
+import RelatorioModal from "../../../components/equipaments/RelatorioModal";
+import {
+  ITENS_POR_PAGINA,
+  type FiltroStatus,
+} from "../../utils/equipamentosUtils";
 
 export default function Equipamentos() {
   const [equipamentos, setEquipamentos] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [pesquisa, setPesquisa] = useState("");
-  const [equipamentoInfo, setEquipamentoInfo] = useState<Equipment | null>(null);
-  const [equipamentoExcluir, setEquipamentoExcluir] = useState<Equipment | null>(null);
+  const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODOS");
+  const [pagina, setPagina] = useState(1);
+
+  const [equipamentoInfo, setEquipamentoInfo] = useState<Equipment | null>(
+    null,
+  );
+  const [equipamentoExcluir, setEquipamentoExcluir] =
+    useState<Equipment | null>(null);
+  const [equipamentoManutencao, setEquipamentoManutencao] =
+    useState<Equipment | null>(null);
+  const [equipamentoFinalizarManutencao, setEquipamentoFinalizarManutencao] =
+    useState<Equipment | null>(null);
+
   const [excluindo, setExcluindo] = useState(false);
+  const [finalizando, setFinalizando] = useState(false);
+  const [enviandoManutencao, setEnviandoManutencao] = useState(false);
+
   const [relatorioUrl, setRelatorioUrl] = useState<string | null>(null);
   const [relatorioId, setRelatorioId] = useState<number | null>(null);
-  const [equipamentoManutencao, setEquipamentoManutencao] = useState<Equipment | null>(null);
+
   const [responsavelManutencao, setResponsavelManutencao] = useState("");
   const [obsManutencao, setObsManutencao] = useState("");
   const [enviandoManutencao, setEnviandoManutencao] = useState(false);
@@ -60,6 +63,10 @@ export default function Equipamentos() {
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODOS");
   const [pagina, setPagina] = useState(1);
 
+  const navigate = useNavigate();
+
+  usePageTitle("Equipamentos");
+
   useEffect(() => {
     carregarEquipamentos();
   }, []);
@@ -67,6 +74,35 @@ export default function Equipamentos() {
   useEffect(() => {
     setPagina(1);
   }, [filtroStatus, pesquisa]);
+
+  const equipamentosFiltrados = useMemo(() => {
+    const termo = pesquisa.toLowerCase();
+
+    return equipamentos.filter((equipamento) => {
+      const passaFiltroStatus =
+        filtroStatus === "TODOS" || equipamento.status === filtroStatus;
+
+      const passaPesquisa = [
+        equipamento.name,
+        equipamento.serialNumber,
+        equipamento.room?.name,
+        equipamento.status,
+      ]
+        .filter(Boolean)
+        .some((valor) => valor!.toString().toLowerCase().includes(termo));
+
+      return passaFiltroStatus && passaPesquisa;
+    });
+  }, [equipamentos, filtroStatus, pesquisa]);
+
+  const totalPaginas = Math.ceil(
+    equipamentosFiltrados.length / ITENS_POR_PAGINA,
+  );
+  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
+  const equipamentosPagina = equipamentosFiltrados.slice(
+    inicio,
+    inicio + ITENS_POR_PAGINA,
+  );
 
   async function carregarEquipamentos() {
     try {
@@ -97,6 +133,7 @@ export default function Equipamentos() {
 
   function handleDownloadRelatorio() {
     if (!relatorioUrl || !relatorioId) return;
+
     try {
       notify.info("Iniciando download...");
       const a = document.createElement("a");
@@ -120,28 +157,27 @@ export default function Equipamentos() {
     setRelatorioId(null);
   }
 
+  function fecharModalManutencao() {
+    setEquipamentoManutencao(null);
+    setResponsavelManutencao("");
+    setObsManutencao("");
+  }
+
   async function handleIniciarManutencao() {
     if (!equipamentoManutencao) return;
 
     try {
       setEnviandoManutencao(true);
 
-      const payload = {
-        status: "MANUTENCAO",
-        maintenanceResponsiblePerson: responsavelManutencao,
-        maintenanceObservations: obsManutencao,
-      };
-    
       const formData = new FormData();
-      formData.append("status", payload.status);
-      formData.append("maintenanceResponsiblePerson", payload.maintenanceResponsiblePerson);
-      formData.append("maintenanceObservations", payload.maintenanceObservations);
+      formData.append("status", "MANUTENCAO");
+      formData.append("maintenanceResponsiblePerson", responsavelManutencao);
+      formData.append("maintenanceObservations", obsManutencao);
+
       await atualizarEquipamento(equipamentoManutencao.id, formData);
-      
+
       notify.info(`${equipamentoManutencao.name} enviado para manutenção!`);
-      setEquipamentoManutencao(null);
-      setResponsavelManutencao("");
-      setObsManutencao("");
+      fecharModalManutencao();
       carregarEquipamentos();
     } catch (error) {
       console.error(error);
@@ -158,8 +194,12 @@ export default function Equipamentos() {
       setFinalizando(true);
       const formData = new FormData();
       formData.append("status", "DISPONIVEL");
+
       await atualizarEquipamento(equipamentoFinalizarManutencao.id, formData);
-      notify.success(`Manutenção de ${equipamentoFinalizarManutencao.name} finalizada!`);
+
+      notify.success(
+        `Manutenção de ${equipamentoFinalizarManutencao.name} finalizada!`,
+      );
       setEquipamentoFinalizarManutencao(null);
       carregarEquipamentos();
     } catch (error) {
@@ -202,7 +242,6 @@ export default function Equipamentos() {
       setExcluindo(true);
 
       await excluirEquipamento(equipamentoExcluir.id);
-
       setEquipamentos((atuais) =>
         atuais.filter((e) => e.id !== equipamentoExcluir.id),
       );
@@ -217,29 +256,6 @@ export default function Equipamentos() {
     }
   }
 
-  const equipamentosFiltrados = equipamentos.filter((equipamento) =>
-  {
-    const passaFiltroStatus =
-      filtroStatus === "TODOS" || equipamento.status === filtroStatus;
-
-      const passaPesquisa = [
-        equipamento.name,
-        equipamento.serialNumber,
-        equipamento.room?.name,
-        equipamento.status,
-      ]
-        .filter(Boolean)
-        .some((valor) =>
-          valor!.toString().toLowerCase().includes(pesquisa.toLowerCase()),
-        );
-      
-      return passaFiltroStatus && passaPesquisa;
-  });
-
-  const totalPaginas = Math.ceil(equipamentosFiltrados.length / ITENS_POR_PAGINA);
-  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
-  const equipamentosPagina = equipamentosFiltrados.slice(inicio, inicio + ITENS_POR_PAGINA);
-
   return (
     <AppTemplate
       hideDefaultContent={true}
@@ -250,99 +266,17 @@ export default function Equipamentos() {
         label: "Novo Equipamento",
         href: "/reserva-equipamentos/equipamentos/criar",
       }}
-      secondaryAction={{
-        label: "Atualizar",
-        href: "/reserva-equipamentos/equipamentos",
-      }}
+      secondaryAction={null}
     >
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: "16px",
-          alignItems: "center",
-          marginBottom: "18px",
-        }}
-      >
-        <div>
-          <span
-            style={{
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--app-accent)",
-            }}
-          >
-            Equipamentos
-          </span>
+      <EquipamentosHeader
+        filtroStatus={filtroStatus}
+        onChangeFiltro={setFiltroStatus}
+      />
 
-          <h2
-            style={{
-              margin: "6px 0 0",
-              fontSize: "24px",
-              color: "#111827",
-            }}
-          >
-            Lista de Equipamentos
-          </h2>
-        </div>
-
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {filtroOptions.map((opcao) => {
-            const ativo = filtroStatus === opcao.value;
-            const { bg, color } =
-              opcao.value === "TODOS"
-                ? { bg: "#111827", color: "#fff" }
-                : getStatusStyle(opcao.value);
- 
-            return (
-              <button
-                key={opcao.value}
-                type="button"
-                onClick={() => setFiltroStatus(opcao.value)}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: "999px",
-                  border: ativo ? "none" : "1px solid #d1d5db",
-                  background: ativo ? (opcao.value === "TODOS" ? bg : bg) : "#fff",
-                  color: ativo ? (opcao.value === "TODOS" ? color : color) : "#374151",
-                  fontSize: "13px",
-                  fontWeight: ativo ? 700 : 500,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                {opcao.label}
-              </button>
-            );
-          })}
-        </div>
-      </header>
-
-      <div style={{ marginBottom: "18px" }}>
-        <input
-          type="text"
-          placeholder="Pesquisar por nome, patrimônio, sala ou status..."
-          value={pesquisa}
-          onChange={(e) => setPesquisa(e.target.value)}
-          style={{
-            width: "100%",
-            maxWidth: "520px",
-            padding: "12px 14px",
-            border: "1px solid #d1d5db",
-            borderRadius: "12px",
-            outline: "none",
-            fontSize: "14px",
-          }}
-        />
-      </div>
+      <BuscaEquipamentos pesquisa={pesquisa} onChangePesquisa={setPesquisa} />
 
       {loading && <p>Carregando equipamentos...</p>}
-
-      {erro && (
-        <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>
-      )}
+      {erro && <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>}
 
       {!loading && !erro && equipamentosFiltrados.length === 0 && (
         <p style={{ color: "#6b7280" }}>Nenhum equipamento encontrado.</p>
@@ -350,494 +284,7 @@ export default function Equipamentos() {
 
       {!loading && !erro && equipamentosFiltrados.length > 0 && (
         <>
-          <div
-            style={{
-              width: "100%",
-              overflowX: "auto",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-            }}
-          >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                minWidth: "750px",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: "#f9fafb",
-                    borderBottom: "1px solid #e5e7eb",
-                  }}
-                >
-                  {["ID", "Nome", "Patrimônio", "Sala", "Status", "Ações"].map(
-                    (titulo) => (
-                      <th
-                        key={titulo}
-                        style={{
-                          textAlign: titulo === "Ações" ? "center" : "left",
-                          padding: "14px 12px",
-                          fontSize: "12px",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.06em",
-                          color: "#374151",
-                        }}
-                      >
-                        {titulo}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              
-              <tbody>
-                {equipamentosPagina.map((equipamento) => {
-                const { bg, color } = getStatusStyle(equipamento.status);
-
                 return (
-                  <tr
-                    key={equipamento.id}
-                    style={{ borderBottom: "1px solid #f3f4f6" }}
-                  >
-                    <td style={{ padding: "14px 12px", fontWeight: 700 }}>
-                      {equipamento.id}
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        <span>{equipamento.name}</span>
-
-                        <button
-                          type="button"
-                          onClick={() => setEquipamentoInfo(equipamento)}
-                          style={{
-                            width: "20px",
-                            height: "20px",
-                            borderRadius: "50%",
-                            border: "1px solid #d1d5db",
-                            background: "#fff",
-                            color: "#374151",
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: 0,
-                            flexShrink: 0,
-                          }}
-                        >
-                          i
-                        </button>
-                      </div>
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      {equipamento.serialNumber ?? "-"}
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      {equipamento.room?.name ?? "-"}
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          padding: "5px 10px",
-                          borderRadius: "999px",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          background: bg,
-                          color,
-                        }}
-                      >
-                        {statusLabels[equipamento.status] ?? equipamento.status}
-                      </span>
-                    </td>
-
-                    <td style={{ padding: "14px 12px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          justifyContent: "center",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() =>
-                            (window.location.href = `/reserva-equipamentos/equipamentos/editar/${equipamento.id}`)
-                          }
-                          style={buttonStyle}
-                        >
-                          Editar
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleGerarRelatorio(equipamento.id)}
-                          style={buttonStyle}
-                        >
-                          Relatório
-                        </button>
-
-                        {equipamento.status === "DISPONIVEL" && (
-                          <button
-                            type="button"
-                            onClick={() => setEquipamentoManutencao(equipamento)}
-                            style={{ ...buttonStyle, background: "#92400e" }}
-                          >
-                            Manutenção
-                          </button>
-                        )}
-
-                        {equipamento.status === "MANUTENCAO" && (
-                          <button
-                            type="button"
-                            onClick={() => setEquipamentoFinalizarManutencao(equipamento)}
-                            style={{ ...buttonStyle, background: "#166534" }}
-                          >
-                            Finalizar
-                          </button>
-                        )}
-
-                        {equipamento.status === "AGUARDANDO_REVISAO" && (
-                          <button
-                            type="button"
-                            onClick={() => setEquipamentoRevisao(equipamento)}
-                            style={{ ...buttonStyle, background: "#6d28d9" }}
-                          >
-                            Revisão
-                          </button>
-                        )}
-
-                        <button
-                          style={{ ...buttonStyle, background: "#7f1d1d" }}
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Paginação */}
-        {totalPaginas > 1 && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: "16px",
-              flexWrap: "wrap",
-              gap: "12px",
-            }}
-          >
-            <span style={{ fontSize: "13px", color: "#6b7280" }}>
-              Exibindo {inicio + 1}–{Math.min(inicio + ITENS_POR_PAGINA, equipamentosFiltrados.length)} de {equipamentosFiltrados.length} equipamento{equipamentosFiltrados.length !== 1 ? "s" : ""}
-            </span>
-
-            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-              <button
-                type="button"
-                onClick={() => setPagina((p) => p - 1)}
-                disabled={pagina === 1}
-                style={{
-                  ...paginaBtnStyle,
-                  opacity: pagina === 1 ? 0.4 : 1,
-                  cursor: pagina === 1 ? "not-allowed" : "pointer",
-                }}
-              >
-                ← Anterior
-              </button>
-
-              {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => setPagina(num)}
-                  style={{
-                    ...paginaBtnStyle,
-                    background: num === pagina ? "#111827" : "#fff",
-                    color: num === pagina ? "#fff" : "#374151",
-                    border: num === pagina ? "none" : "1px solid #d1d5db",
-                    fontWeight: num === pagina ? 700 : 500,
-                    minWidth: "36px",
-                  }}
-                >
-                  {num}
-                </button>
-              ))}
-
-              <button
-                type="button"
-                onClick={() => setPagina((p) => p + 1)}
-                disabled={pagina === totalPaginas}
-                style={{
-                  ...paginaBtnStyle,
-                  opacity: pagina === totalPaginas ? 0.4 : 1,
-                  cursor: pagina === totalPaginas ? "not-allowed" : "pointer",
-                }}
-              >
-                Próxima →
-              </button>
-            </div>
-          </div>
-        )}
-      </>
-      )}
-      
-
-      {equipamentoInfo && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,.55)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              width: "100%",
-              maxWidth: "650px",
-              padding: "24px",
-              boxShadow: "0 20px 40px rgba(0,0,0,.2)",
-            }}
-          >
-            <h2
-              style={{
-                margin: "0 0 20px",
-              }}
-            >
-              Informações Extras do Equipamento
-            </h2>
-
-            {equipamentoInfo.photo && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginBottom: "20px",
-                }}
-              >
-                <img
-                  src={`http://localhost:3000/uploads/equipments/${equipamentoInfo.photo}`}
-                  alt={equipamentoInfo.name}
-                  style={{
-                    width: "auto",
-                    maxWidth: "250px",
-                    maxHeight: "200px",
-                    objectFit: "contain",
-                    borderRadius: "12px",
-                    border: "1px solid #e5e5e5",
-                  }}
-                />
-              </div>
-            )}
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "180px 1fr",
-                gap: "12px",
-              }}
-            >
-              <strong>Nome</strong>
-              <span>{equipamentoInfo.name}</span>
-
-              <strong>Observações</strong>
-              <span>{equipamentoInfo.observations || "-"}</span>
-
-              <strong>Instruções</strong>
-              <span>{equipamentoInfo.instructions || "-"}</span>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                marginTop: "24px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setEquipamentoInfo(null)}
-                style={buttonStyle}
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {equipamentoExcluir && (
-        <div style={modalOverlayStyle}>
-          <div style={{ ...ExcluirModalStyle, maxWidth: "460px" }}>
-            <h2 style={{ margin: "0 0 10px" }}>Excluir equipamento</h2>
-
-            <p style={{ color: "#4b5563", lineHeight: 1.5 }}>
-              Tem certeza que deseja excluir o equipamento{" "}
-              <strong>{equipamentoExcluir.name}</strong>? Essa ação não poderá
-              ser desfeita.
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "10px",
-                marginTop: "22px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setEquipamentoExcluir(null)}
-                disabled={excluindo}
-                style={{ ...buttonStyle, background: "#6b7280" }}
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="button"
-                onClick={confirmarExclusao}
-                disabled={excluindo}
-                style={{
-                  ...buttonStyle,
-                  background: "#7f1d1d",
-                  opacity: excluindo ? 0.7 : 1,
-                  cursor: excluindo ? "not-allowed" : "pointer",
-                }}
-              >
-                {excluindo ? "Excluindo..." : "Excluir"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {equipamentoManutencao && (
-        <div style={modalOverlayStyle}>
-          <div style={{ ...ManutencaoModalStyle, maxWidth: "500px" }}>
-            <h2 style={{ margin: "0 0 20px" }}>Iniciar Manutenção</h2>
-            <p style={{ marginBottom: "15px", color: "#4b5563" }}>
-              Equipamento: <strong>{equipamentoManutencao.name}</strong>
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 600, marginBottom: "5px" }}>
-                  Responsável
-                </label>
-                <input
-                  type="text"
-                  value={responsavelManutencao}
-                  onChange={(e) => setResponsavelManutencao(e.target.value)}
-                  placeholder="Nome do técnico ou empresa"
-                  style={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 600, marginBottom: "5px" }}>
-                  Observações
-                </label>
-                <textarea
-                  value={obsManutencao}
-                  onChange={(e) => setObsManutencao(e.target.value)}
-                  placeholder="Descreva o problema ou serviço..."
-                  style={{ ...inputStyle, height: "100px", resize: "none" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "25px" }}>
-              <button
-                type="button"
-                onClick={() => setEquipamentoManutencao(null)}
-                disabled={enviandoManutencao}
-                style={{ ...buttonStyle, background: "#6b7280" }}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleIniciarManutencao}
-                disabled={enviandoManutencao}
-                style={{ ...buttonStyle, background: "#92400e", opacity: enviandoManutencao ? 0.7 : 1 }}
-              >
-                {enviandoManutencao ? "Processando..." : "Confirmar Manutenção"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-       {equipamentoFinalizarManutencao && (
-        <div style={modalOverlayStyle}>
-          <div style={{ ...finalizarManutencaoModalStyle, maxWidth: "460px" }}>
-            <h2 style={{ margin: "0 0 10px" }}>Finalizar manutenção</h2>
-
-            <p style={{ color: "#4b5563", lineHeight: 1.5 }}>
-              Deseja finalizar a manutenção do equipamento{" "}
-              <strong>{equipamentoFinalizarManutencao.name}</strong>? O status será alterado para <strong>DISPONÍVEL</strong>.
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "10px",
-                marginTop: "22px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setEquipamentoFinalizarManutencao(null)}
-                disabled={finalizando}
-                style={{ ...buttonStyle, background: "#6b7280" }}
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="button"
-                onClick={handleFinalizarManutencao}
-                disabled={finalizando}
-                style={{
-                  ...buttonStyle,
-                  background: "#166534",
-                  opacity: finalizando ? 0.7 : 1,
-                  cursor: finalizando ? "not-allowed" : "pointer",
-                }}
-              >
-                {finalizando ? "Finalizando..." : "Confirmar"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {equipamentoRevisao && (
         <div style={modalOverlayStyle}>
@@ -911,57 +358,6 @@ export default function Equipamentos() {
               >
                 Cancelar
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {relatorioUrl && (
-        <div style={modalOverlayStyle}>
-          <div
-            style={{
-              ...RelatorioModalStyle,
-              maxWidth: "90%",
-              width: "1000px",
-              height: "90vh",
-              display: "flex",
-              flexDirection: "column",
-              padding: "20px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "15px",
-              }}
-            >
-              <h2 style={{ margin: 0 }}>Visualização do Relatório</h2>
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button
-                  type="button"
-                  onClick={handleDownloadRelatorio}
-                  style={{ ...buttonStyle, background: "#166534" }}
-                >
-                  Download PDF
-                </button>
-                <button
-                  type="button"
-                  onClick={handleFecharRelatorio}
-                  style={{ ...buttonStyle, background: "#6b7280" }}
-                >
-                  Voltar
-                </button>
-              </div>
-            </div>
-
-            <div style={{ flex: 1, width: "100%", background: "#f3f4f6", borderRadius: "8px", overflow: "hidden" }}>
-              <iframe
-                src={`${relatorioUrl}#toolbar=0&navpanes=0&scrollbar=1`}
-                title="Relatório de Equipamento"
-                style={{ width: "100%", height: "100%", border: "none" }}
-              />
             </div>
           </div>
         </div>
@@ -1046,3 +442,65 @@ const finalizarManutencaoModalStyle: React.CSSProperties = {
   padding: "24px",
   boxShadow: "0 20px 40px rgba(0,0,0,.2)",
 };
+          
+      <EquipamentosTable
+            equipamentos={equipamentosPagina}
+            onInfo={setEquipamentoInfo}
+            onEditar={(id) =>
+              navigate(`/reserva-equipamentos/equipamentos/editar/${id}`)
+            }
+            onRelatorio={handleGerarRelatorio}
+            onManutencao={setEquipamentoManutencao}
+            onFinalizarManutencao={setEquipamentoFinalizarManutencao}
+            onExcluir={setEquipamentoExcluir}
+          />
+
+          <Paginacao
+            pagina={pagina}
+            totalPaginas={totalPaginas}
+            inicio={inicio}
+            itensPorPagina={ITENS_POR_PAGINA}
+            totalItens={equipamentosFiltrados.length}
+            onChangePagina={setPagina}
+          />
+        </>
+      )}
+
+      <InfoEquipamentoModal
+        equipamento={equipamentoInfo}
+        onClose={() => setEquipamentoInfo(null)}
+      />
+
+      <ConfirmarExclusaoModal
+        equipamento={equipamentoExcluir}
+        excluindo={excluindo}
+        onCancel={() => setEquipamentoExcluir(null)}
+        onConfirm={confirmarExclusao}
+      />
+
+      <ManutencaoModal
+        equipamento={equipamentoManutencao}
+        responsavel={responsavelManutencao}
+        observacoes={obsManutencao}
+        enviando={enviandoManutencao}
+        onChangeResponsavel={setResponsavelManutencao}
+        onChangeObservacoes={setObsManutencao}
+        onCancel={fecharModalManutencao}
+        onConfirm={handleIniciarManutencao}
+      />
+
+      <FinalizarManutencaoModal
+        equipamento={equipamentoFinalizarManutencao}
+        finalizando={finalizando}
+        onCancel={() => setEquipamentoFinalizarManutencao(null)}
+        onConfirm={handleFinalizarManutencao}
+      />
+
+      <RelatorioModal
+        relatorioUrl={relatorioUrl}
+        onDownload={handleDownloadRelatorio}
+        onClose={handleFecharRelatorio}
+      />
+    </AppTemplate>
+  );
+}

@@ -11,7 +11,11 @@ export class RoomService {
     return this.prisma.room.findMany({
       orderBy: { id: 'asc' },
       include: {
-        equipments: true,
+        _count: {
+          select: {
+            equipments: true,
+          },
+        },
       },
     });
   }
@@ -21,6 +25,11 @@ export class RoomService {
       where: { id },
       include: {
         equipments: true,
+        _count: {
+          select: {
+            equipments: true,
+          },
+        },
       },
     });
 
