@@ -14,6 +14,7 @@ type Props = {
   equipamentos: Equipment[];
   onInfo: (equipamento: Equipment) => void;
   onRelatorio: (id: number) => void;
+  onEditar: (id: number) => void;
   onManutencao: (equipamento: Equipment) => void;
   onFinalizarManutencao: (equipamento: Equipment) => void;
   onExcluir: (equipamento: Equipment) => void;
@@ -22,6 +23,7 @@ type Props = {
 export default function EquipamentosTable({
   equipamentos,
   onInfo,
+  onEditar,
   onRelatorio,
   onManutencao,
   onFinalizarManutencao,
@@ -73,36 +75,7 @@ export default function EquipamentosTable({
                 {equipamento.id}
               </td>
 
-              <td style={{ padding: "14px 12px" }}>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                >
-                  <span>{equipamento.name}</span>
-
-                  <button
-                    type="button"
-                    onClick={() => onInfo(equipamento)}
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      borderRadius: "50%",
-                      border: "1px solid #d1d5db",
-                      background: "#fff",
-                      color: "#374151",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: 0,
-                      flexShrink: 0,
-                    }}
-                  >
-                    i
-                  </button>
-                </div>
-              </td>
+              <td style={{ padding: "14px 12px" }}>{equipamento.name}</td>
 
               <td style={{ padding: "14px 12px" }}>
                 {equipamento.serialNumber ?? "-"}
@@ -134,9 +107,7 @@ export default function EquipamentosTable({
                   <IconActionButton
                     title="Editar"
                     icon={<FiEdit size={18} />}
-                    onClick={() =>
-                      (window.location.href = `/reserva-equipamentos/equipamentos/editar/${equipamento.id}`)
-                    }
+                    onClick={() => onEditar(equipamento.id)}
                   />
 
                   <IconActionButton

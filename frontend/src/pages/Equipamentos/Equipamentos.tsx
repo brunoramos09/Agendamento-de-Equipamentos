@@ -11,6 +11,7 @@ import {
 import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import { useNavigate } from "react-router-dom";
 
 import BuscaEquipamentos from "../../../components/equipaments/BuscaEquipamentos";
 import ConfirmarExclusaoModal from "../../../components/equipaments/ConfirmarExclusaoModal";
@@ -53,6 +54,8 @@ export default function Equipamentos() {
 
   const [responsavelManutencao, setResponsavelManutencao] = useState("");
   const [obsManutencao, setObsManutencao] = useState("");
+
+  const navigate = useNavigate();
 
   usePageTitle("Equipamentos");
 
@@ -251,6 +254,9 @@ export default function Equipamentos() {
           <EquipamentosTable
             equipamentos={equipamentosPagina}
             onInfo={setEquipamentoInfo}
+            onEditar={(id) =>
+              navigate(`/reserva-equipamentos/equipamentos/editar/${id}`)
+            }
             onRelatorio={handleGerarRelatorio}
             onManutencao={setEquipamentoManutencao}
             onFinalizarManutencao={setEquipamentoFinalizarManutencao}
