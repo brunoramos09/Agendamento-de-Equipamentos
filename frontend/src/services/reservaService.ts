@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { API_URL } from "./api";
 
-const API_URL = "http://localhost:3000/reservations";
+const API_URL_COMPLETE = `${API_URL}/reservations`;
 
 export async function listarReservas() {
-  const response = await fetch(API_URL);
+  const response = await fetch(API_URL_COMPLETE);
 
   if (!response.ok) {
     throw new Error("Erro ao listar reservas.");
@@ -13,7 +14,7 @@ export async function listarReservas() {
 }
 
 export async function buscarReservaPorId(id: number) {
-  const response = await fetch(`${API_URL}/${id}`);
+  const response = await fetch(`${API_URL_COMPLETE}/${id}`);
 
   if (!response.ok) {
     throw new Error("Erro ao buscar reserva.");
@@ -23,7 +24,7 @@ export async function buscarReservaPorId(id: number) {
 }
 
 export async function criarReserva(payload: any) {
-  const response = await fetch(API_URL, {
+  const response = await fetch(API_URL_COMPLETE, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -41,7 +42,7 @@ export async function criarReserva(payload: any) {
 }
 
 export async function atualizarReserva(id: number, payload: any) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_URL_COMPLETE}/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -62,7 +63,7 @@ export async function devolverReserva(
   id: number,
   payload: { hadIssue: boolean; returnObservations?: string } = { hadIssue: false },
 ) {
-  const response = await fetch(`${API_URL}/${id}/return`, {
+  const response = await fetch(`${API_URL_COMPLETE}/${id}/return`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -80,7 +81,7 @@ export async function devolverReserva(
 }
 
 export async function excluirReserva(id: number): Promise<void> {
-  const response = await fetch(`${API_URL}/${id}`, {
+  const response = await fetch(`${API_URL_COMPLETE}/${id}`, {
     method: "DELETE",
   });
 
