@@ -7,8 +7,8 @@ import EquipamentosCriar from "./pages/Equipamentos/EquipamentosCriar";
 import EditarSala from "./pages/Salas/SalasEditar";
 import EditarEquipamento from "./pages/Equipamentos/EquipamentosEditar";
 import { Toaster } from "sonner";
-import Reservas from "./pages/Reservas.tsx/Reservas";
-import ReservasCriar from "./pages/Reservas.tsx/ReservasCriar";
+import Reservas from "./pages/Reservas/Reservas";
+import ReservasCriar from "./pages/Reservas/ReservasCriar";
 
 function App() {
   return (

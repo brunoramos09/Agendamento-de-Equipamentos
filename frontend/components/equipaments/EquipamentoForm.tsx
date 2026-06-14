@@ -49,38 +49,48 @@ export default function EquipamentoForm({
   return (
     <div
       style={{
-        width: "100%",
         maxWidth: "1000px",
+        margin: "0 auto",
+        width: "100%",
       }}
     >
-      <span
+      <div
         style={{
-          fontSize: "12px",
-          fontWeight: 700,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "var(--app-accent)",
+          marginBottom: "32px",
+          paddingBottom: "20px",
+          borderBottom: "1px solid #e5e7eb",
         }}
       >
-        Equipamentos
-      </span>
+        <span
+          style={{
+            fontSize: "12px",
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "var(--app-accent)",
+          }}
+        >
+          Equipamentos
+        </span>
 
-      <h2
-        style={{
-          margin: "8px 0 32px",
-          fontSize: "22px",
-          fontWeight: 600,
-        }}
-      >
-        {titulo}
-      </h2>
+        <h2
+          style={{
+            margin: "8px 0 0",
+            fontSize: "28px",
+            fontWeight: 700,
+            color: "#111827",
+          }}
+        >
+          {titulo}
+        </h2>
+      </div>
 
       <form onSubmit={onSubmit}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "20px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "24px",
           }}
         >
           <div>
@@ -161,10 +171,7 @@ export default function EquipamentoForm({
               onChange={(e) =>
                 setEquipamento({
                   ...equipamento,
-                  status: e.target.value as
-                    | "DISPONIVEL"
-                    //| "MANUTENCAO"
-                    | "INATIVO",
+                  status: e.target.value as "DISPONIVEL" | "INATIVO",
                 })
               }
               style={{
@@ -184,48 +191,113 @@ export default function EquipamentoForm({
             </select>
           </div>
 
-          <div />
-
           <div style={{ gridColumn: "1 / -1" }}>
             <label style={labelStyle}>Imagem do Equipamento</label>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                setEquipamento({
-                  ...equipamento,
-                  photo: e.target.files?.[0] ?? null,
-                })
-              }
-            />
-
-            {equipamento.photo && (
-              <div style={{ marginTop: "16px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "20px",
+                padding: "18px",
+                border: "1px solid #e5e7eb",
+                borderRadius: "16px",
+                background: "#fff",
+                width: "fit-content",
+                minWidth: "420px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              }}
+            >
+              {equipamento.photo ? (
                 <img
                   src={URL.createObjectURL(equipamento.photo)}
                   alt="Preview"
                   style={{
-                    width: "240px",
-                    maxHeight: "240px",
+                    width: "140px",
+                    height: "140px",
                     objectFit: "cover",
-                    borderRadius: "16px",
-                    border: "1px solid #ddd",
-                    display: "block",
+                    borderRadius: "14px",
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    flexShrink: 0,
                   }}
                 />
-
-                <p
+              ) : (
+                <div
                   style={{
-                    marginTop: "10px",
-                    color: "#666",
-                    fontSize: "14px",
+                    width: "140px",
+                    height: "140px",
+                    borderRadius: "14px",
+                    border: "2px dashed #d1d5db",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "42px",
+                    background: "#f9fafb",
+                    flexShrink: 0,
+                  }}
+                ></div>
+              )}
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 700,
+                    color: "#111827",
                   }}
                 >
-                  {equipamento.photo.name}
-                </p>
+                  {equipamento.photo
+                    ? equipamento.photo.name
+                    : "Nenhuma imagem selecionada"}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "14px",
+                    color: "#6b7280",
+                  }}
+                >
+                  {equipamento.photo
+                    ? `${(equipamento.photo.size / 1024).toFixed(1)} KB`
+                    : ""}
+                </div>
+
+                <label
+                  style={{
+                    marginTop: "8px",
+                    width: "fit-content",
+                    padding: "10px 16px",
+                    borderRadius: "10px",
+                    border: "1px solid #d1d5db",
+                    background: "#f9fafb",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    color: "#111827",
+                  }}
+                >
+                  {equipamento.photo ? "Trocar imagem" : "Selecionar imagem"}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={(e) =>
+                      setEquipamento({
+                        ...equipamento,
+                        photo: e.target.files?.[0] ?? null,
+                      })
+                    }
+                  />
+                </label>
               </div>
-            )}
+            </div>
           </div>
 
           <div style={{ gridColumn: "1 / -1" }}>
@@ -260,15 +332,7 @@ export default function EquipamentoForm({
             />
           </div>
 
-          <div
-            style={{
-              gridColumn: "1 / -1",
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "10px",
-              marginTop: "10px",
-            }}
-          >
+          <div style={actionsStyle}>
             <button type="button" onClick={onCancel} style={cancelButton}>
               Cancelar
             </button>
@@ -287,51 +351,49 @@ const labelStyle: CSSProperties = {
   display: "block",
   marginBottom: "8px",
   fontWeight: 600,
-  fontSize: "14px",
-  color: "#171717",
+  color: "#374151",
 };
 
 const inputStyle: CSSProperties = {
   width: "100%",
-  padding: "14px 18px",
-  borderRadius: "14px",
-  border: "1px solid #cfcfcf",
-  background: "#fff",
-  fontSize: "15px",
+  padding: "12px 14px",
+  border: "1px solid #d1d5db",
+  borderRadius: "12px",
+  background: "#f9fafb",
+  fontSize: "14px",
   boxSizing: "border-box",
-  outline: "none",
 };
 
 const textAreaStyle: CSSProperties = {
-  width: "100%",
-  padding: "14px 18px",
-  borderRadius: "14px",
-  border: "1px solid #cfcfcf",
-  background: "#fff",
-  fontSize: "15px",
+  ...inputStyle,
   resize: "vertical",
-  boxSizing: "border-box",
-  outline: "none",
 };
 
-const saveButton: CSSProperties = {
-  padding: "12px 20px",
-  background: "#111",
-  color: "#fff",
-  border: "none",
-  borderRadius: "12px",
-  cursor: "pointer",
-  fontWeight: 600,
-  minWidth: "110px",
+const actionsStyle: CSSProperties = {
+  gridColumn: "1 / -1",
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: "12px",
+  marginTop: "12px",
+  flexWrap: "wrap",
 };
 
 const cancelButton: CSSProperties = {
   padding: "12px 20px",
-  background: "#fff",
-  color: "#111",
-  border: "1px solid #cfcfcf",
+  border: "1px solid #d1d5db",
   borderRadius: "12px",
+  background: "#fff",
+  cursor: "pointer",
+  fontWeight: 500,
+};
+
+const saveButton: CSSProperties = {
+  padding: "12px 24px",
+  border: "none",
+  borderRadius: "12px",
+  background: "#111827",
+  color: "#fff",
   cursor: "pointer",
   fontWeight: 600,
-  minWidth: "110px",
+  minWidth: "160px",
 };

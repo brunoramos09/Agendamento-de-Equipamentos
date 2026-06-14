@@ -27,38 +27,47 @@ export default function SalaForm({
   return (
     <div
       style={{
+        maxWidth: "1000px",
+        margin: "0 auto",
         width: "100%",
-        maxWidth: "900px",
       }}
     >
-      <span
+      <div
         style={{
-          fontSize: "12px",
-          fontWeight: 700,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "var(--app-accent)",
+          marginBottom: "32px",
+          paddingBottom: "20px",
+          borderBottom: "1px solid #e5e7eb",
         }}
       >
-        Salas
-      </span>
+        <span
+          style={{
+            fontSize: "12px",
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "var(--app-accent)",
+          }}
+        >
+          Salas
+        </span>
 
-      <h2
-        style={{
-          margin: "8px 0 32px",
-          fontSize: "22px",
-          fontWeight: 600,
-        }}
-      >
-        {titulo}
-      </h2>
+        <h2
+          style={{
+            margin: "8px 0 0",
+            fontSize: "28px",
+            fontWeight: 700,
+            color: "#111827",
+          }}
+        >
+          {titulo}
+        </h2>
+      </div>
 
       <form onSubmit={onSubmit}>
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
+            display: "grid",
+            gap: "24px",
           }}
         >
           <div>
@@ -127,14 +136,7 @@ export default function SalaForm({
             />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "8px",
-              marginTop: "12px",
-            }}
-          >
+          <div style={actionsStyle}>
             <button type="button" onClick={onCancel} style={cancelButton}>
               Cancelar
             </button>
@@ -153,39 +155,43 @@ const labelStyle: CSSProperties = {
   display: "block",
   marginBottom: "8px",
   fontWeight: 600,
-  fontSize: "14px",
-  color: "#171717",
+  color: "#374151",
 };
 
 const inputStyle: CSSProperties = {
   width: "100%",
-  padding: "14px 18px",
-  borderRadius: "14px",
-  border: "1px solid #cfcfcf",
-  background: "#fff",
-  fontSize: "15px",
+  padding: "12px 14px",
+  border: "1px solid #d1d5db",
+  borderRadius: "12px",
+  background: "#f9fafb",
+  fontSize: "14px",
   boxSizing: "border-box",
-  outline: "none",
 };
 
-const saveButton: CSSProperties = {
-  padding: "10px 18px",
-  background: "#111",
-  color: "#fff",
-  border: "none",
-  borderRadius: "12px",
-  cursor: "pointer",
-  fontWeight: 600,
-  minWidth: "100px",
+const actionsStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: "12px",
+  marginTop: "12px",
+  flexWrap: "wrap",
 };
 
 const cancelButton: CSSProperties = {
-  padding: "10px 18px",
-  background: "#fff",
-  color: "#111",
-  border: "1px solid #cfcfcf",
+  padding: "12px 20px",
+  border: "1px solid #d1d5db",
   borderRadius: "12px",
+  background: "#fff",
+  cursor: "pointer",
+  fontWeight: 500,
+};
+
+const saveButton: CSSProperties = {
+  padding: "12px 24px",
+  border: "none",
+  borderRadius: "12px",
+  background: "#111827",
+  color: "#fff",
   cursor: "pointer",
   fontWeight: 600,
-  minWidth: "100px",
+  minWidth: "160px",
 };

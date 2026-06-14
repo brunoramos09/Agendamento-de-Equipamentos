@@ -48,6 +48,7 @@ export default function CriarSala() {
       theme={equipamentosTheme}
       primaryAction={null}
       secondaryAction={null}
+      appDescription="Cadastre novas salas."
     >
       <SalaForm
         sala={sala}

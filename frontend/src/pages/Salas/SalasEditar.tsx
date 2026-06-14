@@ -128,6 +128,7 @@ export default function EditarSala() {
       theme={equipamentosTheme}
       primaryAction={null}
       secondaryAction={null}
+      appDescription="Atualize uma sala existente."
     >
       <SalaForm
         sala={sala}
