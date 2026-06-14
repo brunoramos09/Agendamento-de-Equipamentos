@@ -16,6 +16,12 @@ const ITENS_POR_PAGINA = 8;
 
 type FiltroStatus = "TODAS" | "ATIVA" | "ATRASADA" | "DEVOLVIDA";
  
+type ModalDevolucao = {
+  reserva: Reservation;
+  hadIssue: boolean;
+  returnObservations: string;
+}
+
 const filtroOptions: { value: FiltroStatus; label: string; bg: string; color: string }[] = [
   { value: "TODAS",     label: "Todas",     bg: "#111827", color: "#fff"     },
   { value: "ATIVA",     label: "Ativas",    bg: "#dcfce7", color: "#166534"  },
@@ -35,7 +41,9 @@ export default function Reservas() {
   );
 
   const [excluindo, setExcluindo] = useState(false);
-  const [devolvendoId, setDevolvendoId] = useState<number | null>(null);
+  const [devolvendo, setDevolvendo] = useState(false);
+
+  const [modalDevolucao, setModalDevolucao] = useState<ModalDevolucao | null>(null);
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODAS");
   const [pagina, setPagina] = useState(1);
@@ -85,19 +93,36 @@ export default function Reservas() {
     }
   }
 
-  async function devolver(id: number) {
+  function abrirModalDevolucao(reserva: Reservation) {
+    setModalDevolucao({ reserva, hadIssue: false, returnObservations: "" });
+  }
+
+  async function confirmarDevolucao() {
+    if (!modalDevolucao) return;
+ 
+    if (modalDevolucao.hadIssue && !modalDevolucao.returnObservations.trim()) {
+      notify.error("Descreva o problema ocorrido antes de confirmar.");
+      return;
+    }
+ 
     try {
-      setDevolvendoId(id);
-
-      await devolverReserva(id);
-
-      notify.returned(id);
+      setDevolvendo(true);
+ 
+      await devolverReserva(modalDevolucao.reserva.id, {
+        hadIssue: modalDevolucao.hadIssue,
+        returnObservations: modalDevolucao.hadIssue
+          ? modalDevolucao.returnObservations.trim()
+          : undefined,
+      });
+ 
+      notify.returned(modalDevolucao.reserva.id);
+      setModalDevolucao(null);
       await carregarReservas();
     } catch (error) {
       console.error(error);
       notify.error("Não foi possível registrar a devolução.");
     } finally {
-      setDevolvendoId(null);
+      setDevolvendo(false);
     }
   }
 
@@ -378,20 +403,10 @@ export default function Reservas() {
                           {!reserva.returnedAt && (
                             <button
                               type="button"
-                              onClick={() => devolver(reserva.id)}
-                              disabled={devolvendoId === reserva.id}
-                              style={{
-                                ...buttonStyle,
-                                opacity: devolvendoId === reserva.id ? 0.7 : 1,
-                                cursor:
-                                  devolvendoId === reserva.id
-                                    ? "not-allowed"
-                                    : "pointer",
-                              }}
+                              onClick={() => abrirModalDevolucao(reserva)}
+                              style={buttonStyle}
                             >
-                              {devolvendoId === reserva.id
-                                ? "Devolvendo..."
-                                : "Devolver"}
+                              Devolver
                             </button>
                           )}
 
@@ -499,6 +514,20 @@ export default function Reservas() {
 
               <strong>Observações</strong>
               <span>{reservaInfo.observations || "-"}</span>
+
+              {reservaInfo.returnedAt && (
+                <>
+                  <strong>Problema relatado</strong>
+                  <span>{reservaInfo.hadIssue ? "Sim" : "Não"}</span>
+ 
+                  {reservaInfo.hadIssue && (
+                    <>
+                      <strong>Obs. devolução</strong>
+                      <span>{reservaInfo.returnObservations || "-"}</span>
+                    </>
+                  )}
+                </>
+              )}
             </div>
 
             <h3 style={{ margin: "20px 0 10px" }}>Equipamentos</h3>
@@ -525,6 +554,118 @@ export default function Reservas() {
                 style={buttonStyle}
               >
                 Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalDevolucao && (
+        <div style={modalOverlayStyle}>
+          <div style={{ ...modalStyle, maxWidth: "500px" }}>
+            <h2 style={{ margin: "0 0 6px" }}>Devolver reserva</h2>
+ 
+            <p style={{ color: "#4b5563", fontSize: "14px", marginBottom: "22px" }}>
+              Reserva <strong>#{modalDevolucao.reserva.id}</strong> ·{" "}
+              {modalDevolucao.reserva.user}
+            </p>
+ 
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                cursor: "pointer",
+                marginBottom: "18px",
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#111827",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={modalDevolucao.hadIssue}
+                onChange={(e) =>
+                  setModalDevolucao({
+                    ...modalDevolucao,
+                    hadIssue: e.target.checked,
+                    returnObservations: e.target.checked
+                      ? modalDevolucao.returnObservations
+                      : "",
+                  })
+                }
+                style={{ width: "16px", height: "16px", cursor: "pointer" }}
+              />
+              Houve algum problema com o equipamento?
+            </label>
+ 
+            {modalDevolucao.hadIssue && (
+              <div style={{ marginBottom: "20px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "8px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    color: "#374151",
+                  }}
+                >
+                  Descreva o problema{" "}
+                  <span style={{ color: "#991b1b" }}>*</span>
+                </label>
+ 
+                <textarea
+                  rows={4}
+                  placeholder="Descreva o defeito ou problema ocorrido durante o uso..."
+                  value={modalDevolucao.returnObservations}
+                  onChange={(e) =>
+                    setModalDevolucao({
+                      ...modalDevolucao,
+                      returnObservations: e.target.value,
+                    })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "12px 14px",
+                    borderRadius: "12px",
+                    border: "1px solid #d1d5db",
+                    fontSize: "14px",
+                    resize: "vertical",
+                    boxSizing: "border-box",
+                    outline: "none",
+                  }}
+                />
+              </div>
+            )}
+ 
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                marginTop: "4px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setModalDevolucao(null)}
+                disabled={devolvendo}
+                style={{ ...buttonStyle, background: "#6b7280" }}
+              >
+                Cancelar
+              </button>
+ 
+              <button
+                type="button"
+                onClick={confirmarDevolucao}
+                disabled={devolvendo}
+                style={{
+                  ...buttonStyle,
+                  opacity: devolvendo ? 0.7 : 1,
+                  cursor: devolvendo ? "not-allowed" : "pointer",
+                }}
+              >
+                {devolvendo ? "Registrando..." : "Confirmar devolução"}
               </button>
             </div>
           </div>

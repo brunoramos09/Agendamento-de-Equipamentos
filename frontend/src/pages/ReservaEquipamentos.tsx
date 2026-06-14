@@ -38,6 +38,7 @@ const defaultRecentItems: RecentItem[] = [
   { title: "Reservas ativas", description: "Carregando...", meta: "—", status: "—" },
   { title: "Equipamentos disponíveis", description: "Carregando...", meta: "—", status: "—" },
   { title: "Reservas atrasadas", description: "Carregando...", meta: "—", status: "—" },
+  { title: "Equipamentos aguardando revisão", description: "Carregando...", meta: "-", status: "-"},
 ];
 
 export function ReservaEquipamentos() {
@@ -54,6 +55,7 @@ export function ReservaEquipamentos() {
 
         const total = equipamentos.length;
         const disponiveis = equipamentos.filter((e) => e.status === "DISPONIVEL");
+        const revisao = equipamentos.filter((e) => e.status === "AGUARDANDO_REVISAO");
         const ativas = reservas.filter(
           (r) => !r.returnedAt && new Date(r.endDate) >= now,
         );
@@ -102,12 +104,23 @@ export function ReservaEquipamentos() {
           .sort((a, b) => a.name.localeCompare(b.name))
           .slice(0, 4);
 
+        const primeirosRevisao = [...revisao]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .slice(0, 4);
+
         const descricaoDisponiveis =
           primeirosDisponiveis.length > 0
             ? primeirosDisponiveis
                 .map((e) => (e.room?.name ? `${e.name} (${e.room.name})` : e.name))
                 .join(", ")
             : "Nenhum equipamento disponível no momento.";
+
+        const descricaoRevisao =
+          primeirosRevisao.length > 0
+            ? primeirosRevisao
+                .map((e) => (e.room?.name ? `${e.name} (${e.room.name})` : e.name))
+                .join(", ")
+            : "Nenhum equipamento aguardando revisão no momento.";
 
         const atrasadas = reservas
           .filter((r) => !r.returnedAt && new Date(r.endDate) < now)
@@ -139,7 +152,7 @@ export function ReservaEquipamentos() {
           {
             title: "Equipamentos disponíveis",
             description: descricaoDisponiveis,
-            meta: `${disponiveis.length} disponíve${disponiveis.length !== 1 ? "is" : "l"}`,
+            meta: `${disponiveis.length} equipament${disponiveis.length !== 1 ? "os" : "o"}`,
             status: "Disponível",
           },
           {
@@ -147,6 +160,12 @@ export function ReservaEquipamentos() {
             description: descricaoAtrasadas,
             meta: metaAtrasadas,
             status: atrasadas.length > 0 ? "Atenção" : "Em dia",
+          },
+          {
+            title: "Equipamentos aguardando revisão",
+            description: descricaoRevisao,
+            meta: `${revisao.length} equipament${revisao.length !== 1 ? "os" : "o"}`,
+            status: "Aguardando Revisão",
           },
         ]);
       } catch (error) {

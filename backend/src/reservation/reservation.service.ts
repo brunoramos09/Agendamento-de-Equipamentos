@@ -9,6 +9,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { ReturnReservationDto } from './dto/return-reservation.dto';
 
 @Injectable()
 export class ReservationService {
@@ -248,18 +249,48 @@ export class ReservationService {
     });
   }
 
-  async returnReservation(id: number) {
+  async returnReservation(id: number, dto: ReturnReservationDto) {
     const reservation = await this.findOne(id);
-
+ 
     if (reservation.returnedAt) {
       throw new BadRequestException('Esta reserva já foi devolvida');
     }
-
-    return this.prisma.reservation.update({
-      where: { id },
-      data: {
-        returnedAt: new Date(),
-      },
+ 
+    if (dto.hadIssue && !dto.returnObservations?.trim()) {
+      throw new BadRequestException(
+        'É necessário descrever o problema quando houver defeito',
+      );
+    }
+ 
+    return this.prisma.$transaction(async (tx) => {
+      const updatedReservation = await tx.reservation.update({
+        where: { id },
+        data: {
+          returnedAt: new Date(),
+          hadIssue: dto.hadIssue ?? false,
+          returnObservations: dto.returnObservations ?? null,
+        },
+        include: {
+          equipments: {
+            include: {
+              equipment: true,
+            },
+          },
+        },
+      });
+ 
+      if (dto.hadIssue) {
+        const equipmentIds = reservation.equipments.map(
+          (e) => e.equipmentId,
+        );
+ 
+        await tx.equipment.updateMany({
+          where: { id: { in: equipmentIds } },
+          data: { status: 'AGUARDANDO_REVISAO' },
+        });
+      }
+ 
+      return updatedReservation;
     });
   }
 }

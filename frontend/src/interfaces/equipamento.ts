@@ -1,4 +1,4 @@
-export type EquipmentStatus = "DISPONIVEL" | "MANUTENCAO" | "INATIVO";
+export type EquipmentStatus = "DISPONIVEL" | "MANUTENCAO" | "INATIVO" | "AGUARDANDO_REVISAO";
 
 export interface Room {
   id: number;

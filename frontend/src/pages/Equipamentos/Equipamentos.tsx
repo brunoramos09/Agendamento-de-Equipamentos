@@ -8,6 +8,7 @@ import {
   gerarRelatorioEquipamento,
   atualizarEquipamento,
 } from "../../services/equipamentoService";
+//import type Equipment, { EquipmentStatus } from "../../interfaces/equipamento";
 import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
 
@@ -17,20 +18,24 @@ const statusLabels: Record<string, string> = {
   DISPONIVEL: "DISPONÍVEL",
   MANUTENCAO: "MANUTENÇÃO",
   INATIVO: "INATIVO",
+  AGUARDANDO_REVISAO: "AGUARDANDO REVISÃO",
 };
 
 function getStatusStyle(status: string) {
   if (status === "DISPONIVEL") return { bg: "#dcfce7", color: "#166534" };
   if (status === "MANUTENCAO") return { bg: "#fef3c7", color: "#92400e" };
+  if (status === "AGUARDANDO_REVISAO") return { bg: "#ede9fe", color: "#6d28d9" };
   return { bg: "#fee2e2", color: "#991b1b" };
 }
 
-type FiltroStatus = "TODOS" | "DISPONIVEL" | "MANUTENCAO" | "INATIVO";
+//type FiltroStatus = EquipmentStatus | "TODOS";
+type FiltroStatus = "TODOS" | "DISPONIVEL" | "MANUTENCAO" | "INATIVO" | "AGUARDANDO_REVISAO";
  
 const filtroOptions: { value: FiltroStatus; label: string }[] = [
   { value: "TODOS", label: "Todos" },
   { value: "DISPONIVEL", label: "Disponíveis" },
   { value: "MANUTENCAO", label: "Em manutenção" },
+  { value: "AGUARDANDO_REVISAO", label: "Aguardando revisão" },
   { value: "INATIVO", label: "Inativos" },
 ];
 
@@ -50,6 +55,8 @@ export default function Equipamentos() {
   const [enviandoManutencao, setEnviandoManutencao] = useState(false);
   const [equipamentoFinalizarManutencao, setEquipamentoFinalizarManutencao] = useState<Equipment | null>(null);
   const [finalizando, setFinalizando] = useState(false);
+  const [equipamentoRevisao, setEquipamentoRevisao] = useState<Equipment | null>(null);
+  const [processandoRevisao, setProcessandoRevisao] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODOS");
   const [pagina, setPagina] = useState(1);
 
@@ -160,6 +167,31 @@ export default function Equipamentos() {
       notify.error("Erro ao finalizar manutenção.");
     } finally {
       setFinalizando(false);
+    }
+  }
+
+  async function handleDecisaoRevisao(destino: "MANUTENCAO" | "DISPONIVEL") {
+    if (!equipamentoRevisao) return;
+
+    try {
+      setProcessandoRevisao(true);
+      const formData = new FormData();
+      formData.append("status", destino);
+      await atualizarEquipamento(equipamentoRevisao.id, formData);
+
+      if (destino === "MANUTENCAO") {
+        notify.info(`${equipamentoRevisao.name} enviado para manutenção.`);
+      } else {
+        notify.success(`${equipamentoRevisao.name} marcado como disponível.`);
+      }
+
+      setEquipamentoRevisao(null);
+      carregarEquipamentos();
+    } catch (error) {
+      console.error(error);
+      notify.error("Erro ao atualizar status do equipamento.");
+    } finally {
+      setProcessandoRevisao(false);
     }
   }
 
@@ -479,9 +511,17 @@ export default function Equipamentos() {
                           </button>
                         )}
 
+                        {equipamento.status === "AGUARDANDO_REVISAO" && (
+                          <button
+                            type="button"
+                            onClick={() => setEquipamentoRevisao(equipamento)}
+                            style={{ ...buttonStyle, background: "#6d28d9" }}
+                          >
+                            Revisão
+                          </button>
+                        )}
+
                         <button
-                          type="button"
-                          onClick={() => setEquipamentoExcluir(equipamento)}
                           style={{ ...buttonStyle, background: "#7f1d1d" }}
                         >
                           Excluir
@@ -495,6 +535,7 @@ export default function Equipamentos() {
           </table>
         </div>
 
+        {/* Paginação */}
         {totalPaginas > 1 && (
           <div
             style={{
@@ -798,6 +839,83 @@ export default function Equipamentos() {
         </div>
       )}
 
+      {equipamentoRevisao && (
+        <div style={modalOverlayStyle}>
+          <div style={{ ...ManutencaoModalStyle, maxWidth: "480px" }}>
+            <h2 style={{ margin: "0 0 8px" }}>Revisão de equipamento</h2>
+
+            <p style={{ color: "#4b5563", fontSize: "14px", marginBottom: "24px" }}>
+              Equipamento <strong>{equipamentoRevisao.name}</strong> foi devolvido
+              com problema relatado. Como deseja prosseguir?
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setEquipamentoManutencao(equipamentoRevisao);
+                  setEquipamentoRevisao(null);
+                }}
+                disabled={enviandoManutencao}
+                style={{
+                  ...buttonStyle,
+                  background: "#92400e",
+                  padding: "14px 16px",
+                  borderRadius: "12px",
+                  fontSize: "14px",
+                  textAlign: "left",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  opacity: processandoRevisao ? 0.7 : 1,
+                  cursor: processandoRevisao ? "not-allowed" : "pointer",
+                }}
+              >
+                <span style={{ fontWeight: 700 }}>Enviar para manutenção</span>
+                <span style={{ fontWeight: 400, fontSize: "12px", opacity: 0.85 }}>
+                  O equipamento tinha um problema e precisa de reparo
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDecisaoRevisao("DISPONIVEL")}
+                disabled={processandoRevisao}
+                style={{
+                  ...buttonStyle,
+                  background: "#166534",
+                  padding: "14px 16px",
+                  borderRadius: "12px",
+                  fontSize: "14px",
+                  textAlign: "left",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  opacity: processandoRevisao ? 0.7 : 1,
+                  cursor: processandoRevisao ? "not-allowed" : "pointer",
+                }}
+              >
+                <span style={{ fontWeight: 700 }}>Marcar como disponível</span>
+                <span style={{ fontWeight: 400, fontSize: "12px", opacity: 0.85 }}>
+                  O equipamento está funcionando corretamente
+                </span>
+              </button>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+              <button
+                type="button"
+                onClick={() => setEquipamentoRevisao(null)}
+                disabled={processandoRevisao}
+                style={{ ...buttonStyle, background: "#6b7280" }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {relatorioUrl && (
         <div style={modalOverlayStyle}>
           <div
@@ -928,4 +1046,3 @@ const finalizarManutencaoModalStyle: React.CSSProperties = {
   padding: "24px",
   boxShadow: "0 20px 40px rgba(0,0,0,.2)",
 };
-
