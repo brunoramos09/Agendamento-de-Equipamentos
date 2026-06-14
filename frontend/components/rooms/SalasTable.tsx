@@ -35,23 +35,29 @@ export default function SalasTable({ salas, onExcluirSala }: SalasTableProps) {
               borderBottom: "1px solid #e5e7eb",
             }}
           >
-            {["ID", "Nome", "Prédio", "Andar", "Campus", "Ações"].map(
-              (titulo) => (
-                <th
-                  key={titulo}
-                  style={{
-                    textAlign: titulo === "Ações" ? "center" : "left",
-                    padding: "14px 12px",
-                    fontSize: "12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.06em",
-                    color: "#374151",
-                  }}
-                >
-                  {titulo}
-                </th>
-              ),
-            )}
+            {[
+              "ID",
+              "Nome",
+              "Prédio",
+              "Andar",
+              "Campus",
+              "Equipamentos",
+              "Ações",
+            ].map((titulo) => (
+              <th
+                key={titulo}
+                style={{
+                  textAlign: titulo === "Ações" ? "center" : "left",
+                  padding: "14px 12px",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  color: "#374151",
+                }}
+              >
+                {titulo}
+              </th>
+            ))}
           </tr>
         </thead>
 
@@ -69,6 +75,10 @@ export default function SalasTable({ salas, onExcluirSala }: SalasTableProps) {
               <td style={{ padding: "14px 12px" }}>{sala.floor ?? "-"}</td>
 
               <td style={{ padding: "14px 12px" }}>{sala.campus ?? "-"}</td>
+
+              <td style={{ padding: "14px 12px", textAlign: "center" }}>
+                {sala._count?.equipments ?? 0}
+              </td>
 
               <td style={{ padding: "14px 12px" }}>
                 <div

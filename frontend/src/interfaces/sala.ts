@@ -6,4 +6,8 @@ export default interface Room {
   campus: string;
   createdAt: string;
   updatedAt: string;
+
+  _count?: {
+    equipments: number;
+  };
 }
