@@ -1,18 +1,21 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+import { useNavigate } from "react-router-dom";
+
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
+
 import {
   listarEquipamentos,
   excluirEquipamento,
   gerarRelatorioEquipamento,
   atualizarEquipamento,
 } from "../../services/equipamentoService";
-//import type Equipment, { EquipmentStatus } from "../../interfaces/equipamento";
+
 import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { useNavigate } from "react-router-dom";
 
 import BuscaEquipamentos from "../../../components/equipaments/BuscaEquipamentos";
 import ConfirmarExclusaoModal from "../../../components/equipaments/ConfirmarExclusaoModal";
@@ -23,49 +26,56 @@ import InfoEquipamentoModal from "../../../components/equipaments/InfoEquipament
 import ManutencaoModal from "../../../components/equipaments/ManutencaoModal";
 import Paginacao from "../../../components/equipaments/Paginacao";
 import RelatorioModal from "../../../components/equipaments/RelatorioModal";
+
 import {
   ITENS_POR_PAGINA,
   type FiltroStatus,
 } from "../../utils/equipamentosUtils";
 
+import {
+  modalOverlayStyle,
+  buttonStyle,
+} from "../../styles/equipamentosStyles";
+
 export default function Equipamentos() {
+  const navigate = useNavigate();
+
+  usePageTitle("Equipamentos");
+
   const [equipamentos, setEquipamentos] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [pesquisa, setPesquisa] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODOS");
-  const [pagina, setPagina] = useState(1);
 
   const [equipamentoInfo, setEquipamentoInfo] = useState<Equipment | null>(
     null,
   );
+
   const [equipamentoExcluir, setEquipamentoExcluir] =
     useState<Equipment | null>(null);
+
   const [equipamentoManutencao, setEquipamentoManutencao] =
     useState<Equipment | null>(null);
+
   const [equipamentoFinalizarManutencao, setEquipamentoFinalizarManutencao] =
     useState<Equipment | null>(null);
 
-  const [excluindo, setExcluindo] = useState(false);
-  const [finalizando, setFinalizando] = useState(false);
-  const [enviandoManutencao, setEnviandoManutencao] = useState(false);
+  const [equipamentoRevisao, setEquipamentoRevisao] =
+    useState<Equipment | null>(null);
 
   const [relatorioUrl, setRelatorioUrl] = useState<string | null>(null);
   const [relatorioId, setRelatorioId] = useState<number | null>(null);
 
   const [responsavelManutencao, setResponsavelManutencao] = useState("");
   const [obsManutencao, setObsManutencao] = useState("");
+
+  const [excluindo, setExcluindo] = useState(false);
   const [enviandoManutencao, setEnviandoManutencao] = useState(false);
-  const [equipamentoFinalizarManutencao, setEquipamentoFinalizarManutencao] = useState<Equipment | null>(null);
   const [finalizando, setFinalizando] = useState(false);
-  const [equipamentoRevisao, setEquipamentoRevisao] = useState<Equipment | null>(null);
   const [processandoRevisao, setProcessandoRevisao] = useState(false);
+
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODOS");
   const [pagina, setPagina] = useState(1);
-
-  const navigate = useNavigate();
-
-  usePageTitle("Equipamentos");
 
   useEffect(() => {
     carregarEquipamentos();
@@ -76,7 +86,7 @@ export default function Equipamentos() {
   }, [filtroStatus, pesquisa]);
 
   const equipamentosFiltrados = useMemo(() => {
-    const termo = pesquisa.toLowerCase();
+    const termo = pesquisa.toLowerCase().trim();
 
     return equipamentos.filter((equipamento) => {
       const passaFiltroStatus =
@@ -98,7 +108,9 @@ export default function Equipamentos() {
   const totalPaginas = Math.ceil(
     equipamentosFiltrados.length / ITENS_POR_PAGINA,
   );
+
   const inicio = (pagina - 1) * ITENS_POR_PAGINA;
+
   const equipamentosPagina = equipamentosFiltrados.slice(
     inicio,
     inicio + ITENS_POR_PAGINA,
@@ -123,6 +135,7 @@ export default function Equipamentos() {
     try {
       const blob = await gerarRelatorioEquipamento(id);
       const url = window.URL.createObjectURL(blob);
+
       setRelatorioUrl(url);
       setRelatorioId(id);
     } catch (error) {
@@ -136,12 +149,14 @@ export default function Equipamentos() {
 
     try {
       notify.info("Iniciando download...");
+
       const a = document.createElement("a");
       a.href = relatorioUrl;
       a.download = `relatorio-equipamento-${relatorioId}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
+
       notify.info("Download concluído com sucesso!");
     } catch (error) {
       console.error(error);
@@ -153,6 +168,7 @@ export default function Equipamentos() {
     if (relatorioUrl) {
       window.URL.revokeObjectURL(relatorioUrl);
     }
+
     setRelatorioUrl(null);
     setRelatorioId(null);
   }
@@ -177,6 +193,7 @@ export default function Equipamentos() {
       await atualizarEquipamento(equipamentoManutencao.id, formData);
 
       notify.info(`${equipamentoManutencao.name} enviado para manutenção!`);
+
       fecharModalManutencao();
       carregarEquipamentos();
     } catch (error) {
@@ -192,6 +209,7 @@ export default function Equipamentos() {
 
     try {
       setFinalizando(true);
+
       const formData = new FormData();
       formData.append("status", "DISPONIVEL");
 
@@ -200,6 +218,7 @@ export default function Equipamentos() {
       notify.success(
         `Manutenção de ${equipamentoFinalizarManutencao.name} finalizada!`,
       );
+
       setEquipamentoFinalizarManutencao(null);
       carregarEquipamentos();
     } catch (error) {
@@ -215,8 +234,10 @@ export default function Equipamentos() {
 
     try {
       setProcessandoRevisao(true);
+
       const formData = new FormData();
       formData.append("status", destino);
+
       await atualizarEquipamento(equipamentoRevisao.id, formData);
 
       if (destino === "MANUTENCAO") {
@@ -242,8 +263,11 @@ export default function Equipamentos() {
       setExcluindo(true);
 
       await excluirEquipamento(equipamentoExcluir.id);
+
       setEquipamentos((atuais) =>
-        atuais.filter((e) => e.id !== equipamentoExcluir.id),
+        atuais.filter(
+          (equipamento) => equipamento.id !== equipamentoExcluir.id,
+        ),
       );
 
       notify.deleted(equipamentoExcluir.name);
@@ -276,6 +300,7 @@ export default function Equipamentos() {
       <BuscaEquipamentos pesquisa={pesquisa} onChangePesquisa={setPesquisa} />
 
       {loading && <p>Carregando equipamentos...</p>}
+
       {erro && <p style={{ color: "#991b1b", fontWeight: 600 }}>{erro}</p>}
 
       {!loading && !erro && equipamentosFiltrados.length === 0 && (
@@ -284,166 +309,7 @@ export default function Equipamentos() {
 
       {!loading && !erro && equipamentosFiltrados.length > 0 && (
         <>
-                return (
-
-      {equipamentoRevisao && (
-        <div style={modalOverlayStyle}>
-          <div style={{ ...ManutencaoModalStyle, maxWidth: "480px" }}>
-            <h2 style={{ margin: "0 0 8px" }}>Revisão de equipamento</h2>
-
-            <p style={{ color: "#4b5563", fontSize: "14px", marginBottom: "24px" }}>
-              Equipamento <strong>{equipamentoRevisao.name}</strong> foi devolvido
-              com problema relatado. Como deseja prosseguir?
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setEquipamentoManutencao(equipamentoRevisao);
-                  setEquipamentoRevisao(null);
-                }}
-                disabled={enviandoManutencao}
-                style={{
-                  ...buttonStyle,
-                  background: "#92400e",
-                  padding: "14px 16px",
-                  borderRadius: "12px",
-                  fontSize: "14px",
-                  textAlign: "left",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                  opacity: processandoRevisao ? 0.7 : 1,
-                  cursor: processandoRevisao ? "not-allowed" : "pointer",
-                }}
-              >
-                <span style={{ fontWeight: 700 }}>Enviar para manutenção</span>
-                <span style={{ fontWeight: 400, fontSize: "12px", opacity: 0.85 }}>
-                  O equipamento tinha um problema e precisa de reparo
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleDecisaoRevisao("DISPONIVEL")}
-                disabled={processandoRevisao}
-                style={{
-                  ...buttonStyle,
-                  background: "#166534",
-                  padding: "14px 16px",
-                  borderRadius: "12px",
-                  fontSize: "14px",
-                  textAlign: "left",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                  opacity: processandoRevisao ? 0.7 : 1,
-                  cursor: processandoRevisao ? "not-allowed" : "pointer",
-                }}
-              >
-                <span style={{ fontWeight: 700 }}>Marcar como disponível</span>
-                <span style={{ fontWeight: 400, fontSize: "12px", opacity: 0.85 }}>
-                  O equipamento está funcionando corretamente
-                </span>
-              </button>
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-              <button
-                type="button"
-                onClick={() => setEquipamentoRevisao(null)}
-                disabled={processandoRevisao}
-                style={{ ...buttonStyle, background: "#6b7280" }}
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </AppTemplate>
-  );
-}
-
-const ExcluirModalStyle: React.CSSProperties = {
-  background: "#fff",
-  borderRadius: "16px",
-  width: "100%",
-  padding: "24px",
-  boxShadow: "0 20px 40px rgba(0,0,0,.2)",
-};
-
-const buttonStyle: React.CSSProperties = {
-  border: "none",
-  background: "#111827",
-  color: "#fff",
-  padding: "8px 12px",
-  borderRadius: "9px",
-  fontSize: "13px",
-  fontWeight: 700,
-  cursor: "pointer",
-};
-
-const paginaBtnStyle: React.CSSProperties = {
-  border: "1px solid #d1d5db",
-  background: "#fff",
-  color: "#374151",
-  padding: "7px 12px",
-  borderRadius: "9px",
-  fontSize: "13px",
-  cursor: "pointer",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "10px 12px",
-  border: "1px solid #d1d5db",
-  borderRadius: "8px",
-  fontSize: "14px",
-  outline: "none",
-};
-
-const modalOverlayStyle: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  background: "rgba(0,0,0,.55)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 9999,
-  padding: "20px",
-};
-
-const RelatorioModalStyle: React.CSSProperties = {
-  background: "#fff",
-  padding: "24px",
-  borderRadius: "16px",
-  width: "100%",
-  maxWidth: "650px",
-  maxHeight: "85vh",
-  overflowY: "auto",
-  boxShadow: "0 20px 40px rgba(0,0,0,.25)",
-};
-
-const ManutencaoModalStyle: React.CSSProperties = {
-  background: "#fff",
-  padding: "24px",
-  borderRadius: "16px",
-  width: "100%",
-  maxWidth: "500px",
-  boxShadow: "0 20px 40px rgba(0,0,0,.25)",
-};
-
-const finalizarManutencaoModalStyle: React.CSSProperties = {
-  background: "#fff",
-  borderRadius: "16px",
-  width: "100%",
-  padding: "24px",
-  boxShadow: "0 20px 40px rgba(0,0,0,.2)",
-};
-          
-      <EquipamentosTable
+          <EquipamentosTable
             equipamentos={equipamentosPagina}
             onInfo={setEquipamentoInfo}
             onEditar={(id) =>
@@ -501,6 +367,122 @@ const finalizarManutencaoModalStyle: React.CSSProperties = {
         onDownload={handleDownloadRelatorio}
         onClose={handleFecharRelatorio}
       />
+
+      {equipamentoRevisao && (
+        <div style={modalOverlayStyle}>
+          <div style={revisaoModalStyle}>
+            <h2 style={{ margin: "0 0 8px" }}>Revisão de equipamento</h2>
+
+            <p
+              style={{
+                color: "#4b5563",
+                fontSize: "14px",
+                marginBottom: "24px",
+              }}
+            >
+              Equipamento <strong>{equipamentoRevisao.name}</strong> foi
+              devolvido com problema relatado. Como deseja prosseguir?
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setEquipamentoManutencao(equipamentoRevisao);
+                  setEquipamentoRevisao(null);
+                }}
+                disabled={processandoRevisao}
+                style={{
+                  ...buttonStyle,
+                  background: "#92400e",
+                  padding: "14px 16px",
+                  borderRadius: "12px",
+                  fontSize: "14px",
+                  textAlign: "left",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  opacity: processandoRevisao ? 0.7 : 1,
+                  cursor: processandoRevisao ? "not-allowed" : "pointer",
+                }}
+              >
+                <span style={{ fontWeight: 700 }}>Enviar para manutenção</span>
+                <span
+                  style={{
+                    fontWeight: 400,
+                    fontSize: "12px",
+                    opacity: 0.85,
+                  }}
+                >
+                  O equipamento tinha um problema e precisa de reparo.
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDecisaoRevisao("DISPONIVEL")}
+                disabled={processandoRevisao}
+                style={{
+                  ...buttonStyle,
+                  background: "#166534",
+                  padding: "14px 16px",
+                  borderRadius: "12px",
+                  fontSize: "14px",
+                  textAlign: "left",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  opacity: processandoRevisao ? 0.7 : 1,
+                  cursor: processandoRevisao ? "not-allowed" : "pointer",
+                }}
+              >
+                <span style={{ fontWeight: 700 }}>Marcar como disponível</span>
+                <span
+                  style={{
+                    fontWeight: 400,
+                    fontSize: "12px",
+                    opacity: 0.85,
+                  }}
+                >
+                  O equipamento está funcionando corretamente.
+                </span>
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginTop: "20px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setEquipamentoRevisao(null)}
+                disabled={processandoRevisao}
+                style={{ ...buttonStyle, background: "#6b7280" }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppTemplate>
   );
 }
+
+const revisaoModalStyle: CSSProperties = {
+  background: "#fff",
+  padding: "24px",
+  borderRadius: "16px",
+  width: "100%",
+  maxWidth: "480px",
+  boxShadow: "0 20px 40px rgba(0,0,0,.25)",
+};

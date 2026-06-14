@@ -50,8 +50,9 @@ export default function Reservas() {
   const [excluindo, setExcluindo] = useState(false);
   const [devolvendo, setDevolvendo] = useState(false);
 
-  const [modalDevolucao, setModalDevolucao] =
-    useState<ModalDevolucao | null>(null);
+  const [modalDevolucao, setModalDevolucao] = useState<ModalDevolucao | null>(
+    null,
+  );
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("TODAS");
   const [pagina, setPagina] = useState(1);
@@ -129,7 +130,7 @@ export default function Reservas() {
           : undefined,
       });
 
-      notify.returned(`Reserva #${modalDevolucao.reserva.id}`);
+      notify.returned(modalDevolucao.reserva.id);
       setModalDevolucao(null);
       await carregarReservas();
     } catch (error) {
@@ -182,6 +183,7 @@ export default function Reservas() {
           <ReservasTable
             reservas={reservasPagina}
             onInfo={setReservaInfo}
+            devolvendoId={null}
             onDevolver={abrirModalDevolucao}
             onExcluir={setReservaExcluir}
           />

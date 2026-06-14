@@ -7,7 +7,7 @@ type ReservasTableProps = {
   reservas: Reservation[];
   devolvendoId: number | null;
   onInfo: (reserva: Reservation) => void;
-  onDevolver: (id: number) => void;
+  onDevolver: (reserva: Reservation) => void;
   onExcluir: (reserva: Reservation) => void;
 };
 
@@ -138,7 +138,7 @@ export default function ReservasTable({
                         icon={<FiRotateCcw size={18} />}
                         variant="success"
                         disabled={devolvendoId === reserva.id}
-                        onClick={() => onDevolver(reserva.id)}
+                        onClick={() => onDevolver(reserva)}
                       />
                     )}
 
