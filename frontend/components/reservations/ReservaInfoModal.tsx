@@ -36,6 +36,20 @@ export default function ReservaInfoModal({
 
           <strong>Observações</strong>
           <span>{reserva.observations || "-"}</span>
+
+          {reserva.returnedAt && (
+            <>
+              <strong>Problema relatado</strong>
+              <span>{reserva.hadIssue ? "Sim" : "Não"}</span>
+
+              {reserva.hadIssue && (
+                <>
+                  <strong>Obs. devolução</strong>
+                  <span>{reserva.returnObservations || "-"}</span>
+                </>
+              )}
+            </>
+          )}
         </div>
 
         <h3 style={{ margin: "20px 0 10px" }}>Equipamentos</h3>
