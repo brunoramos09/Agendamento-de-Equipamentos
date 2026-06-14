@@ -1,6 +1,7 @@
 import type Reservation from "../../src/interfaces/reserva";
 import { formatarData, getStatusReserva } from "../../src/utils/reservaUtils";
-import { buttonStyle } from "../../src/styles/reservaStyles";
+import { FiInfo, FiRotateCcw, FiTrash2 } from "react-icons/fi";
+import IconActionButton from "../../components/global/IconActionButton";
 
 type ReservasTableProps = {
   reservas: Reservation[];
@@ -110,54 +111,43 @@ export default function ReservasTable({
                     {status.label}
                   </span>
                 </td>
-
                 <td style={{ padding: "14px 12px" }}>
                   <div
                     style={{
                       display: "flex",
-                      gap: "8px",
+                      gap: "10px",
                       justifyContent: "center",
+                      alignItems: "center",
                       flexWrap: "wrap",
                     }}
                   >
-                    <button
-                      type="button"
+                    <IconActionButton
+                      title="Informações da reserva"
+                      icon={<FiInfo size={18} />}
                       onClick={() => onInfo(reserva)}
-                      style={buttonStyle}
-                    >
-                      Info
-                    </button>
+                      variant="info"
+                    />
 
                     {!reserva.returnedAt && (
-                      <button
-                        type="button"
-                        onClick={() => onDevolver(reserva.id)}
+                      <IconActionButton
+                        title={
+                          devolvendoId === reserva.id
+                            ? "Devolvendo..."
+                            : "Registrar devolução"
+                        }
+                        icon={<FiRotateCcw size={18} />}
+                        variant="success"
                         disabled={devolvendoId === reserva.id}
-                        style={{
-                          ...buttonStyle,
-                          opacity: devolvendoId === reserva.id ? 0.7 : 1,
-                          cursor:
-                            devolvendoId === reserva.id
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
-                      >
-                        {devolvendoId === reserva.id
-                          ? "Devolvendo..."
-                          : "Devolver"}
-                      </button>
+                        onClick={() => onDevolver(reserva.id)}
+                      />
                     )}
 
-                    <button
-                      type="button"
+                    <IconActionButton
+                      title="Excluir reserva"
+                      icon={<FiTrash2 size={18} />}
+                      variant="danger"
                       onClick={() => onExcluir(reserva)}
-                      style={{
-                        ...buttonStyle,
-                        background: "#7f1d1d",
-                      }}
-                    >
-                      Excluir
-                    </button>
+                    />
                   </div>
                 </td>
               </tr>

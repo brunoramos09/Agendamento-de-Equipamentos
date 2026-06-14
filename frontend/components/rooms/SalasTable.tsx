@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/immutability */
+import { FiEdit, FiFileText, FiTrash2 } from "react-icons/fi";
 import type Room from "../../src/interfaces/sala";
-import { buttonStyle } from "../../src/styles/salasStyles";
+import IconActionButton from "../../components/global/IconActionButton";
 
 type SalasTableProps = {
   salas: Room[];
@@ -84,30 +85,29 @@ export default function SalasTable({ salas, onExcluirSala }: SalasTableProps) {
                 <div
                   style={{
                     display: "flex",
-                    gap: "8px",
                     justifyContent: "center",
-                    flexWrap: "wrap",
+                    gap: "10px",
+                    alignItems: "center",
                   }}
                 >
-                  <button
-                    type="button"
+                  <IconActionButton
+                    title="Editar sala"
+                    icon={<FiEdit size={18} />}
                     onClick={() => editarSala(sala.id)}
-                    style={buttonStyle}
-                  >
-                    Editar
-                  </button>
+                  />
 
-                  <button type="button" style={buttonStyle}>
-                    Relatório
-                  </button>
+                  <IconActionButton
+                    title="Gerar relatório"
+                    icon={<FiFileText size={18} />}
+                    variant="report"
+                  />
 
-                  <button
-                    type="button"
+                  <IconActionButton
+                    title="Excluir sala"
+                    icon={<FiTrash2 size={18} />}
+                    variant="danger"
                     onClick={() => onExcluirSala(sala)}
-                    style={{ ...buttonStyle, background: "#7f1d1d" }}
-                  >
-                    Excluir
-                  </button>
+                  />
                 </div>
               </td>
             </tr>

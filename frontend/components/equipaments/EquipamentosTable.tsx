@@ -1,6 +1,14 @@
 import type Equipment from "../../src/interfaces/equipamento";
-import { buttonStyle } from "../../src/styles/equipamentosStyles";
 import StatusBadge from "./StatusBadge";
+import {
+  FiEdit,
+  FiFileText,
+  FiInfo,
+  FiTool,
+  FiCheckCircle,
+  FiTrash2,
+} from "react-icons/fi";
+import IconActionButton from "../../components/global/IconActionButton";
 
 type Props = {
   equipamentos: Equipment[];
@@ -106,61 +114,62 @@ export default function EquipamentosTable({
               <td style={{ padding: "14px 12px" }}>
                 <StatusBadge status={equipamento.status} />
               </td>
-
               <td style={{ padding: "14px 12px" }}>
                 <div
                   style={{
                     display: "flex",
-                    gap: "8px",
+                    gap: "10px",
                     justifyContent: "center",
+                    alignItems: "center",
                     flexWrap: "wrap",
                   }}
                 >
-                  <button
-                    type="button"
+                  <IconActionButton
+                    title="Informações"
+                    icon={<FiInfo size={18} />}
+                    onClick={() => onInfo(equipamento)}
+                    variant="info"
+                  />
+
+                  <IconActionButton
+                    title="Editar"
+                    icon={<FiEdit size={18} />}
                     onClick={() =>
                       (window.location.href = `/reserva-equipamentos/equipamentos/editar/${equipamento.id}`)
                     }
-                    style={buttonStyle}
-                  >
-                    Editar
-                  </button>
+                  />
 
-                  <button
-                    type="button"
+                  <IconActionButton
+                    title="Relatório"
+                    icon={<FiFileText size={18} />}
                     onClick={() => onRelatorio(equipamento.id)}
-                    style={buttonStyle}
-                  >
-                    Relatório
-                  </button>
+                    variant="report"
+                  />
 
                   {equipamento.status === "DISPONIVEL" && (
-                    <button
-                      type="button"
+                    <IconActionButton
+                      title="Enviar para manutenção"
+                      icon={<FiTool size={18} />}
+                      variant="warning"
                       onClick={() => onManutencao(equipamento)}
-                      style={{ ...buttonStyle, background: "#92400e" }}
-                    >
-                      Manutenção
-                    </button>
+                    />
                   )}
 
                   {equipamento.status === "MANUTENCAO" && (
-                    <button
-                      type="button"
+                    <IconActionButton
+                      title="Finalizar manutenção"
+                      icon={<FiCheckCircle size={18} />}
+                      variant="success"
                       onClick={() => onFinalizarManutencao(equipamento)}
-                      style={{ ...buttonStyle, background: "#166534" }}
-                    >
-                      Finalizar
-                    </button>
+                    />
                   )}
 
-                  <button
-                    type="button"
+                  <IconActionButton
+                    title="Excluir"
+                    icon={<FiTrash2 size={18} />}
+                    variant="danger"
                     onClick={() => onExcluir(equipamento)}
-                    style={{ ...buttonStyle, background: "#7f1d1d" }}
-                  >
-                    Excluir
-                  </button>
+                  />
                 </div>
               </td>
             </tr>
