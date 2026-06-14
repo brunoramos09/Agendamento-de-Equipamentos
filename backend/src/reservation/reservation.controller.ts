@@ -44,8 +44,7 @@ export class ReservationController {
   returnReservation(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ReturnReservationDto,
-  ) 
-    {
+  ) {
     return this.reservationService.returnReservation(id, dto);
   }
 

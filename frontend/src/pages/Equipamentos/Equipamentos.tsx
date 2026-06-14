@@ -319,6 +319,7 @@ export default function Equipamentos() {
             onManutencao={setEquipamentoManutencao}
             onFinalizarManutencao={setEquipamentoFinalizarManutencao}
             onExcluir={setEquipamentoExcluir}
+            onRevisao={setEquipamentoRevisao}
           />
 
           <Paginacao

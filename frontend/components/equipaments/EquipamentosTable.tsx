@@ -17,6 +17,7 @@ type Props = {
   onEditar: (id: number) => void;
   onManutencao: (equipamento: Equipment) => void;
   onFinalizarManutencao: (equipamento: Equipment) => void;
+  onRevisao: (equipamento: Equipment) => void;
   onExcluir: (equipamento: Equipment) => void;
 };
 
@@ -26,6 +27,7 @@ export default function EquipamentosTable({
   onEditar,
   onRelatorio,
   onManutencao,
+  onRevisao,
   onFinalizarManutencao,
   onExcluir,
 }: Props) {
@@ -132,6 +134,15 @@ export default function EquipamentosTable({
                       icon={<FiCheckCircle size={18} />}
                       variant="success"
                       onClick={() => onFinalizarManutencao(equipamento)}
+                    />
+                  )}
+
+                  {equipamento.status === "AGUARDANDO_REVISAO" && (
+                    <IconActionButton
+                      title="Revisar devolução"
+                      icon={<FiTool size={18} />}
+                      variant="warning"
+                      onClick={() => onRevisao(equipamento)}
                     />
                   )}
 
