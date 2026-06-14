@@ -31,133 +31,252 @@ export default function EquipamentosTable({
   onFinalizarManutencao,
   onExcluir,
 }: Props) {
+  function renderActions(equipamento: Equipment) {
+    return (
+      <>
+        <IconActionButton
+          title="Informações"
+          icon={<FiInfo size={18} />}
+          onClick={() => onInfo(equipamento)}
+          variant="info"
+        />
+
+        <IconActionButton
+          title="Editar"
+          icon={<FiEdit size={18} />}
+          onClick={() => onEditar(equipamento.id)}
+        />
+
+        <IconActionButton
+          title="Relatório"
+          icon={<FiFileText size={18} />}
+          onClick={() => onRelatorio(equipamento.id)}
+          variant="report"
+        />
+
+        {equipamento.status === "DISPONIVEL" && (
+          <IconActionButton
+            title="Enviar para manutenção"
+            icon={<FiTool size={18} />}
+            variant="warning"
+            onClick={() => onManutencao(equipamento)}
+          />
+        )}
+
+        {equipamento.status === "MANUTENCAO" && (
+          <IconActionButton
+            title="Finalizar manutenção"
+            icon={<FiCheckCircle size={18} />}
+            variant="success"
+            onClick={() => onFinalizarManutencao(equipamento)}
+          />
+        )}
+
+        {equipamento.status === "AGUARDANDO_REVISAO" && (
+          <IconActionButton
+            title="Revisar devolução"
+            icon={<FiTool size={18} />}
+            variant="warning"
+            onClick={() => onRevisao(equipamento)}
+          />
+        )}
+
+        <IconActionButton
+          title="Excluir"
+          icon={<FiTrash2 size={18} />}
+          variant="danger"
+          onClick={() => onExcluir(equipamento)}
+        />
+      </>
+    );
+  }
+
   return (
-    <div
-      style={{
-        width: "100%",
-        overflowX: "auto",
-        border: "1px solid #e5e7eb",
-        borderRadius: "14px",
-      }}
-    >
-      <table
-        style={{ width: "100%", borderCollapse: "collapse", minWidth: "750px" }}
-      >
-        <thead>
-          <tr
-            style={{ background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}
-          >
-            {["ID", "Nome", "Patrimônio", "Sala", "Status", "Ações"].map(
-              (titulo) => (
-                <th
-                  key={titulo}
-                  style={{
-                    textAlign: titulo === "Ações" ? "center" : "left",
-                    padding: "14px 12px",
-                    fontSize: "12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.06em",
-                    color: "#374151",
-                  }}
-                >
-                  {titulo}
-                </th>
-              ),
-            )}
-          </tr>
-        </thead>
+    <>
+      <style>
+        {`
+          .equipamentos-table-wrapper {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+          }
 
-        <tbody>
-          {equipamentos.map((equipamento) => (
+          .equipamentos-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          .equipamentos-mobile-list {
+            display: none;
+          }
+
+          @media (max-width: 768px) {
+            .equipamentos-table-wrapper {
+              display: none;
+            }
+
+            .equipamentos-mobile-list {
+              display: grid;
+              gap: 12px;
+              width: 100%;
+            }
+          }
+        `}
+      </style>
+
+      <div className="equipamentos-table-wrapper">
+        <table className="equipamentos-table">
+          <thead>
             <tr
-              key={equipamento.id}
-              style={{ borderBottom: "1px solid #f3f4f6" }}
+              style={{
+                background: "#f9fafb",
+                borderBottom: "1px solid #e5e7eb",
+              }}
             >
-              <td style={{ padding: "14px 12px", fontWeight: 700 }}>
-                {equipamento.id}
-              </td>
+              {["ID", "Nome", "Patrimônio", "Sala", "Status", "Ações"].map(
+                (titulo) => (
+                  <th
+                    key={titulo}
+                    style={{
+                      textAlign: titulo === "Ações" ? "center" : "left",
+                      padding: "14px 12px",
+                      fontSize: "12px",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      color: "#374151",
+                    }}
+                  >
+                    {titulo}
+                  </th>
+                ),
+              )}
+            </tr>
+          </thead>
 
-              <td style={{ padding: "14px 12px" }}>{equipamento.name}</td>
+          <tbody>
+            {equipamentos.map((equipamento) => (
+              <tr
+                key={equipamento.id}
+                style={{ borderBottom: "1px solid #f3f4f6" }}
+              >
+                <td style={{ padding: "14px 12px", fontWeight: 700 }}>
+                  {equipamento.id}
+                </td>
 
-              <td style={{ padding: "14px 12px" }}>
-                {equipamento.serialNumber ?? "-"}
-              </td>
-              <td style={{ padding: "14px 12px" }}>
-                {equipamento.room?.name ?? "-"}
-              </td>
+                <td style={{ padding: "14px 12px" }}>{equipamento.name}</td>
 
-              <td style={{ padding: "14px 12px" }}>
-                <StatusBadge status={equipamento.status} />
-              </td>
-              <td style={{ padding: "14px 12px" }}>
-                <div
+                <td style={{ padding: "14px 12px" }}>
+                  {equipamento.serialNumber ?? "-"}
+                </td>
+
+                <td style={{ padding: "14px 12px" }}>
+                  {equipamento.room?.name ?? "-"}
+                </td>
+
+                <td style={{ padding: "14px 12px" }}>
+                  <StatusBadge status={equipamento.status} />
+                </td>
+
+                <td style={{ padding: "14px 12px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {renderActions(equipamento)}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="equipamentos-mobile-list">
+        {equipamentos.map((equipamento) => (
+          <div
+            key={equipamento.id}
+            style={{
+              border: "1px solid #e5e7eb",
+              borderRadius: "14px",
+              padding: "14px",
+              background: "#fff",
+              boxShadow: "0 8px 18px rgba(15, 23, 42, 0.06)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "12px",
+                alignItems: "flex-start",
+                marginBottom: "12px",
+              }}
+            >
+              <div>
+                <strong
                   style={{
-                    display: "flex",
-                    gap: "10px",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexWrap: "wrap",
+                    display: "block",
+                    fontSize: "15px",
+                    color: "#111827",
                   }}
                 >
-                  <IconActionButton
-                    title="Informações"
-                    icon={<FiInfo size={18} />}
-                    onClick={() => onInfo(equipamento)}
-                    variant="info"
-                  />
+                  {equipamento.name}
+                </strong>
 
-                  <IconActionButton
-                    title="Editar"
-                    icon={<FiEdit size={18} />}
-                    onClick={() => onEditar(equipamento.id)}
-                  />
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    marginTop: "4px",
+                  }}
+                >
+                  ID #{equipamento.id}
+                </span>
+              </div>
 
-                  <IconActionButton
-                    title="Relatório"
-                    icon={<FiFileText size={18} />}
-                    onClick={() => onRelatorio(equipamento.id)}
-                    variant="report"
-                  />
+              <StatusBadge status={equipamento.status} />
+            </div>
 
-                  {equipamento.status === "DISPONIVEL" && (
-                    <IconActionButton
-                      title="Enviar para manutenção"
-                      icon={<FiTool size={18} />}
-                      variant="warning"
-                      onClick={() => onManutencao(equipamento)}
-                    />
-                  )}
+            <div
+              style={{
+                display: "grid",
+                gap: "8px",
+                fontSize: "13px",
+                color: "#374151",
+                marginBottom: "14px",
+              }}
+            >
+              <div>
+                <strong>Patrimônio: </strong>
+                {equipamento.serialNumber ?? "-"}
+              </div>
 
-                  {equipamento.status === "MANUTENCAO" && (
-                    <IconActionButton
-                      title="Finalizar manutenção"
-                      icon={<FiCheckCircle size={18} />}
-                      variant="success"
-                      onClick={() => onFinalizarManutencao(equipamento)}
-                    />
-                  )}
+              <div>
+                <strong>Sala: </strong>
+                {equipamento.room?.name ?? "-"}
+              </div>
+            </div>
 
-                  {equipamento.status === "AGUARDANDO_REVISAO" && (
-                    <IconActionButton
-                      title="Revisar devolução"
-                      icon={<FiTool size={18} />}
-                      variant="warning"
-                      onClick={() => onRevisao(equipamento)}
-                    />
-                  )}
-
-                  <IconActionButton
-                    title="Excluir"
-                    icon={<FiTrash2 size={18} />}
-                    variant="danger"
-                    onClick={() => onExcluir(equipamento)}
-                  />
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+                justifyContent: "flex-start",
+              }}
+            >
+              {renderActions(equipamento)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }

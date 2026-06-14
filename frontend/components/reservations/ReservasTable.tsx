@@ -19,142 +19,289 @@ export default function ReservasTable({
   onExcluir,
 }: ReservasTableProps) {
   return (
-    <div
-      style={{
-        width: "100%",
-        overflowX: "auto",
-        border: "1px solid #e5e7eb",
-        borderRadius: "14px",
-      }}
-    >
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          minWidth: "850px",
-        }}
-      >
-        <thead>
-          <tr
-            style={{
-              background: "#f9fafb",
-              borderBottom: "1px solid #e5e7eb",
-            }}
-          >
-            {[
-              "ID",
-              "Usuário",
-              "Início",
-              "Fim",
-              "Equipamentos",
-              "Status",
-              "Ações",
-            ].map((titulo) => (
-              <th
-                key={titulo}
+    <>
+      <style>
+        {`
+          .reservas-table-wrapper {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+          }
+
+          .reservas-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          .reservas-mobile {
+            display: none;
+          }
+
+          @media (max-width: 768px) {
+            .reservas-table-wrapper {
+              display: none;
+            }
+
+            .reservas-mobile {
+              display: grid;
+              gap: 12px;
+              width: 100%;
+            }
+          }
+        `}
+      </style>
+
+      <div className="reservas-table-wrapper">
+        <table className="reservas-table">
+          <thead>
+            <tr
+              style={{
+                background: "#f9fafb",
+                borderBottom: "1px solid #e5e7eb",
+              }}
+            >
+              {[
+                "ID",
+                "Usuário",
+                "Início",
+                "Fim",
+                "Equipamentos",
+                "Status",
+                "Ações",
+              ].map((titulo) => (
+                <th
+                  key={titulo}
+                  style={{
+                    textAlign: titulo === "Ações" ? "center" : "left",
+                    padding: "14px 12px",
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    color: "#374151",
+                  }}
+                >
+                  {titulo}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {reservas.map((reserva) => {
+              const status = getStatusReserva(reserva);
+
+              return (
+                <tr
+                  key={reserva.id}
+                  style={{
+                    borderBottom: "1px solid #f3f4f6",
+                  }}
+                >
+                  <td style={{ padding: "14px 12px", fontWeight: 700 }}>
+                    {reserva.id}
+                  </td>
+
+                  <td style={{ padding: "14px 12px" }}>{reserva.user}</td>
+
+                  <td style={{ padding: "14px 12px" }}>
+                    {formatarData(reserva.startDate)}
+                  </td>
+
+                  <td style={{ padding: "14px 12px" }}>
+                    {formatarData(reserva.endDate)}
+                  </td>
+
+                  <td style={{ padding: "14px 12px" }}>
+                    {reserva.equipments?.length ?? 0}
+                  </td>
+
+                  <td style={{ padding: "14px 12px" }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        padding: "5px 10px",
+                        borderRadius: "999px",
+                        fontSize: "12px",
+                        fontWeight: 800,
+                        background: status.bg,
+                        color: status.color,
+                      }}
+                    >
+                      {status.label}
+                    </span>
+                  </td>
+
+                  <td style={{ padding: "14px 12px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <IconActionButton
+                        title="Informações da reserva"
+                        icon={<FiInfo size={18} />}
+                        onClick={() => onInfo(reserva)}
+                        variant="info"
+                      />
+
+                      {!reserva.returnedAt && (
+                        <IconActionButton
+                          title={
+                            devolvendoId === reserva.id
+                              ? "Devolvendo..."
+                              : "Registrar devolução"
+                          }
+                          icon={<FiRotateCcw size={18} />}
+                          variant="success"
+                          disabled={devolvendoId === reserva.id}
+                          onClick={() => onDevolver(reserva)}
+                        />
+                      )}
+
+                      <IconActionButton
+                        title="Excluir reserva"
+                        icon={<FiTrash2 size={18} />}
+                        variant="danger"
+                        onClick={() => onExcluir(reserva)}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="reservas-mobile">
+        {reservas.map((reserva) => {
+          const status = getStatusReserva(reserva);
+
+          return (
+            <div
+              key={reserva.id}
+              style={{
+                border: "1px solid #e5e7eb",
+                borderRadius: "14px",
+                padding: "14px",
+                background: "#fff",
+                boxShadow: "0 8px 18px rgba(15, 23, 42, 0.06)",
+              }}
+            >
+              <div
                 style={{
-                  textAlign: titulo === "Ações" ? "center" : "left",
-                  padding: "14px 12px",
-                  fontSize: "12px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  color: "#374151",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: "12px",
+                  marginBottom: "12px",
                 }}
               >
-                {titulo}
-              </th>
-            ))}
-          </tr>
-        </thead>
+                <div>
+                  <strong
+                    style={{
+                      display: "block",
+                      fontSize: "15px",
+                      color: "#111827",
+                    }}
+                  >
+                    {reserva.user}
+                  </strong>
 
-        <tbody>
-          {reservas.map((reserva) => {
-            const status = getStatusReserva(reserva);
-
-            return (
-              <tr
-                key={reserva.id}
-                style={{
-                  borderBottom: "1px solid #f3f4f6",
-                }}
-              >
-                <td style={{ padding: "14px 12px", fontWeight: 700 }}>
-                  {reserva.id}
-                </td>
-
-                <td style={{ padding: "14px 12px" }}>{reserva.user}</td>
-
-                <td style={{ padding: "14px 12px" }}>
-                  {formatarData(reserva.startDate)}
-                </td>
-
-                <td style={{ padding: "14px 12px" }}>
-                  {formatarData(reserva.endDate)}
-                </td>
-
-                <td style={{ padding: "14px 12px" }}>
-                  {reserva.equipments?.length ?? 0}
-                </td>
-
-                <td style={{ padding: "14px 12px" }}>
                   <span
                     style={{
-                      display: "inline-flex",
-                      padding: "5px 10px",
-                      borderRadius: "999px",
+                      display: "block",
                       fontSize: "12px",
-                      fontWeight: 800,
-                      background: status.bg,
-                      color: status.color,
+                      color: "#6b7280",
+                      marginTop: "4px",
                     }}
                   >
-                    {status.label}
+                    Reserva #{reserva.id}
                   </span>
-                </td>
-                <td style={{ padding: "14px 12px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <IconActionButton
-                      title="Informações da reserva"
-                      icon={<FiInfo size={18} />}
-                      onClick={() => onInfo(reserva)}
-                      variant="info"
-                    />
+                </div>
 
-                    {!reserva.returnedAt && (
-                      <IconActionButton
-                        title={
-                          devolvendoId === reserva.id
-                            ? "Devolvendo..."
-                            : "Registrar devolução"
-                        }
-                        icon={<FiRotateCcw size={18} />}
-                        variant="success"
-                        disabled={devolvendoId === reserva.id}
-                        onClick={() => onDevolver(reserva)}
-                      />
-                    )}
+                <span
+                  style={{
+                    display: "inline-flex",
+                    padding: "5px 10px",
+                    borderRadius: "999px",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                    background: status.bg,
+                    color: status.color,
+                  }}
+                >
+                  {status.label}
+                </span>
+              </div>
 
-                    <IconActionButton
-                      title="Excluir reserva"
-                      icon={<FiTrash2 size={18} />}
-                      variant="danger"
-                      onClick={() => onExcluir(reserva)}
-                    />
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+              <div
+                style={{
+                  display: "grid",
+                  gap: "8px",
+                  fontSize: "13px",
+                  color: "#374151",
+                  marginBottom: "14px",
+                }}
+              >
+                <div>
+                  <strong>Início:</strong> {formatarData(reserva.startDate)}
+                </div>
+
+                <div>
+                  <strong>Fim:</strong> {formatarData(reserva.endDate)}
+                </div>
+
+                <div>
+                  <strong>Equipamentos:</strong>{" "}
+                  {reserva.equipments?.length ?? 0}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <IconActionButton
+                  title="Informações da reserva"
+                  icon={<FiInfo size={18} />}
+                  onClick={() => onInfo(reserva)}
+                  variant="info"
+                />
+
+                {!reserva.returnedAt && (
+                  <IconActionButton
+                    title={
+                      devolvendoId === reserva.id
+                        ? "Devolvendo..."
+                        : "Registrar devolução"
+                    }
+                    icon={<FiRotateCcw size={18} />}
+                    variant="success"
+                    disabled={devolvendoId === reserva.id}
+                    onClick={() => onDevolver(reserva)}
+                  />
+                )}
+
+                <IconActionButton
+                  title="Excluir reserva"
+                  icon={<FiTrash2 size={18} />}
+                  variant="danger"
+                  onClick={() => onExcluir(reserva)}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
