@@ -1,18 +1,18 @@
-/* eslint-disable react-hooks/immutability */
 import { FiEdit, FiFileText, FiTrash2 } from "react-icons/fi";
 import type Room from "../../src/interfaces/sala";
 import IconActionButton from "../../components/global/IconActionButton";
 
 type SalasTableProps = {
   salas: Room[];
+  onEditarSala: (id: number) => void;
   onExcluirSala: (sala: Room) => void;
 };
 
-export default function SalasTable({ salas, onExcluirSala }: SalasTableProps) {
-  function editarSala(id: number) {
-    window.location.href = `/reserva-equipamentos/salas/editar/${id}`;
-  }
-
+export default function SalasTable({
+  salas,
+  onEditarSala,
+  onExcluirSala,
+}: SalasTableProps) {
   return (
     <div
       style={{
@@ -93,7 +93,7 @@ export default function SalasTable({ salas, onExcluirSala }: SalasTableProps) {
                   <IconActionButton
                     title="Editar sala"
                     icon={<FiEdit size={18} />}
-                    onClick={() => editarSala(sala.id)}
+                    onClick={() => onEditarSala(sala.id)}
                   />
 
                   <IconActionButton

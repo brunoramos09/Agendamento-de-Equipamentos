@@ -7,6 +7,7 @@ import { listarSalas, excluirSala } from "../../services/salasService";
 import type Room from "../../interfaces/sala";
 import { notify } from "../../utils/notifications";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import { useNavigate } from "react-router-dom";
 
 import SalasPageHeader from "../../../components/rooms/SalasPageHeader";
 import SalasSearchBar from "../../../components/rooms/SalasSearchBar";
@@ -25,6 +26,7 @@ export default function Salas() {
   const [excluindo, setExcluindo] = useState(false);
   const [pagina, setPagina] = useState(1);
 
+  const navigate = useNavigate();
   usePageTitle("Salas");
 
   useEffect(() => {
@@ -112,7 +114,13 @@ export default function Salas() {
 
       {!loading && !erro && salasFiltradas.length > 0 && (
         <>
-          <SalasTable salas={salasPagina} onExcluirSala={setSalaExcluir} />
+          <SalasTable
+            salas={salasPagina}
+            onEditarSala={(id) =>
+              navigate(`/reserva-equipamentos/salas/editar/${id}`)
+            }
+            onExcluirSala={setSalaExcluir}
+          />
 
           <SalasPagination
             pagina={pagina}
