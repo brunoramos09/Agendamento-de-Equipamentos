@@ -9,6 +9,7 @@ import EditarEquipamento from "./pages/Equipamentos/EquipamentosEditar";
 import { Toaster } from "sonner";
 import Reservas from "./pages/Reservas/Reservas";
 import ReservasCriar from "./pages/Reservas/ReservasCriar";
+import Login from "./pages/Login";
 
 function App() {
   return (
@@ -17,10 +18,11 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<Navigate to="/reserva-equipamentos" replace />}
+            element={<Navigate to="/reserva-equipamentos/login" replace />}
           />
+          <Route path="/reserva-equipamentos/login" element={<Login />} />
           <Route
-            path="/reserva-equipamentos"
+            path="/reserva-equipamentos/"
             element={<ReservaEquipamentos />}
           />
           <Route

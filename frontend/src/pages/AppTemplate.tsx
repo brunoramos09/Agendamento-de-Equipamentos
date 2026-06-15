@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import styles from "./AppTemplate.module.css";
+import { isAdmin } from "../../src/utils/authRole";
 
 type ThemePalette = {
   background: string;
@@ -74,8 +75,14 @@ const defaultNavigation: NavigationItem[] = [
   { label: "Visão Geral", href: "/reserva-equipamentos" },
   { label: "Equipamentos", href: "/reserva-equipamentos/equipamentos" },
   { label: "Reservas", href: "/reserva-equipamentos/reservas" },
-  { label: "Salas", href: "/reserva-equipamentos/salas" },
 ];
+
+if (isAdmin()) {
+  defaultNavigation.push({
+    label: "Salas",
+    href: "/reserva-equipamentos/salas",
+  });
+}
 
 const defaultMetrics: MetricCard[] = [
   { label: "Ativos principais", value: "128", hint: "Itens prontos para uso" },

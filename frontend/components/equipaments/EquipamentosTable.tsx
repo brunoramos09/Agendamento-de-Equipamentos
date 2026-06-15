@@ -1,4 +1,5 @@
 import type Equipment from "../../src/interfaces/equipamento";
+import { isAdmin } from "../../src/utils/authRole";
 import StatusBadge from "./StatusBadge";
 import {
   FiEdit,
@@ -31,6 +32,8 @@ export default function EquipamentosTable({
   onFinalizarManutencao,
   onExcluir,
 }: Props) {
+  const admin = isAdmin();
+
   function renderActions(equipamento: Equipment) {
     return (
       <>
@@ -41,20 +44,24 @@ export default function EquipamentosTable({
           variant="info"
         />
 
-        <IconActionButton
-          title="Editar"
-          icon={<FiEdit size={18} />}
-          onClick={() => onEditar(equipamento.id)}
-        />
+        {admin && (
+          <IconActionButton
+            title="Editar"
+            icon={<FiEdit size={18} />}
+            onClick={() => onEditar(equipamento.id)}
+          />
+        )}
 
-        <IconActionButton
-          title="Relatório"
-          icon={<FiFileText size={18} />}
-          onClick={() => onRelatorio(equipamento.id)}
-          variant="report"
-        />
+        {admin && (
+          <IconActionButton
+            title="Relatório"
+            icon={<FiFileText size={18} />}
+            onClick={() => onRelatorio(equipamento.id)}
+            variant="report"
+          />
+        )}
 
-        {equipamento.status === "DISPONIVEL" && (
+        {admin && equipamento.status === "DISPONIVEL" && (
           <IconActionButton
             title="Enviar para manutenção"
             icon={<FiTool size={18} />}
@@ -63,7 +70,7 @@ export default function EquipamentosTable({
           />
         )}
 
-        {equipamento.status === "MANUTENCAO" && (
+        {admin && equipamento.status === "MANUTENCAO" && (
           <IconActionButton
             title="Finalizar manutenção"
             icon={<FiCheckCircle size={18} />}
@@ -72,7 +79,7 @@ export default function EquipamentosTable({
           />
         )}
 
-        {equipamento.status === "AGUARDANDO_REVISAO" && (
+        {admin && equipamento.status === "AGUARDANDO_REVISAO" && (
           <IconActionButton
             title="Revisar devolução"
             icon={<FiTool size={18} />}
@@ -81,12 +88,14 @@ export default function EquipamentosTable({
           />
         )}
 
-        <IconActionButton
-          title="Excluir"
-          icon={<FiTrash2 size={18} />}
-          variant="danger"
-          onClick={() => onExcluir(equipamento)}
-        />
+        {admin && (
+          <IconActionButton
+            title="Excluir"
+            icon={<FiTrash2 size={18} />}
+            variant="danger"
+            onClick={() => onExcluir(equipamento)}
+          />
+        )}
       </>
     );
   }

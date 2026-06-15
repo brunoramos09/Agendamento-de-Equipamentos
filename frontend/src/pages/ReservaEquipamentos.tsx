@@ -124,8 +124,7 @@ export function ReservaEquipamentos() {
         const proximasVencer = [...ativas]
           .sort(
             (a, b) =>
-              new Date(a.endDate).getTime() -
-              new Date(b.endDate).getTime(),
+              new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
           )
           .slice(0, 3);
 
@@ -178,8 +177,7 @@ export function ReservaEquipamentos() {
           .filter((r) => !r.returnedAt && new Date(r.endDate) < now)
           .sort(
             (a, b) =>
-              new Date(a.endDate).getTime() -
-              new Date(b.endDate).getTime(),
+              new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
           )
           .slice(0, 3);
 
@@ -250,7 +248,10 @@ export function ReservaEquipamentos() {
         label: "Nova reserva",
         href: "/reserva-equipamentos/reservas/criar",
       }}
-      secondaryAction={null}
+      secondaryAction={{
+        label: "Sair",
+        href: "/reserva-equipamentos/login",
+      }}
       featuredTitle="Fluxo principal de reserva"
       featuredDescription="Selecione um equipamento disponível, escolha o período de uso e acompanhe o status da solicitação."
       featuredBullets={[
