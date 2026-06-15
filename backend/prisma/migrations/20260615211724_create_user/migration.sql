@@ -8,7 +8,12 @@
 
 */
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('NORMAL', 'ADMIN');
+DO $$
+BEGIN
+  CREATE TYPE "UserRole" AS ENUM ('NORMAL', 'ADMIN');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AlterTable
 ALTER TABLE "Reservation" DROP COLUMN "hadIssue",
