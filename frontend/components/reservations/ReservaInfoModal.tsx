@@ -61,7 +61,7 @@ export default function ReservaInfoModal({
           }}
         >
           <strong>Usuário</strong>
-          <span>{reserva.user}</span>
+          <span>{reserva.user.name}</span>
 
           <strong>Data de início</strong>
           <span>{formatarData(reserva.startDate)}</span>

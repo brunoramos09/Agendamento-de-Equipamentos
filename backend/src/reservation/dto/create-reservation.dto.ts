@@ -18,8 +18,8 @@ class ReservationEquipmentDto {
 }
 
 export class CreateReservationDto {
-  @IsString()
-  user!: string;
+  @IsInt()
+  userId!: number;
 
   @IsDateString()
   startDate!: string;

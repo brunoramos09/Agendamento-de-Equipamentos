@@ -77,7 +77,7 @@ export function filtrarReservas(
     if (!termo) return passaFiltroStatus;
 
     const passaPesquisa = [
-      reserva.user,
+      reserva.user?.name,
       reserva.observations,
       reserva.id?.toString(),
       reserva.equipments

@@ -1,5 +1,13 @@
 import type Equipment from "./equipamento";
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  role: "NORMAL" | "ADMIN";
+}
+
 export interface ReservationEquipment {
   id: number;
   equipmentId: number;
@@ -11,7 +19,9 @@ export interface ReservationEquipment {
 export default interface Reservation {
   id: number;
 
-  user: string;
+  userId: number;
+  user: User;
+
   startDate: string;
   endDate: string;
   returnedAt?: string | null;

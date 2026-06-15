@@ -15,15 +15,23 @@ import { ReturnReservationDto } from './dto/return-reservation.dto';
 export class ReservationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(userId?: number) {
     return this.prisma.reservation.findMany({
+      where: userId
+        ? {
+            userId,
+          }
+        : undefined,
+
       include: {
+        user: true,
         equipments: {
           include: {
             equipment: true,
           },
         },
       },
+
       orderBy: {
         startDate: 'desc',
       },
@@ -34,6 +42,7 @@ export class ReservationService {
     const reservation = await this.prisma.reservation.findUnique({
       where: { id },
       include: {
+        user: true,
         equipments: {
           include: {
             equipment: true,
@@ -132,7 +141,7 @@ export class ReservationService {
 
     return this.prisma.reservation.create({
       data: {
-        user: dto.user,
+        userId: dto.userId,
         startDate,
         endDate,
         observations: dto.observations,
@@ -175,10 +184,6 @@ export class ReservationService {
 
     const updateData: any = {};
 
-    if (data.user !== undefined) {
-      updateData.user = data.user;
-    }
-
     if (data.observations !== undefined) {
       updateData.observations = data.observations;
     }
@@ -218,6 +223,7 @@ export class ReservationService {
             },
           },
           include: {
+            user: true,
             equipments: {
               include: {
                 equipment: true,
@@ -232,6 +238,7 @@ export class ReservationService {
       where: { id },
       data: updateData,
       include: {
+        user: true,
         equipments: {
           include: {
             equipment: true,
@@ -271,6 +278,7 @@ export class ReservationService {
           returnObservations: dto.returnObservations ?? null,
         },
         include: {
+          user: true,
           equipments: {
             include: {
               equipment: true,

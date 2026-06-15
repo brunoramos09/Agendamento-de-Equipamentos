@@ -54,9 +54,11 @@ model Equipment {
 }
 
 model Reservation {
-  id Int @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
 
-  user               String
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+
   startDate          DateTime
   endDate            DateTime
   returnedAt         DateTime?
@@ -97,4 +99,26 @@ model Maintenance {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  NORMAL
+  ADMIN
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+
+  name      String
+  email     String   @unique
+  phone     String?
+
+  password  String
+
+  role      UserRole @default(NORMAL)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reservations Reservation[]
 }

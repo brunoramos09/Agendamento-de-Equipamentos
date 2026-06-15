@@ -102,7 +102,7 @@ export default function ReservasTable({
                     {reserva.id}
                   </td>
 
-                  <td style={{ padding: "14px 12px" }}>{reserva.user}</td>
+                  <td style={{ padding: "14px 12px" }}>{reserva.user.name}</td>
 
                   <td style={{ padding: "14px 12px" }}>
                     {formatarData(reserva.startDate)}
@@ -210,7 +210,7 @@ export default function ReservasTable({
                       color: "#111827",
                     }}
                   >
-                    {reserva.user}
+                    {reserva.user.name}
                   </strong>
 
                   <span

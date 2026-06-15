@@ -8,7 +8,6 @@ import type Reservation from "../../src/interfaces/reserva";
 import {
   datesGridStyle,
   fieldLabelStyle,
-  inputStyle,
   textareaStyle,
 } from "../../src/styles/criarReservaStyles";
 
@@ -86,23 +85,6 @@ export default function ReservaBasicFields({
 
   return (
     <>
-      <div>
-        <label style={fieldLabelStyle}>Usuário</label>
-
-        <input
-          type="text"
-          value={reserva.user}
-          onChange={(event) =>
-            onChangeReserva({
-              ...reserva,
-              user: event.target.value,
-            })
-          }
-          placeholder="Nome do responsável"
-          style={inputStyle}
-        />
-      </div>
-
       <div style={datesGridStyle}>
         <div>
           <label style={fieldLabelStyle}>Data/Hora Inicial</label>

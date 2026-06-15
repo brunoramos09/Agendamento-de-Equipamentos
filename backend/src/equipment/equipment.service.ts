@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -65,8 +67,11 @@ export class EquipmentService {
           },
         });
       }
-      
-      if (currentEquipment.status === 'MANUTENCAO' && data.status === 'DISPONIVEL') {
+
+      if (
+        currentEquipment.status === 'MANUTENCAO' &&
+        data.status === 'DISPONIVEL'
+      ) {
         const openMaintenance = await this.prisma.maintenance.findFirst({
           where: {
             equipmentId: id,
@@ -112,7 +117,11 @@ export class EquipmentService {
         maintenances: true,
         reservations: {
           include: {
-            reservation: true,
+            reservation: {
+              include: {
+                user: true,
+              },
+            },
           },
         },
       },
@@ -207,21 +216,25 @@ export class EquipmentService {
       totalReservas > 0 ? (totalDiasReservados / totalReservas).toFixed(1) : 0;
 
     const dataCriacao = new Date(equipment.createdAt);
-    const tempoTotalExistencia = Math.abs(agora.getTime() - dataCriacao.getTime());
+    const tempoTotalExistencia = Math.abs(
+      agora.getTime() - dataCriacao.getTime(),
+    );
     const diasTotaisExistencia = tempoTotalExistencia / (1000 * 60 * 60 * 24);
     const taxaUtilizacao =
       diasTotaisExistencia > 0
         ? Math.min(
             (totalDiasReservados / diasTotaisExistencia) * 100,
-            100
-        ).toFixed(1)
+            100,
+          ).toFixed(1)
         : 0;
 
     doc.text(`Total de Reservas (Histórico): ${totalReservas}`);
     doc.text(`Reservas Agendadas (Atual/Futuras): ${reservasFuturas}`);
     doc.text(`Tempo Médio de Reserva: ${tempoMedioReserva} dias`);
     doc.text(`Taxa de Utilização Total: ${taxaUtilizacao}%`);
-    doc.text(`Quantidade de Manutenções Realizadas: ${equipment.maintenances.length}`);
+    doc.text(
+      `Quantidade de Manutenções Realizadas: ${equipment.maintenances.length}`,
+    );
 
     doc.moveDown(2);
 
@@ -236,13 +249,16 @@ export class EquipmentService {
       doc.text('Nenhuma manutenção registrada.');
     } else {
       equipment.maintenances.forEach((m, index) => {
-        doc.text(`${index + 1}. Início: ${m.startDate.toLocaleString('pt-BR')}`);
+        doc.text(
+          `${index + 1}. Início: ${m.startDate.toLocaleString('pt-BR')}`,
+        );
         doc.text(
           `   Fim: ${
             m.endDate ? m.endDate.toLocaleString('pt-BR') : 'Em andamento'
           }`,
         );
-        if (m.responsiblePerson) doc.text(`   Responsável: ${m.responsiblePerson}`);
+        if (m.responsiblePerson)
+          doc.text(`   Responsável: ${m.responsiblePerson}`);
         if (m.observations) doc.text(`   Observações: ${m.observations}`);
         doc.moveDown(0.5);
       });
@@ -286,7 +302,7 @@ export class EquipmentService {
       equipment.reservations.forEach((item, index) => {
         const reservation = item.reservation;
 
-        doc.text(`${index + 1}. ${reservation.user}`);
+        doc.text(`${index + 1}. ${reservation.user.name}`);
 
         doc.text(
           `Início: ${new Date(reservation.startDate).toLocaleString('pt-BR')}`,
