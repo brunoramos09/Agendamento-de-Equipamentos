@@ -137,7 +137,21 @@ export default function EquipamentosReservaSelector({
                     marginTop: "2px",
                   }}
                 >
-                  Patrimônio: {equipamento.serialNumber || "Não informado"}
+                  <strong>Local:</strong>{" "}
+                  {equipamento.room
+                    ? `${equipamento.room.name} - ${equipamento.room.building} - ${equipamento.room.campus}`
+                    : "Não informado"}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    marginTop: "2px",
+                  }}
+                >
+                  <strong>Responsável:</strong>{" "}
+                  {equipamento.responsibleEmployee || "Não informado"}
                 </div>
               </div>
             </label>

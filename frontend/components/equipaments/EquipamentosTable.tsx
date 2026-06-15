@@ -134,7 +134,7 @@ export default function EquipamentosTable({
                 borderBottom: "1px solid #e5e7eb",
               }}
             >
-              {["ID", "Nome", "Patrimônio", "Sala", "Status", "Ações"].map(
+              {["ID", "Nome", "Responsável", "Sala", "Status", "Ações"].map(
                 (titulo) => (
                   <th
                     key={titulo}
@@ -167,7 +167,7 @@ export default function EquipamentosTable({
                 <td style={{ padding: "14px 12px" }}>{equipamento.name}</td>
 
                 <td style={{ padding: "14px 12px" }}>
-                  {equipamento.serialNumber ?? "-"}
+                  {equipamento.responsibleEmployee ?? "-"}
                 </td>
 
                 <td style={{ padding: "14px 12px" }}>
@@ -255,7 +255,7 @@ export default function EquipamentosTable({
             >
               <div>
                 <strong>Patrimônio: </strong>
-                {equipamento.serialNumber ?? "-"}
+                {equipamento.responsibleEmployee ?? "-"}
               </div>
 
               <div>

@@ -87,7 +87,7 @@ export default function InfoEquipamentoModal({ equipamento, onClose }: Props) {
           <strong>Nome</strong>
           <span>{equipamento.name}</span>
 
-          <strong>Número de Série</strong>
+          <strong>Patrimônio</strong>
           <span>{equipamento.serialNumber || "-"}</span>
 
           <strong>Responsável</strong>
