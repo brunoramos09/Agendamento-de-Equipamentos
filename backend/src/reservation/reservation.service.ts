@@ -15,6 +15,18 @@ import { ReturnReservationDto } from './dto/return-reservation.dto';
 export class ReservationService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async debugUsers() {
+    return {
+      users: await this.prisma.user.findMany(),
+      equipments: await this.prisma.equipment.findMany({
+        select: {
+          id: true,
+          name: true,
+        },
+      }),
+    };
+  }
+
   async findAll(userId?: number) {
     return this.prisma.reservation.findMany({
       where: userId

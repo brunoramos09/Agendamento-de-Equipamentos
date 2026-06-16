@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
   Body,
   Controller,
@@ -17,6 +18,11 @@ import { ReturnReservationDto } from './dto/return-reservation.dto';
 @Controller('reservations')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
+
+  @Get('debug/users')
+  debugUsers() {
+    return this.reservationService.debugUsers();
+  }
 
   @Get()
   findAll(@Query('userId') userId?: string) {
