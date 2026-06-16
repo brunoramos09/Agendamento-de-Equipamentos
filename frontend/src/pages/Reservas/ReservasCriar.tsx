@@ -144,6 +144,16 @@ export default function CriarReserva() {
 
       const usuario = JSON.parse(localStorage.getItem("usuario") ?? "null");
 
+      console.log("USUARIO", usuario);
+
+      console.log({
+        userId: usuario?.id,
+        startDate: startDate!.toISOString(),
+        endDate: endDate!.toISOString(),
+        observations: reserva.observations,
+        equipments: reserva.equipments,
+      });
+
       await criarReserva({
         userId: usuario.id,
         startDate: startDate!.toISOString(),
