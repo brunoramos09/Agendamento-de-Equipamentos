@@ -36,6 +36,7 @@ import {
   modalOverlayStyle,
   buttonStyle,
 } from "../../styles/equipamentosStyles";
+import { isAdmin } from "../../utils/authRole";
 
 export default function Equipamentos() {
   const navigate = useNavigate();
@@ -286,10 +287,14 @@ export default function Equipamentos() {
       theme={equipamentosTheme}
       appSubtitle="Gerenciamento de Equipamentos"
       appDescription="Consulte, cadastre e acompanhe os equipamentos disponíveis para reserva."
-      primaryAction={{
-        label: "Novo Equipamento",
-        href: "/reserva-equipamentos/equipamentos/criar",
-      }}
+      primaryAction={
+        isAdmin()
+          ? {
+              label: "Novo Equipamento",
+              href: "/reserva-equipamentos/equipamentos/criar",
+            }
+          : null
+      }
       secondaryAction={null}
     >
       <EquipamentosHeader
