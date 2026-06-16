@@ -137,7 +137,6 @@ export class EquipmentService {
     const contentW = pageW - margin * 2;
     const bottomLimit = pageH - 60;
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     const statusColors: Record<string, { bg: string; text: string }> = {
       DISPONIVEL:         { bg: '#dcfce7', text: '#166534' },
       MANUTENCAO:         { bg: '#fef3c7', text: '#92400e' },
@@ -223,7 +222,6 @@ export class EquipmentService {
       return `${dias} dia${dias > 1 ? 's' : ''} e ${horasRestantes}h`;
     }
 
-    // ── Métricas ──────────────────────────────────────────────────────────────
     const agora = new Date();
     const totalReservas = equipment.reservations.length;
     const reservasFuturas = equipment.reservations.filter(
@@ -252,7 +250,6 @@ export class EquipmentService {
         ? Math.min((totalDiasReservados / diasTotaisExistencia) * 100, 100).toFixed(1)
         : '0';
 
-    // ── Cabeçalho ─────────────────────────────────────────────────────────────
     doc.rect(0, 0, pageW, 110).fill('#1e293b');
     doc
       .fillColor('#94a3b8').fontSize(9).font('Helvetica')
@@ -275,7 +272,6 @@ export class EquipmentService {
     doc.fillColor(sc.text).fontSize(9).font('Helvetica-Bold')
       .text(statusText, badgeX, 50, { width: badgeW, align: 'center' });
 
-    // ── Cards de métricas ─────────────────────────────────────────────────────
     const cardY = 128;
     const cardH = 56;
     const cardGap = 10;
@@ -299,7 +295,7 @@ export class EquipmentService {
 
     let y = cardY + cardH + 28;
 
-    // ── Informações Gerais ────────────────────────────────────────────────────
+    // exibicao das infos do equipamento
     y = sectionTitle('INFORMAÇÕES GERAIS', y);
     y = infoRow('Patrimônio/Série',  equipment.serialNumber        ?? '-', y);
     y = infoRow('Responsável',       equipment.responsibleEmployee ?? '-', y);
@@ -316,7 +312,7 @@ export class EquipmentService {
     y = infoRow('Instruções',        equipment.instructions ?? '-', y);
     y += 16;
 
-    // exibição de reserva ativa, caso tenha alguma
+    // exibição de reserva atual, caso tenha alguma
     const reservaAtual = equipment.reservations.find(
       (item) => !item.reservation.returnedAt,
     );
@@ -512,8 +508,6 @@ export class EquipmentService {
       });
     }
 
-    // ── Rodapé da última página ───────────────────────────────────────────────
-    drawFooter();
     doc.end();
   }
 }
