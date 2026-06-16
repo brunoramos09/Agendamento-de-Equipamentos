@@ -6,12 +6,14 @@ type SalasTableProps = {
   salas: Room[];
   onEditarSala: (id: number) => void;
   onExcluirSala: (sala: Room) => void;
+  onRelatorio: (id: number) => void;
 };
 
 export default function SalasTable({
   salas,
   onEditarSala,
   onExcluirSala,
+  onRelatorio,
 }: SalasTableProps) {
   return (
     <>
@@ -128,8 +130,9 @@ export default function SalasTable({
                     />
 
                     <IconActionButton
-                      title="Gerar relatório"
+                      title="Relatório"
                       icon={<FiFileText size={18} />}
+                      onClick={() => onRelatorio(sala.id)}
                       variant="report"
                     />
 
@@ -243,6 +246,7 @@ export default function SalasTable({
               <IconActionButton
                 title="Gerar relatório"
                 icon={<FiFileText size={18} />}
+                onClick={() => onRelatorio(sala.id)}
                 variant="report"
               />
 
