@@ -1,14 +1,20 @@
 import type Reservation from "../../src/interfaces/reserva";
 import { formatarData, getStatusReserva } from "../../src/utils/reservaUtils";
-import { FiInfo, FiRotateCcw, FiTrash2 } from "react-icons/fi";
+import { FiInfo, FiRotateCcw, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import IconActionButton from "../../components/global/IconActionButton";
+import { isAdmin } from "../../src/utils/authRole";
 
 type ReservasTableProps = {
   reservas: Reservation[];
   devolvendoId: number | null;
+  isAdmin: boolean;
+
   onInfo: (reserva: Reservation) => void;
   onDevolver: (reserva: Reservation) => void;
   onExcluir: (reserva: Reservation) => void;
+
+  onApprove: (reserva: Reservation) => void;
+  onReject: (reserva: Reservation) => void;
 };
 
 export default function ReservasTable({
@@ -17,7 +23,36 @@ export default function ReservasTable({
   onInfo,
   onDevolver,
   onExcluir,
+  onApprove,
+  onReject,
 }: ReservasTableProps) {
+  function getReservationStatus(reserva: Reservation) {
+    if (reserva.returnedAt) {
+      return {
+        label: "DEVOLVIDA",
+        bg: "#dcfce7",
+        color: "#166534",
+      };
+    }
+
+    if (reserva.status === "PENDENTE_APROVACAO") {
+      return {
+        label: "PENDENTE",
+        bg: "#fef3c7",
+        color: "#92400e",
+      };
+    }
+
+    if (reserva.status === "REJEITADA") {
+      return {
+        label: "REJEITADA",
+        bg: "#fee2e2",
+        color: "#991b1b",
+      };
+    }
+
+    return getStatusReserva(reserva);
+  }
   return (
     <>
       <style>
@@ -89,7 +124,7 @@ export default function ReservasTable({
 
           <tbody>
             {reservas.map((reserva) => {
-              const status = getStatusReserva(reserva);
+              const status = getReservationStatus(reserva);
 
               return (
                 <tr
@@ -149,19 +184,39 @@ export default function ReservasTable({
                         variant="info"
                       />
 
-                      {!reserva.returnedAt && (
-                        <IconActionButton
-                          title={
-                            devolvendoId === reserva.id
-                              ? "Devolvendo..."
-                              : "Registrar devolução"
-                          }
-                          icon={<FiRotateCcw size={18} />}
-                          variant="success"
-                          disabled={devolvendoId === reserva.id}
-                          onClick={() => onDevolver(reserva)}
-                        />
+                      {isAdmin() && reserva.status === "PENDENTE_APROVACAO" && (
+                        <>
+                          <IconActionButton
+                            title="Aprovar reserva"
+                            icon={<FiCheck size={18} />}
+                            variant="success"
+                            onClick={() => onApprove(reserva)}
+                          />
+
+                          <IconActionButton
+                            title="Rejeitar reserva"
+                            icon={<FiX size={18} />}
+                            variant="danger"
+                            onClick={() => onReject(reserva)}
+                          />
+                        </>
                       )}
+
+                      {!reserva.returnedAt &&
+                        reserva.status !== "PENDENTE_APROVACAO" &&
+                        reserva.status !== "REJEITADA" && (
+                          <IconActionButton
+                            title={
+                              devolvendoId === reserva.id
+                                ? "Devolvendo..."
+                                : "Registrar devolução"
+                            }
+                            icon={<FiRotateCcw size={18} />}
+                            variant="success"
+                            disabled={devolvendoId === reserva.id}
+                            onClick={() => onDevolver(reserva)}
+                          />
+                        )}
 
                       <IconActionButton
                         title="Excluir reserva"
@@ -180,7 +235,7 @@ export default function ReservasTable({
 
       <div className="reservas-mobile">
         {reservas.map((reserva) => {
-          const status = getStatusReserva(reserva);
+          const status = getReservationStatus(reserva);
 
           return (
             <div
@@ -277,19 +332,39 @@ export default function ReservasTable({
                   variant="info"
                 />
 
-                {!reserva.returnedAt && (
-                  <IconActionButton
-                    title={
-                      devolvendoId === reserva.id
-                        ? "Devolvendo..."
-                        : "Registrar devolução"
-                    }
-                    icon={<FiRotateCcw size={18} />}
-                    variant="success"
-                    disabled={devolvendoId === reserva.id}
-                    onClick={() => onDevolver(reserva)}
-                  />
+                {isAdmin() && reserva.status === "PENDENTE_APROVACAO" && (
+                  <>
+                    <IconActionButton
+                      title="Aprovar reserva"
+                      icon={<FiCheck size={18} />}
+                      variant="success"
+                      onClick={() => onApprove(reserva)}
+                    />
+
+                    <IconActionButton
+                      title="Rejeitar reserva"
+                      icon={<FiX size={18} />}
+                      variant="danger"
+                      onClick={() => onReject(reserva)}
+                    />
+                  </>
                 )}
+
+                {!reserva.returnedAt &&
+                  reserva.status !== "PENDENTE_APROVACAO" &&
+                  reserva.status !== "REJEITADA" && (
+                    <IconActionButton
+                      title={
+                        devolvendoId === reserva.id
+                          ? "Devolvendo..."
+                          : "Registrar devolução"
+                      }
+                      icon={<FiRotateCcw size={18} />}
+                      variant="success"
+                      disabled={devolvendoId === reserva.id}
+                      onClick={() => onDevolver(reserva)}
+                    />
+                  )}
 
                 <IconActionButton
                   title="Excluir reserva"

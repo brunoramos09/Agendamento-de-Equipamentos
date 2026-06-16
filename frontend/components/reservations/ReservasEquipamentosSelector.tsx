@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import type Equipment from "../../src/interfaces/equipamento";
+import type Reservation from "../../src/interfaces/reserva";
 
 import {
   emptyListStyle,
@@ -10,16 +11,29 @@ import {
   selectedCountStyle,
 } from "../../src/styles/criarReservaStyles";
 
+type EquipamentoSelecionado = {
+  equipmentId: number;
+  subdivisionsQuantity: number;
+};
+
 type EquipamentosReservaSelectorProps = {
   equipamentos: Equipment[];
-  equipamentosSelecionados: { equipmentId: number }[];
+  equipamentosSelecionados: EquipamentoSelecionado[];
+  reservas: Reservation[];
+  startDate: Date | null;
+  endDate: Date | null;
   onToggleEquipamento: (id: number) => void;
+  onChangeQuantidade: (equipmentId: number, quantidade: number) => void;
 };
 
 export default function EquipamentosReservaSelector({
   equipamentos,
   equipamentosSelecionados,
+  reservas,
+  startDate,
+  endDate,
   onToggleEquipamento,
+  onChangeQuantidade,
 }: EquipamentosReservaSelectorProps) {
   const [pesquisa, setPesquisa] = useState("");
 
@@ -44,6 +58,30 @@ export default function EquipamentosReservaSelector({
       ),
     );
   }, [equipamentos, equipamentosSelecionados]);
+
+  function temConflitoHorario(reserva: Reservation) {
+    if (!startDate || !endDate) {
+      return false;
+    }
+
+    const reservaInicio = new Date(reserva.startDate);
+    const reservaFim = new Date(reserva.endDate);
+
+    return startDate < reservaFim && endDate > reservaInicio;
+  }
+
+  function calcularSubdivisoesReservadas(equipmentId: number) {
+    return reservas
+      .filter((reserva) => !reserva.returnedAt)
+      .filter(temConflitoHorario)
+      .reduce((total, reserva) => {
+        const quantidadeNaReserva = reserva.equipments
+          .filter((item) => item.equipmentId === equipmentId)
+          .reduce((soma, item) => soma + (item.subdivisionsQuantity ?? 1), 0);
+
+        return total + quantidadeNaReserva;
+      }, 0);
+  }
 
   return (
     <div>
@@ -112,12 +150,41 @@ export default function EquipamentosReservaSelector({
             (item) => item.equipmentId === equipamento.id,
           );
 
+          const equipamentoSelecionado = equipamentosSelecionados.find(
+            (item) => item.equipmentId === equipamento.id,
+          );
+
+          const totalSubdivisoes = Math.max(equipamento.subdivisions ?? 1, 1);
+
+          const subdivisoesReservadas = calcularSubdivisoesReservadas(
+            equipamento.id,
+          );
+
+          const subdivisoesDisponiveis = Math.max(
+            totalSubdivisoes - subdivisoesReservadas,
+            0,
+          );
+
+          const indisponivel = subdivisoesDisponiveis <= 0 && !selecionado;
+
           return (
-            <label key={equipamento.id} style={equipmentCardStyle(selecionado)}>
+            <label
+              key={equipamento.id}
+              style={{
+                ...equipmentCardStyle(selecionado),
+                opacity: indisponivel ? 0.55 : 1,
+                cursor: indisponivel ? "not-allowed" : "pointer",
+              }}
+            >
               <input
                 type="checkbox"
                 checked={selecionado}
-                onChange={() => onToggleEquipamento(equipamento.id)}
+                disabled={indisponivel}
+                onChange={() => {
+                  if (!indisponivel) {
+                    onToggleEquipamento(equipamento.id);
+                  }
+                }}
               />
 
               <div>
@@ -153,6 +220,57 @@ export default function EquipamentosReservaSelector({
                   <strong>Responsável:</strong>{" "}
                   {equipamento.responsibleEmployee || "Não informado"}
                 </div>
+
+                {totalSubdivisoes > 1 && (
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: subdivisoesDisponiveis > 0 ? "#166534" : "#dc2626",
+                      marginTop: "2px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Disponível: {subdivisoesDisponiveis} / {totalSubdivisoes}
+                  </div>
+                )}
+
+                {selecionado && totalSubdivisoes > 1 && (
+                  <div style={{ marginTop: "10px" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "12px",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      Quantidade
+                    </label>
+
+                    <input
+                      type="number"
+                      min={1}
+                      max={subdivisoesDisponiveis}
+                      value={equipamentoSelecionado?.subdivisionsQuantity ?? 1}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        const valor = Number(e.target.value);
+
+                        const quantidadeLimitada = Math.min(
+                          Math.max(valor, 1),
+                          subdivisoesDisponiveis,
+                        );
+
+                        onChangeQuantidade(equipamento.id, quantidadeLimitada);
+                      }}
+                      style={{
+                        width: "90px",
+                        padding: "6px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             </label>
           );

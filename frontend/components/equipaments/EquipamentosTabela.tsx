@@ -1,6 +1,6 @@
 import type Equipment from "../../src/interfaces/equipamento";
 import { isAdmin } from "../../src/utils/authRole";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "./EquipamentosStatusBadge";
 import {
   FiEdit,
   FiFileText,
@@ -9,7 +9,7 @@ import {
   FiCheckCircle,
   FiTrash2,
 } from "react-icons/fi";
-import IconActionButton from "../../components/global/IconActionButton";
+import IconActionButton from "../global/IconActionButton";
 
 type Props = {
   equipamentos: Equipment[];

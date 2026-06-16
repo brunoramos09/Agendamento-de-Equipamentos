@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
+import { aprovarReserva, rejeitarReserva } from "../../services/reservaService";
 
 import type Reservation from "../../interfaces/reserva";
 
@@ -17,9 +18,9 @@ import {
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { notify } from "../../utils/notifications";
 
-import ConfirmarExclusaoReservaModal from "../../../components/reservations/ConfirmarExclusaoReservaModal";
-import ReservaInfoModal from "../../../components/reservations/ReservaInfoModal";
-import ReservaSearch from "../../../components/reservations/ReservaSearch";
+import ConfirmarExclusaoReservaModal from "../../../components/reservations/ReservasExclusaoModal";
+import ReservaInfoModal from "../../../components/reservations/ReservasInfoModal";
+import ReservaSearch from "../../../components/reservations/ReservasSearch";
 import ReservasHeader from "../../../components/reservations/ReservasHeader";
 import ReservasPagination from "../../../components/reservations/ReservasPagination";
 import ReservasTable from "../../../components/reservations/ReservasTable";
@@ -69,6 +70,32 @@ export default function Reservas() {
   useEffect(() => {
     setPagina(1);
   }, [filtroStatus, pesquisa]);
+
+  async function aprovarReservaHandler(reserva: Reservation) {
+    try {
+      await aprovarReserva(reserva.id);
+
+      notify.success("Reserva aprovada");
+
+      await carregarReservas();
+    } catch (error) {
+      console.error(error);
+      notify.error("Erro ao aprovar reserva.");
+    }
+  }
+
+  async function rejeitarReservaHandler(reserva: Reservation) {
+    try {
+      await rejeitarReserva(reserva.id);
+
+      notify.success("Reserva rejeitada");
+
+      await carregarReservas();
+    } catch (error) {
+      console.error(error);
+      notify.error("Erro ao rejeitar reserva.");
+    }
+  }
 
   async function carregarReservas() {
     try {
@@ -212,10 +239,13 @@ export default function Reservas() {
         <>
           <ReservasTable
             reservas={reservasPagina}
-            onInfo={setReservaInfo}
             devolvendoId={null}
+            isAdmin={usuario?.role === "ADMIN"}
+            onInfo={setReservaInfo}
             onDevolver={abrirModalDevolucao}
             onExcluir={setReservaExcluir}
+            onApprove={aprovarReservaHandler}
+            onReject={rejeitarReservaHandler}
           />
 
           <ReservasPagination

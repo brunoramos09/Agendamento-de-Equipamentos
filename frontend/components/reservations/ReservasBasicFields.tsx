@@ -1,5 +1,6 @@
 import DatePicker from "react-datepicker";
 import { ptBR } from "date-fns/locale";
+import type Equipment from "../../src/interfaces/equipamento";
 
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -16,12 +17,16 @@ export type ReservaFormState = {
   startDate: string;
   endDate: string;
   observations: string;
-  equipments: { equipmentId: number }[];
+  equipments: {
+    equipmentId: number;
+    subdivisionsQuantity: number;
+  }[];
 };
 
 type ReservaBasicFieldsProps = {
   reserva: ReservaFormState;
   reservas: Reservation[];
+  equipamentos: Equipment[];
   equipamentosSelecionados: number[];
   startDate: Date | null;
   endDate: Date | null;
@@ -33,6 +38,7 @@ type ReservaBasicFieldsProps = {
 export default function ReservaBasicFields({
   reserva,
   reservas,
+  equipamentos,
   equipamentosSelecionados,
   startDate,
   endDate,
@@ -41,22 +47,39 @@ export default function ReservaBasicFields({
   onChangeEndDate,
 }: ReservaBasicFieldsProps) {
   function horarioReservado(date: Date) {
-    return reservas.some((reservaExistente) => {
-      const possuiEquipamentoSelecionado = reservaExistente.equipments.some(
-        (equipamentoReserva) =>
-          equipamentosSelecionados.includes(equipamentoReserva.equipmentId),
-      );
+    if (equipamentosSelecionados.length === 0) {
+      return false;
+    }
 
-      if (!possuiEquipamentoSelecionado) {
-        return false;
-      }
+    return equipamentosSelecionados.some((equipmentId) => {
+      const equipamento = equipamentos.find((e) => e.id === equipmentId);
 
-      const inicio = new Date(reservaExistente.startDate);
-      const fim = new Date(reservaExistente.endDate);
+      const totalSubdivisoes = Math.max(equipamento?.subdivisions ?? 1, 1);
 
-      return (
-        date.getTime() >= inicio.getTime() && date.getTime() <= fim.getTime()
-      );
+      const reservadas = reservas
+        .filter(
+          (reservaExistente) =>
+            reservaExistente.status === "ATIVA" ||
+            reservaExistente.status === "PENDENTE_APROVACAO",
+        )
+        .filter((reservaExistente) => {
+          const inicio = new Date(reservaExistente.startDate);
+          const fim = new Date(reservaExistente.endDate);
+
+          return (
+            date.getTime() >= inicio.getTime() &&
+            date.getTime() <= fim.getTime()
+          );
+        })
+        .reduce((total, reservaExistente) => {
+          const item = reservaExistente.equipments.find(
+            (e) => e.equipmentId === equipmentId,
+          );
+
+          return total + (item?.subdivisionsQuantity ?? 1);
+        }, 0);
+
+      return reservadas >= totalSubdivisoes;
     });
   }
 

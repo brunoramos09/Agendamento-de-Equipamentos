@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import AppTemplate from "../AppTemplate";
 import equipamentosTheme from "../../styles/theme/equipamentosTheme";
-import { 
-  listarSalas, 
+import {
+  listarSalas,
   excluirSala,
   gerarRelatorioSala,
 } from "../../services/salasService";
@@ -18,7 +18,7 @@ import SalasSearchBar from "../../../components/rooms/SalasSearchBar";
 import SalasTable from "../../../components/rooms/SalasTable";
 import SalasPagination from "../../../components/rooms/SalasPagination";
 import ConfirmDeleteRoomModal from "../../../components/rooms/ConfirmDeleteRoomModal";
-import RelatorioModal from "../../../components/equipaments/RelatorioModal";
+import RelatorioModal from "../../../components/equipaments/EquipamentosRelatorioModal";
 
 const ITENS_POR_PAGINA = 8;
 
@@ -63,7 +63,7 @@ export default function Salas() {
     try {
       const blob = await gerarRelatorioSala(id);
       const url = window.URL.createObjectURL(blob);
-    
+
       setRelatorioUrl(url);
       setRelatorioId(id);
     } catch (error) {

@@ -95,3 +95,31 @@ export async function excluirReserva(id: number): Promise<void> {
     throw new Error("Erro ao excluir reserva.");
   }
 }
+
+export async function aprovarReserva(id: number) {
+  const response = await fetch(`${API_URL_COMPLETE}/${id}/approve`, {
+    method: "PATCH",
+  });
+
+  if (!response.ok) {
+    const erro = await response.json().catch(() => null);
+
+    throw new Error(erro?.message || "Erro ao aprovar reserva.");
+  }
+
+  return response.json();
+}
+
+export async function rejeitarReserva(id: number) {
+  const response = await fetch(`${API_URL_COMPLETE}/${id}/reject`, {
+    method: "PATCH",
+  });
+
+  if (!response.ok) {
+    const erro = await response.json().catch(() => null);
+
+    throw new Error(erro?.message || "Erro ao rejeitar reserva.");
+  }
+
+  return response.json();
+}

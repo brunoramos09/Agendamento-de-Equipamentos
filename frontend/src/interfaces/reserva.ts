@@ -33,4 +33,6 @@ export default interface Reservation {
   updatedAt: string;
 
   equipments: ReservationEquipment[];
+
+  status: "ATIVA" | "PENDENTE_APROVACAO" | "REJEITADA";
 }

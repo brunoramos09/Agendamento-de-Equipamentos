@@ -17,15 +17,15 @@ import type Equipment from "../../interfaces/equipamento";
 import { notify } from "../../utils/notifications";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
-import BuscaEquipamentos from "../../../components/equipaments/BuscaEquipamentos";
-import ConfirmarExclusaoModal from "../../../components/equipaments/ConfirmarExclusaoModal";
+import BuscaEquipamentos from "../../../components/equipaments/EquipamentosBusca";
+import ConfirmarExclusaoModal from "../../../components/equipaments/EquipamentosExclusaoModal";
 import EquipamentosHeader from "../../../components/equipaments/EquipamentosHeader";
-import EquipamentosTable from "../../../components/equipaments/EquipamentosTable";
-import FinalizarManutencaoModal from "../../../components/equipaments/FinalizarManutencaoModal";
-import InfoEquipamentoModal from "../../../components/equipaments/InfoEquipamentoModal";
-import ManutencaoModal from "../../../components/equipaments/ManutencaoModal";
-import Paginacao from "../../../components/equipaments/Paginacao";
-import RelatorioModal from "../../../components/equipaments/RelatorioModal";
+import EquipamentosTable from "../../../components/equipaments/EquipamentosTabela";
+import FinalizarManutencaoModal from "../../../components/equipaments/EquipamentosFinalizarManutencaoModal";
+import InfoEquipamentoModal from "../../../components/equipaments/EquipamentosInfoModal";
+import ManutencaoModal from "../../../components/equipaments/EquipamentosManutencaoModal";
+import Paginacao from "../../../components/equipaments/EquipamentosPaginacao";
+import RelatorioModal from "../../../components/equipaments/EquipamentosRelatorioModal";
 
 import {
   ITENS_POR_PAGINA,

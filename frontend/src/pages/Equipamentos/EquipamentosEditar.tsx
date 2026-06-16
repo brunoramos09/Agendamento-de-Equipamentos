@@ -15,10 +15,11 @@ import { listarSalas } from "../../services/salasService";
 
 import type Room from "../../interfaces/sala";
 
-import EquipamentoForm, {
-  editStatusOptions,
-} from "../../../components/equipaments/EquipamentoForm";
-import type { EquipamentoFormData } from "../../../components/equipaments/types";
+import EquipamentoForm from "../../../components/equipaments/form/EquipamentosForm";
+
+import { editStatusOptions } from "../../../src/utils/equipamentoFormConstants";
+
+import type { EquipamentoFormData } from "../../interfaces/equipamentoFormData";
 
 import { notify } from "../../utils/notifications";
 import { usePageTitle } from "../../hooks/usePageTitle";
@@ -48,6 +49,7 @@ export default function EditarEquipamento() {
     instructions: "",
     roomId: 0,
     status: "DISPONIVEL",
+    subdivisions: 0,
     photo: null,
     photoUrl: "",
     documents: [],
@@ -79,6 +81,7 @@ export default function EditarEquipamento() {
         responsibleEmployee: equipamentoData.responsibleEmployee ?? "",
         observations: equipamentoData.observations ?? "",
         instructions: equipamentoData.instructions ?? "",
+        subdivisions: equipamentoData.subdivisions ?? "",
         roomId: equipamentoData.roomId,
         status: equipamentoData.status,
         photo: null,
@@ -122,6 +125,8 @@ export default function EditarEquipamento() {
       if (equipamento.observations) {
         formData.append("observations", equipamento.observations);
       }
+
+      formData.append("subdivisions", String(equipamento.subdivisions ?? 0));
 
       if (equipamento.instructions) {
         formData.append("instructions", equipamento.instructions);

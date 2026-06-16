@@ -15,12 +15,12 @@ import { criarReserva, listarReservas } from "../../services/reservaService";
 import { notify } from "../../utils/notifications";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
-import CriarReservaHeader from "../../../components/reservations/CriarReservaHeader";
-import EquipamentosReservaSelector from "../../../components/reservations/EquipamentosReservaSelector";
+import CriarReservaHeader from "../../../components/reservations/ReservasCriarHeader";
+import EquipamentosReservaSelector from "../../../components/reservations/ReservasEquipamentosSelector";
 import ReservaBasicFields, {
   type ReservaFormState,
-} from "../../../components/reservations/ReservaBasicFields";
-import ReservaFormActions from "../../../components/reservations/ReservaFormActions";
+} from "../../../components/reservations/ReservasBasicFields";
+import ReservaFormActions from "../../../components/reservations/ReservasFormActions";
 import {
   formGridStyle,
   pageContainerStyle,
@@ -105,9 +105,29 @@ export default function CriarReserva() {
         ...reservaAtual,
         equipments: existe
           ? reservaAtual.equipments.filter((item) => item.equipmentId !== id)
-          : [...reservaAtual.equipments, { equipmentId: id }],
+          : [
+              ...reservaAtual.equipments,
+              {
+                equipmentId: id,
+                subdivisionsQuantity: 1,
+              },
+            ],
       };
     });
+  }
+
+  function alterarQuantidade(equipmentId: number, quantidade: number) {
+    setReserva((reservaAtual) => ({
+      ...reservaAtual,
+      equipments: reservaAtual.equipments.map((item) =>
+        item.equipmentId === equipmentId
+          ? {
+              ...item,
+              subdivisionsQuantity: quantidade,
+            }
+          : item,
+      ),
+    }));
   }
 
   function validarReserva() {
@@ -189,6 +209,7 @@ export default function CriarReserva() {
           <ReservaBasicFields
             reserva={reserva}
             reservas={reservas}
+            equipamentos={equipamentos}
             equipamentosSelecionados={reserva.equipments.map(
               (equipamento) => equipamento.equipmentId,
             )}
@@ -202,7 +223,11 @@ export default function CriarReserva() {
           <EquipamentosReservaSelector
             equipamentos={equipamentos}
             equipamentosSelecionados={reserva.equipments}
+            reservas={reservas}
+            startDate={startDate}
+            endDate={endDate}
             onToggleEquipamento={toggleEquipamento}
+            onChangeQuantidade={alterarQuantidade}
           />
 
           <ReservaFormActions

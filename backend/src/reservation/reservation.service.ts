@@ -15,18 +15,6 @@ import { ReturnReservationDto } from './dto/return-reservation.dto';
 export class ReservationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async debugUsers() {
-    return {
-      users: await this.prisma.user.findMany(),
-      equipments: await this.prisma.equipment.findMany({
-        select: {
-          id: true,
-          name: true,
-        },
-      }),
-    };
-  }
-
   async findAll(userId?: number) {
     return this.prisma.reservation.findMany({
       where: userId
@@ -98,13 +86,14 @@ export class ReservationService {
         );
       }
 
-      const conflict = await this.prisma.reservationEquipment.findFirst({
+      const reservations = await this.prisma.reservationEquipment.findMany({
         where: {
           equipmentId: item.equipmentId,
-
           reservation: {
             returnedAt: null,
-
+            status: {
+              in: ['ATIVA', 'PENDENTE_APROVACAO'],
+            },
             ...(reservationId
               ? {
                   id: {
@@ -112,24 +101,34 @@ export class ReservationService {
                   },
                 }
               : {}),
-
             startDate: {
               lte: endDate,
             },
-
             endDate: {
               gte: startDate,
             },
           },
         },
-        include: {
-          reservation: true,
-        },
       });
 
-      if (conflict) {
+      const totalSubdivisions = Math.max(equipment.subdivisions ?? 1, 1);
+
+      const reservedSubdivisions = reservations.reduce(
+        (total, reservation) => total + (reservation.subdivisionsQuantity ?? 1),
+        0,
+      );
+
+      const requestedSubdivisions = item.subdivisionsQuantity ?? 1;
+      if (requestedSubdivisions <= 0) {
         throw new BadRequestException(
-          `O equipamento "${equipment.name}" já está reservado neste período`,
+          'A quantidade de subdivisões deve ser maior que zero',
+        );
+      }
+      const availableSubdivisions = totalSubdivisions - reservedSubdivisions;
+
+      if (requestedSubdivisions > availableSubdivisions) {
+        throw new BadRequestException(
+          `O equipamento "${equipment.name}" possui apenas ${availableSubdivisions} subdivisão(ões) disponível(is) neste período`,
         );
       }
     }
@@ -151,12 +150,19 @@ export class ReservationService {
 
     await this.validateReservationConflicts(dto.equipments, startDate, endDate);
 
+    const diffMs = endDate.getTime() - startDate.getTime();
+    const diffDias = diffMs / (1000 * 60 * 60 * 24);
+
+    const status = diffDias > 7 ? 'PENDENTE_APROVACAO' : 'ATIVA';
+
     return this.prisma.reservation.create({
       data: {
         userId: dto.userId,
         startDate,
         endDate,
         observations: dto.observations,
+
+        status,
 
         equipments: {
           create: dto.equipments.map((e) => ({
@@ -309,6 +315,56 @@ export class ReservationService {
       }
 
       return updatedReservation;
+    });
+  }
+
+  async approve(id: number) {
+    const reservation = await this.findOne(id);
+
+    if (reservation.status !== 'PENDENTE_APROVACAO') {
+      throw new BadRequestException(
+        'Apenas reservas pendentes podem ser aprovadas',
+      );
+    }
+
+    return this.prisma.reservation.update({
+      where: { id },
+      data: {
+        status: 'ATIVA',
+      },
+      include: {
+        user: true,
+        equipments: {
+          include: {
+            equipment: true,
+          },
+        },
+      },
+    });
+  }
+
+  async reject(id: number) {
+    const reservation = await this.findOne(id);
+
+    if (reservation.status !== 'PENDENTE_APROVACAO') {
+      throw new BadRequestException(
+        'Apenas reservas pendentes podem ser rejeitadas',
+      );
+    }
+
+    return this.prisma.reservation.update({
+      where: { id },
+      data: {
+        status: 'REJEITADA',
+      },
+      include: {
+        user: true,
+        equipments: {
+          include: {
+            equipment: true,
+          },
+        },
+      },
     });
   }
 }

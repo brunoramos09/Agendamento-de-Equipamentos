@@ -18,11 +18,6 @@ import { ReturnReservationDto } from './dto/return-reservation.dto';
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
-  @Get('debug/users')
-  debugUsers() {
-    return this.reservationService.debugUsers();
-  }
-
   @Get()
   findAll(@Query('userId') userId?: string) {
     return this.reservationService.findAll(userId ? Number(userId) : undefined);
@@ -44,6 +39,16 @@ export class ReservationController {
     @Body() data: UpdateReservationDto,
   ) {
     return this.reservationService.update(id, data);
+  }
+
+  @Patch(':id/approve')
+  approve(@Param('id', ParseIntPipe) id: number) {
+    return this.reservationService.approve(id);
+  }
+
+  @Patch(':id/reject')
+  reject(@Param('id', ParseIntPipe) id: number) {
+    return this.reservationService.reject(id);
   }
 
   @Patch(':id/return')

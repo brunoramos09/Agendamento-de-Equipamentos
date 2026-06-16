@@ -6,13 +6,13 @@ import equipamentosTheme from "../../styles/theme/equipamentosTheme";
 import { criarEquipamento } from "../../services/equipamentoService";
 import { listarSalas } from "../../services/salasService";
 import type Room from "../../interfaces/sala";
-import EquipamentoForm, {
-  editStatusOptions,
-} from "../../../components/equipaments/EquipamentoForm";
-import type { EquipamentoFormData } from "../../../components/equipaments/types";
+import EquipamentoForm from "../../../components/equipaments/form/EquipamentosForm";
+
+import { editStatusOptions } from "../../../src/utils/equipamentoFormConstants";
 
 import { notify } from "../../utils/notifications";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import type { EquipamentoFormData } from "../../interfaces/equipamentoFormData";
 
 export default function CriarEquipamento() {
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ export default function CriarEquipamento() {
     photo: null,
     documents: [],
     attachedDocuments: [""],
+    subdivisions: 0,
   });
 
   usePageTitle("Equipamentos: Novo");
@@ -71,6 +72,8 @@ export default function CriarEquipamento() {
       formData.append("name", equipamento.name);
       formData.append("roomId", String(equipamento.roomId));
       formData.append("status", equipamento.status);
+
+      formData.append("subdivisions", String(equipamento.subdivisions ?? 0));
 
       if (equipamento.serialNumber) {
         formData.append("serialNumber", equipamento.serialNumber);

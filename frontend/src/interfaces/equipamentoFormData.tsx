@@ -8,7 +8,7 @@ export type EquipamentoFormData = {
   status: "DISPONIVEL" | "MANUTENCAO" | "INATIVO";
   photo: File | null;
   photoUrl?: string;
-
+  subdivisions: number | null;
   documents?: File[];
   attachedDocuments?: string[];
 };
