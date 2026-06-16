@@ -47,8 +47,10 @@ export default function EquipamentoForm({
     <div
       style={{
         maxWidth: "1000px",
-        margin: "0 auto",
         width: "100%",
+        margin: "0 auto",
+        padding: "0 16px",
+        boxSizing: "border-box",
       }}
     >
       <div
@@ -86,8 +88,9 @@ export default function EquipamentoForm({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
             gap: "24px",
+            width: "100%",
           }}
         >
           <div>
@@ -204,10 +207,10 @@ export default function EquipamentoForm({
           <div style={{ gridColumn: "1 / -1" }}>
             <div
               style={{
-                display: "flex",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
                 gap: "20px",
-                flexWrap: "wrap",
-                alignItems: "flex-start",
+                width: "100%",
               }}
             >
               <EquipamentoImageUpload
@@ -254,7 +257,16 @@ export default function EquipamentoForm({
             />
           </div>
 
-          <div style={actionsStyle}>
+          <div
+            style={{
+              ...actionsStyle,
+              gridColumn: "1 / -1",
+              display: "flex",
+              gap: "12px",
+              justifyContent: "flex-end",
+              flexWrap: "wrap",
+            }}
+          >
             <button type="button" onClick={onCancel} style={cancelButton}>
               Cancelar
             </button>

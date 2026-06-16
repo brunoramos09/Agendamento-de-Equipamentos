@@ -220,7 +220,7 @@ export default function InfoEquipamentoModal({ equipamento, onClose }: Props) {
                       fontSize: "14px",
                     }}
                   >
-                    Exibir
+                    Baixar
                   </span>
                 </a>
               ))}

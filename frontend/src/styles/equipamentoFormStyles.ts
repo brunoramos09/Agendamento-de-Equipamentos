@@ -29,6 +29,7 @@ export const actionsStyle: CSSProperties = {
   justifyContent: "flex-end",
   gap: "14px",
   marginTop: "24px",
+  flexWrap: "wrap",
 };
 
 export const cancelButton: CSSProperties = {
@@ -37,6 +38,7 @@ export const cancelButton: CSSProperties = {
   borderRadius: "14px",
   background: "#fff",
   cursor: "pointer",
+  minWidth: "140px",
 };
 
 export const saveButton: CSSProperties = {
@@ -46,10 +48,12 @@ export const saveButton: CSSProperties = {
   background: "#111827",
   color: "#fff",
   cursor: "pointer",
+  minWidth: "140px",
 };
 
 export const imageStyle: CSSProperties = {
-  width: "160px",
+  width: "100%",
+  maxWidth: "160px",
   height: "160px",
   objectFit: "cover",
   borderRadius: "18px",
