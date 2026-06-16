@@ -407,7 +407,7 @@ export function ReservaEquipamentos() {
       metrics={metrics}
       appDescription="Visão geral com informações sobre equipamentos e reservas."
       primaryAction={{
-        label: "Nova reserva",
+        label: "Nova Reserva",
         href: "/reserva-equipamentos/reservas/criar",
       }}
       secondaryAction={{
