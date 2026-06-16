@@ -26,6 +26,21 @@ import * as fs from 'fs';
 export class EquipmentController {
   constructor(private readonly equipmentService: EquipmentService) {}
 
+  @Get('teste-upload')
+  testeUpload() {
+    return {
+      cwd: process.cwd(),
+
+      uploadsExists: fs.existsSync('./uploads'),
+
+      equipmentsExists: fs.existsSync('./uploads/equipments'),
+
+      files: fs.existsSync('./uploads/equipments')
+        ? fs.readdirSync('./uploads/equipments')
+        : [],
+    };
+  }
+
   @Get()
   findAll() {
     return this.equipmentService.findAll();
@@ -114,20 +129,5 @@ export class EquipmentController {
     @Res() res: Response,
   ) {
     await this.equipmentService.generateReport(id, res);
-  }
-
-  @Get('teste-upload')
-  testeUpload() {
-    return {
-      cwd: process.cwd(),
-
-      uploadsExists: fs.existsSync('./uploads'),
-
-      equipmentsExists: fs.existsSync('./uploads/equipments'),
-
-      files: fs.existsSync('./uploads/equipments')
-        ? fs.readdirSync('./uploads/equipments')
-        : [],
-    };
   }
 }
