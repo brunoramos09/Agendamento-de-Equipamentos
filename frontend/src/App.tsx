@@ -57,14 +57,9 @@ function App() {
       <Toaster
         position="top-right"
         richColors
-        //expand={true}
-        //closeButton
         duration={3000}
-        //theme="dark"
         toastOptions={{
           style: {
-            //background: "#111",
-            //color: "#fff",
             borderRadius: "14px",
             fontSize: "14px",
           },

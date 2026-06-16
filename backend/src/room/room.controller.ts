@@ -7,10 +7,12 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Res,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
+import { Response } from 'express';
 
 @Controller('rooms')
 export class RoomController {
@@ -39,5 +41,10 @@ export class RoomController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.roomService.remove(id);
+  }
+
+  @Get(':id/report')
+  async generateRoomReport(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    await this.roomService.generateRoomReport(id, res);
   }
 }

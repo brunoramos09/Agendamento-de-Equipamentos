@@ -69,3 +69,13 @@ export async function excluirSala(id: number): Promise<void> {
     throw new Error("Erro ao excluir sala.");
   }
 }
+
+export async function gerarRelatorioSala(id: number){
+  const response = await fetch(`${API_URL_COMPLETE}/${id}/report`);
+
+  if (!response.ok) {
+    throw new Error("Erro ao gerar relatório");
+  }
+
+  return response.blob();
+}
