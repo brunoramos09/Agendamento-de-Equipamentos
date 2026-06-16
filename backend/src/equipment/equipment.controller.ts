@@ -18,6 +18,9 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
+import { join } from 'path';
+
+import * as fs from 'fs';
 
 @Controller('equipments')
 export class EquipmentController {
@@ -42,7 +45,7 @@ export class EquipmentController {
       ],
       {
         storage: diskStorage({
-          destination: './uploads/equipments',
+          destination: join(process.cwd(), 'uploads/equipments'),
           filename: (req, file, cb) => {
             const originalName = Buffer.from(
               file.originalname,
@@ -80,7 +83,7 @@ export class EquipmentController {
       ],
       {
         storage: diskStorage({
-          destination: './uploads/equipments',
+          destination: join(process.cwd(), 'uploads/equipments'),
           filename: (req, file, cb) => {
             const originalName = Buffer.from(
               file.originalname,
@@ -111,5 +114,20 @@ export class EquipmentController {
     @Res() res: Response,
   ) {
     await this.equipmentService.generateReport(id, res);
+  }
+
+  @Get('teste-upload')
+  testeUpload() {
+    return {
+      cwd: process.cwd(),
+
+      uploadsExists: fs.existsSync('./uploads'),
+
+      equipmentsExists: fs.existsSync('./uploads/equipments'),
+
+      files: fs.existsSync('./uploads/equipments')
+        ? fs.readdirSync('./uploads/equipments')
+        : [],
+    };
   }
 }
