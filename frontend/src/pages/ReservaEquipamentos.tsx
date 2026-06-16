@@ -27,7 +27,7 @@ function formatarData(data: string) {
 
 function calcularTempoAtraso(endDate: string) {
   const diff = Date.now() - new Date(endDate).getTime();
-  
+
   const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
   const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -128,29 +128,86 @@ export function ReservaEquipamentos() {
         );
 
         const ativas = reservasFiltradas.filter(
-          (r) => !r.returnedAt && new Date(r.endDate) >= now,
+          (r) =>
+            !r.returnedAt && r.status === "ATIVA" && new Date(r.endDate) >= now,
         );
 
+        const pendentes = reservasFiltradas.filter(
+          (r) => r.status === "PENDENTE_APROVACAO",
+        );
+
+        const atrasadas = reservasFiltradas
+          .filter(
+            (r) =>
+              !r.returnedAt &&
+              r.status === "ATIVA" &&
+              new Date(r.endDate) < now,
+          )
+          .sort(
+            (a, b) =>
+              new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
+          )
+          .slice(0, 3);
+
         // Métricas condicionais
-        const metricasExibidas: MetricCard[] = [
-          {
-            label: "Equipamentos disponíveis",
-            value: String(disponiveis.length),
-            hint: "Com status disponível",
-          },
-          {
-            label: admin ? "Reservas ativas" : "Minhas reservas ativas",
-            value: String(ativas.length),
-            hint: "Em andamento no momento atual",
-          },
-        ];
+        const metricasExibidas: MetricCard[] = [];
 
         if (admin) {
-          metricasExibidas.unshift({
-            label: "Equipamentos totais",
-            value: String(total),
-            hint: "Total de equipamentos cadastrados",
-          });
+          metricasExibidas.push(
+            {
+              label: "Equipamentos totais",
+              value: String(total),
+              hint: "Cadastrados no sistema",
+            },
+            {
+              label: "Disponíveis",
+              value: String(disponiveis.length),
+              hint: "Prontos para reserva",
+            },
+            {
+              label: "Reservas ativas",
+              value: String(ativas.length),
+              hint: "Em andamento",
+            },
+            {
+              label: "Reservas Pendentes",
+              value: String(pendentes.length),
+              hint: "Aguardando aprovação",
+            },
+            {
+              label: "Manutenção",
+              value: String(manutencao.length),
+              hint: "Equipamentos indisponíveis",
+            },
+            {
+              label: "Revisão",
+              value: String(revisao.length),
+              hint: "Equipamentos aguardando análise",
+            },
+          );
+        } else {
+          metricasExibidas.push(
+            {
+              label: "Minhas reservas ativas",
+              value: String(ativas.length),
+              hint: "Em andamento",
+            },
+            {
+              label: "Minhas reservas pendentes",
+              value: String(pendentes.length),
+              hint: "Aguardando aprovação",
+            },
+            {
+              label: "Minhas reservas atrasadas",
+              value: String(atrasadas.length),
+              hint: "Aguardando devolução",
+            },
+            {
+              label: "Equipamentos disponíveis",
+              value: String(disponiveis.length),
+              hint: "Prontos para reserva",
+            },
+          );
         }
 
         setMetrics(metricasExibidas);
@@ -171,10 +228,27 @@ export function ReservaEquipamentos() {
                     .filter(Boolean)
                     .join(", ");
 
-                  return `${admin ? r.user.name : 'Minha reserva'}${nomes ? ` · ${nomes}` : ""}`;
+                  return `${admin ? r.user.name : "Minha reserva"}${nomes ? ` · ${nomes}` : ""}`;
                 })
                 .join(" / ")
             : "Nenhuma reserva ativa no momento.";
+
+        const descricaoPendentes =
+          pendentes.length > 0
+            ? pendentes
+                .slice(0, 3)
+                .map((r) => {
+                  const nomes = r.equipments
+                    ?.map((item) => item.equipment?.name)
+                    .filter(Boolean)
+                    .join(", ");
+
+                  return `${admin ? r.user.name : "Minha solicitação"}${
+                    nomes ? ` · ${nomes}` : ""
+                  }`;
+                })
+                .join(" / ")
+            : "Nenhuma reserva pendente.";
 
         const metaAtivas =
           proximasVencer.length > 0
@@ -187,7 +261,7 @@ export function ReservaEquipamentos() {
 
         const primeirosManutencao = [...manutencao]
           .sort((a, b) => a.name.localeCompare(b.name))
-          .slice(0, 4);  
+          .slice(0, 4);
 
         const primeirosRevisao = [...revisao]
           .sort((a, b) => a.name.localeCompare(b.name))
@@ -201,14 +275,14 @@ export function ReservaEquipamentos() {
                 )
                 .join(", ")
             : "Nenhum equipamento disponível no momento.";
-        
+
         const descricaoManutencao =
           primeirosManutencao.length > 0
             ? primeirosManutencao
                 .map((e) =>
-                e.room?.name ? `${e.name} (${e.room.name})` : e.name,
-              )
-              .join(", ")
+                  e.room?.name ? `${e.name} (${e.room.name})` : e.name,
+                )
+                .join(", ")
             : "Nenhum equipamento em manutenção no momento.";
 
         const descricaoRevisao =
@@ -220,21 +294,13 @@ export function ReservaEquipamentos() {
                 .join(", ")
             : "Nenhum equipamento aguardando revisão no momento.";
 
-        const atrasadas = reservasFiltradas
-          .filter((r) => !r.returnedAt && new Date(r.endDate) < now)
-          .sort(
-            (a, b) =>
-              new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
-          )
-          .slice(0, 3);
-
         const descricaoAtrasadas =
           atrasadas.length > 0
             ? atrasadas
                 .map((r) => {
                   const tempo = calcularTempoAtraso(r.endDate);
 
-                  return `${admin ? r.user.name : 'Minha reserva'} · ${tempo} em atraso`;
+                  return `${admin ? r.user.name : "Minha reserva"} · ${tempo} em atraso`;
                 })
                 .join(" / ")
             : "Nenhuma reserva em atraso.";
@@ -246,12 +312,38 @@ export function ReservaEquipamentos() {
               } em atraso`
             : "Em dia";
 
+        const rankingEquipamentos = equipamentos
+          .map((equipamento) => ({
+            nome: equipamento.name,
+            totalReservas: reservas.filter((reserva) =>
+              reserva.equipments.some(
+                (item) => item.equipmentId === equipamento.id,
+              ),
+            ).length,
+          }))
+          .filter((item) => item.totalReservas > 0)
+          .sort((a, b) => b.totalReservas - a.totalReservas)
+          .slice(0, 5);
+
+        const descricaoRanking =
+          rankingEquipamentos.length > 0
+            ? rankingEquipamentos
+                .map((item) => `${item.nome} (${item.totalReservas})`)
+                .join(", ")
+            : "Ainda não há equipamentos com reservas.";
+
         const itensExibidos: RecentItem[] = [
           {
             title: admin ? "Reservas ativas" : "Minhas reservas ativas",
             description: descricaoAtivas,
             meta: metaAtivas,
             status: `${ativas.length} ativa${ativas.length !== 1 ? "s" : ""}`,
+          },
+          {
+            title: admin ? "Reservas pendentes" : "Minhas reservas pendentes",
+            description: descricaoPendentes,
+            meta: `${pendentes.length} pendente${pendentes.length !== 1 ? "s" : ""}`,
+            status: "Aguardando aprovação",
           },
           {
             title: admin ? "Reservas atrasadas" : "Minhas reservas atrasadas",
@@ -268,6 +360,15 @@ export function ReservaEquipamentos() {
             status: "Disponível",
           },
         ];
+
+        if (admin) {
+          itensExibidos.push({
+            title: "Equipamentos mais reservados",
+            description: descricaoRanking,
+            meta: "Top 5 por quantidade de reservas",
+            status: "Uso frequente",
+          });
+        }
 
         if (admin) {
           itensExibidos.push({
@@ -313,13 +414,6 @@ export function ReservaEquipamentos() {
         label: "Sair",
         href: "/reserva-equipamentos/login",
       }}
-      featuredTitle="Fluxo principal de reserva"
-      featuredDescription="Selecione um equipamento disponível, escolha o período de uso e acompanhe o status da solicitação."
-      featuredBullets={[
-        "Usuários padrão podem reservar equipamentos e acompanhar suas próprias reservas.",
-        "Administradores podem cadastrar, editar e remover equipamentos.",
-        "Relatórios permitem acompanhar reservas e uso dos equipamentos.",
-      ]}
       recentTitle="Resumo operacional"
       recentItems={recentItems}
     />

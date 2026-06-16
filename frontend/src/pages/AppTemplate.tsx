@@ -127,13 +127,6 @@ export function AppTemplate(props: Readonly<AppTemplateProps>) {
     metrics = defaultMetrics,
     primaryAction = { label: "Acao principal", href: "#primary-action" },
     secondaryAction = { label: "Acao secundaria", href: "#secondary-action" },
-    featuredTitle = "Area destacada",
-    featuredDescription = "Substitua este bloco pelo conteudo central do app. A estrutura ja suporta diferentes paletas, cards e secoes por aplicacao.",
-    featuredBullets = [
-      "Reaproveite a mesma estrutura entre apps.",
-      "Troque apenas os dados e as cores por configuracao.",
-      "Mantenha uma experiencia visual consistente no portal.",
-    ],
     recentTitle = "Painel de informacoes",
     recentItems = defaultRecentItems,
     theme,
@@ -233,69 +226,29 @@ export function AppTemplate(props: Readonly<AppTemplateProps>) {
               ))}
             </section>
 
-            <section className={styles.panelGrid}>
-              <article className={`${styles.panel} ${styles.featuredPanel}`}>
-                <header className={styles.panelHeader}>
-                  <div>
-                    <span className={styles.panelKicker}>Bloco principal</span>
-                    <h2>{featuredTitle}</h2>
-                  </div>
-                </header>
-
-                <p className={styles.featuredText}>{featuredDescription}</p>
-
-                <ul className={styles.bulletList}>
-                  {featuredBullets.map((bullet) => (
-                    <li key={bullet}>{bullet}</li>
-                  ))}
-                </ul>
-              </article>
-
-              <article className={`${styles.panel} ${styles.recentPanel}`}>
-                <header className={styles.panelHeader}>
-                  <div>
-                    <span className={styles.panelKicker}>Resumo rapido</span>
-                    <h2>{recentTitle}</h2>
-                  </div>
-                </header>
-
-                <div className={styles.recentList}>
-                  {recentItems.map((item) => (
-                    <article key={item.title} className={styles.recentItem}>
-                      <div>
-                        <strong>{item.title}</strong>
-                        <p>{item.description}</p>
-                      </div>
-                      <div className={styles.recentMeta}>
-                        <span>{item.meta}</span>
-                        <strong>{item.status}</strong>
-                      </div>
-                    </article>
-                  ))}
+            <article className={`${styles.panel} ${styles.recentPanel}`}>
+              <header className={styles.panelHeader}>
+                <div>
+                  <span className={styles.panelKicker}>Resumo rápido</span>
+                  <h2>{recentTitle}</h2>
                 </div>
-              </article>
+              </header>
 
-              <article
-                className={`${styles.panel} ${styles.placeholderPanel}`}
-                id="overview"
-              >
-                <header className={styles.panelHeader}>
-                  <div>
-                    <span className={styles.panelKicker}>
-                      Conteudo expansivel
-                    </span>
-                    <h2>Espaco para novas secoes</h2>
-                  </div>
-                </header>
-
-                <p>
-                  Use este espaco para tabelas, formularios, tabs, graficos ou
-                  qualquer feature especifica de cada app.
-                </p>
-
-                {children}
-              </article>
-            </section>
+              <div className={styles.recentList}>
+                {recentItems.map((item) => (
+                  <article key={item.title} className={styles.recentItem}>
+                    <div>
+                      <strong>{item.title}</strong>
+                      <p>{item.description}</p>
+                    </div>
+                    <div className={styles.recentMeta}>
+                      <span>{item.meta}</span>
+                      <strong>{item.status}</strong>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </article>
           </>
         )}
       </section>
