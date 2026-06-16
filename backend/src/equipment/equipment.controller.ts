@@ -41,6 +41,18 @@ export class EquipmentController {
     };
   }
 
+  @Get('debug/image-url')
+  debugImageUrl() {
+    return {
+      image: '/uploads/equipments/1781624577449-balança.png',
+    };
+  }
+
+  @Get('debug/static')
+  debugStatic() {
+    return 'ok';
+  }
+
   @Get()
   findAll() {
     return this.equipmentService.findAll();
