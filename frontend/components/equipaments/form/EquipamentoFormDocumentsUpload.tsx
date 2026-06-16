@@ -24,7 +24,9 @@ export default function EquipamentoDocumentsUpload({
           background: "#fff",
           boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
           display: "flex",
-          minWidth: "400px",
+          width: "100%",
+          minWidth: 0,
+          boxSizing: "border-box",
           flexDirection: "column",
           minHeight: "176px",
         }}
@@ -97,8 +99,7 @@ export default function EquipamentoDocumentsUpload({
                   style={{
                     flex: 1,
                     overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    wordBreak: "break-word",
                     fontSize: "14px",
                   }}
                 >
