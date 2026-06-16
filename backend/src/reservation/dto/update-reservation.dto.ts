@@ -22,8 +22,8 @@ class ReservationEquipmentDto {
 
 export class UpdateReservationDto {
   @IsOptional()
-  @IsString()
-  user?: string;
+  @IsInt()
+  userId?: number;
 
   @IsOptional()
   @IsDateString()

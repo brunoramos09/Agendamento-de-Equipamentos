@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -65,8 +67,11 @@ export class EquipmentService {
           },
         });
       }
-      
-      if (currentEquipment.status === 'MANUTENCAO' && data.status === 'DISPONIVEL') {
+
+      if (
+        currentEquipment.status === 'MANUTENCAO' &&
+        data.status === 'DISPONIVEL'
+      ) {
         const openMaintenance = await this.prisma.maintenance.findFirst({
           where: {
             equipmentId: id,
@@ -112,7 +117,11 @@ export class EquipmentService {
         maintenances: true,
         reservations: {
           include: {
-            reservation: true,
+            reservation: {
+              include: {
+                user: true,
+              },
+            },
           },
         },
       },

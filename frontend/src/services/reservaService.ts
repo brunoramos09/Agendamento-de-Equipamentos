@@ -3,11 +3,15 @@ import { API_URL } from "./api";
 
 const API_URL_COMPLETE = `${API_URL}/reservations`;
 
-export async function listarReservas() {
-  const response = await fetch(API_URL_COMPLETE);
+export async function listarReservas(userId?: number) {
+  const url = userId
+    ? `${API_URL}/reservations?userId=${userId}`
+    : `${API_URL}/reservations`;
+
+  const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error("Erro ao listar reservas.");
+    throw new Error("Erro ao listar reservas");
   }
 
   return response.json();
@@ -61,7 +65,9 @@ export async function atualizarReserva(id: number, payload: any) {
 
 export async function devolverReserva(
   id: number,
-  payload: { hadIssue: boolean; returnObservations?: string } = { hadIssue: false },
+  payload: { hadIssue: boolean; returnObservations?: string } = {
+    hadIssue: false,
+  },
 ) {
   const response = await fetch(`${API_URL_COMPLETE}/${id}/return`, {
     method: "PATCH",
@@ -70,13 +76,13 @@ export async function devolverReserva(
     },
     body: JSON.stringify(payload),
   });
- 
+
   if (!response.ok) {
     const erro = await response.json().catch(() => null);
- 
+
     throw new Error(erro?.message || "Erro ao devolver reserva.");
   }
- 
+
   return response.json();
 }
 

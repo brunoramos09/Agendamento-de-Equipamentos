@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
@@ -46,6 +47,8 @@ export default function Reservas() {
   const [reservaExcluir, setReservaExcluir] = useState<Reservation | null>(
     null,
   );
+  const [mostrarSomenteMinhas, setMostrarSomenteMinhas] = useState(false);
+  const usuario = JSON.parse(localStorage.getItem("usuario") ?? "null");
 
   const [excluindo, setExcluindo] = useState(false);
   const [devolvendo, setDevolvendo] = useState(false);
@@ -61,7 +64,7 @@ export default function Reservas() {
 
   useEffect(() => {
     carregarReservas();
-  }, []);
+  }, [mostrarSomenteMinhas]);
 
   useEffect(() => {
     setPagina(1);
@@ -72,7 +75,11 @@ export default function Reservas() {
       setLoading(true);
       setErro("");
 
-      const dados = await listarReservas();
+      const dados =
+        usuario?.role === "ADMIN"
+          ? await listarReservas(mostrarSomenteMinhas ? usuario.id : undefined)
+          : await listarReservas(usuario.id);
+
       setReservas(dados);
     } catch (error) {
       console.error(error);
@@ -170,13 +177,36 @@ export default function Reservas() {
 
       <ReservaSearch pesquisa={pesquisa} onChangePesquisa={setPesquisa} />
 
+      {usuario?.role === "ADMIN" && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: "16px",
+          }}
+        >
+          <button
+            onClick={() => setMostrarSomenteMinhas((valor) => !valor)}
+            style={{
+              padding: "12px 20px",
+              borderRadius: "999px",
+              border: "1px solid #d1d5db",
+              background: mostrarSomenteMinhas ? "#0f172a" : "#ffffff",
+              color: mostrarSomenteMinhas ? "#ffffff" : "#334155",
+              fontWeight: 600,
+              fontSize: "15px",
+              cursor: "pointer",
+              transition: "all .2s ease",
+            }}
+          >
+            {mostrarSomenteMinhas ? "Minhas Reservas" : "Todas as Reservas"}
+          </button>
+        </div>
+      )}
+
       {loading && <p>Carregando reservas...</p>}
 
       {erro && <p style={erroStyle}>{erro}</p>}
-
-      {!loading && !erro && reservasFiltradas.length === 0 && (
-        <p style={{ color: "#6b7280" }}>Nenhuma reserva encontrada.</p>
-      )}
 
       {!loading && !erro && reservasFiltradas.length > 0 && (
         <>
@@ -213,7 +243,7 @@ export default function Reservas() {
 
             <p style={modalDescriptionStyle}>
               Reserva <strong>#{modalDevolucao.reserva.id}</strong> ·{" "}
-              {modalDevolucao.reserva.user}
+              {modalDevolucao.reserva.user.name}
             </p>
 
             <label style={checkboxLabelStyle}>

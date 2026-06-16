@@ -4,7 +4,15 @@ export default function Login() {
   const navigate = useNavigate();
 
   function entrarComoAdmin() {
-    localStorage.setItem("role", "ADMIN");
+    localStorage.setItem(
+      "usuario",
+      JSON.stringify({
+        id: 1,
+        name: "Admin",
+        email: "admin@teste.com",
+        role: "ADMIN",
+      }),
+    );
 
     navigate("/reserva-equipamentos");
 
@@ -12,9 +20,16 @@ export default function Login() {
       window.location.reload();
     }, 0);
   }
-
   function entrarComoUsuario() {
-    localStorage.setItem("role", "USER");
+    localStorage.setItem(
+      "usuario",
+      JSON.stringify({
+        id: 2,
+        name: "Default",
+        email: "default@teste.com",
+        role: "NORMAL",
+      }),
+    );
 
     navigate("/reserva-equipamentos");
 

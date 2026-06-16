@@ -1,25 +1,46 @@
 export type UserRole = "ADMIN" | "USER";
 
-const ROLE_KEY = "role";
+export interface Usuario {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+}
 
-export function setRole(role: UserRole) {
-  localStorage.setItem(ROLE_KEY, role);
+const USER_KEY = "usuario";
+
+export function setUsuario(usuario: Usuario) {
+  localStorage.setItem(USER_KEY, JSON.stringify(usuario));
+}
+
+export function getUsuario(): Usuario | null {
+  const usuario = localStorage.getItem(USER_KEY);
+
+  if (!usuario) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(usuario) as Usuario;
+  } catch {
+    return null;
+  }
 }
 
 export function getRole(): UserRole {
-  const role = localStorage.getItem(ROLE_KEY);
+  const usuario = getUsuario();
 
-  if (role === "ADMIN") {
+  if (usuario?.role === "ADMIN") {
     return "ADMIN";
   }
 
   return "USER";
 }
 
-export function isAdmin() {
+export function isAdmin(): boolean {
   return getRole() === "ADMIN";
 }
 
 export function logoutRole() {
-  localStorage.removeItem(ROLE_KEY);
+  localStorage.removeItem(USER_KEY);
 }

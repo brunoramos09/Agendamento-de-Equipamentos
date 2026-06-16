@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -18,8 +19,8 @@ export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
   @Get()
-  findAll() {
-    return this.reservationService.findAll();
+  findAll(@Query('userId') userId?: string) {
+    return this.reservationService.findAll(userId ? Number(userId) : undefined);
   }
 
   @Get(':id')

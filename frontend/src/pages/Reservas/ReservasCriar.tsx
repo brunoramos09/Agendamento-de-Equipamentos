@@ -111,11 +111,6 @@ export default function CriarReserva() {
   }
 
   function validarReserva() {
-    if (!reserva.user.trim()) {
-      notify.error("Informe o nome do usuário.");
-      return false;
-    }
-
     if (!startDate) {
       notify.error("Informe a data inicial.");
       return false;
@@ -147,11 +142,13 @@ export default function CriarReserva() {
 
       setSalvando(true);
 
+      const usuario = JSON.parse(localStorage.getItem("usuario") ?? "null");
+
       await criarReserva({
-        user: reserva.user.trim(),
+        userId: usuario.id,
         startDate: startDate!.toISOString(),
         endDate: endDate!.toISOString(),
-        observations: reserva.observations.trim() || undefined,
+        observations: reserva.observations,
         equipments: reserva.equipments,
       });
 
