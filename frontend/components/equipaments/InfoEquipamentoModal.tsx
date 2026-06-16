@@ -5,6 +5,7 @@ import {
   modalBoxStyle,
   buttonStyle,
 } from "../../src/styles/equipamentosStyles";
+import { equipmentFileUrl } from "../../src/services/api";
 
 type Props = {
   equipamento: Equipment | null;
@@ -184,7 +185,7 @@ export default function InfoEquipamentoModal({ equipamento, onClose }: Props) {
               {equipamento.attachedDocuments.map((documento, index) => (
                 <a
                   key={index}
-                  href={`${filesUrl}/uploads/equipments/${documento}`}
+                  href={equipmentFileUrl(documento)}
                   target="_blank"
                   rel="noopener noreferrer"
                   download

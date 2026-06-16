@@ -20,37 +20,13 @@ import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { join } from 'path';
 
-import * as fs from 'fs';
-
 @Controller('equipments')
 export class EquipmentController {
   constructor(private readonly equipmentService: EquipmentService) {}
 
-  @Get('teste-upload')
-  testeUpload() {
-    return {
-      cwd: process.cwd(),
-
-      uploadsExists: fs.existsSync('./uploads'),
-
-      equipmentsExists: fs.existsSync('./uploads/equipments'),
-
-      files: fs.existsSync('./uploads/equipments')
-        ? fs.readdirSync('./uploads/equipments')
-        : [],
-    };
-  }
-
-  @Get('debug/image-url')
-  debugImageUrl() {
-    return {
-      image: '/uploads/equipments/1781624577449-balança.png',
-    };
-  }
-
-  @Get('debug/static')
-  debugStatic() {
-    return 'ok';
+  @Get('file/:name')
+  getFile(@Param('name') name: string, @Res() res: Response) {
+    return res.sendFile(join(process.cwd(), 'uploads', 'equipments', name));
   }
 
   @Get()

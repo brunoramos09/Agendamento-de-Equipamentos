@@ -2,8 +2,8 @@
 import type { CSSProperties } from "react";
 import type Room from "../../src/interfaces/sala";
 import type { EquipamentoFormData } from "./types";
-import { filesUrl } from "../../src/utils/equipamentosUtils";
 import { FiTrash2 } from "react-icons/fi";
+import { equipmentFileUrl } from "../../src/services/api";
 
 type StatusOption = {
   value: "DISPONIVEL" | "MANUTENCAO" | "INATIVO";
@@ -227,7 +227,7 @@ export default function EquipamentoForm({
                     />
                   ) : equipamento.photoUrl ? (
                     <img
-                      src={`${filesUrl}/uploads/equipments/${equipamento.photoUrl}`}
+                      src={equipmentFileUrl(equipamento.photoUrl)}
                       alt="Preview"
                       style={imageStyle}
                     />
@@ -354,7 +354,7 @@ export default function EquipamentoForm({
                           {equipamento.attachedDocuments?.map((doc, index) => (
                             <a
                               key={index}
-                              href={`${filesUrl}/uploads/equipments/${doc}`}
+                              href={equipmentFileUrl(doc)}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
