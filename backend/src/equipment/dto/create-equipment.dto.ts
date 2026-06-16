@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 
 export enum EquipmentStatus {
   DISPONIVEL = 'DISPONIVEL',
@@ -47,4 +47,8 @@ export class CreateEquipmentDto {
   @IsOptional()
   @IsString()
   maintenanceObservations?: string;
+
+  @IsOptional()
+  @IsArray()
+  attachedDocuments?: string[];
 }

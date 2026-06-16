@@ -49,6 +49,9 @@ export default function EditarEquipamento() {
     roomId: 0,
     status: "DISPONIVEL",
     photo: null,
+    photoUrl: "",
+    documents: [],
+    attachedDocuments: [],
   });
 
   usePageTitle("Equipamentos: Editar");
@@ -79,6 +82,10 @@ export default function EditarEquipamento() {
         roomId: equipamentoData.roomId,
         status: equipamentoData.status,
         photo: null,
+        photoUrl: equipamentoData.photo ?? "",
+
+        documents: [],
+        attachedDocuments: equipamentoData.attachedDocuments ?? [],
       });
     } catch (error) {
       console.error(error);
@@ -122,6 +129,12 @@ export default function EditarEquipamento() {
 
       if (equipamento.photo) {
         formData.append("photo", equipamento.photo);
+      }
+
+      if (equipamento.documents) {
+        equipamento.documents.forEach((file) => {
+          formData.append("documents", file);
+        });
       }
 
       await atualizarEquipamento(Number(id), formData);

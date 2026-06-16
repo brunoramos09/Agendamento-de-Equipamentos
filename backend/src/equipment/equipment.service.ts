@@ -44,16 +44,34 @@ export class EquipmentService {
     return equipment;
   }
 
-  create(data: CreateEquipmentDto, photo?: any) {
+  async create(
+    data: CreateEquipmentDto,
+    files: {
+      photo?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ) {
+    const photo = files.photo?.[0];
+
+    const documents = files.documents?.map((file) => file.filename) ?? [];
+
     return this.prisma.equipment.create({
       data: {
         ...data,
-        photo: photo?.filename,
+        photo: photo?.filename ?? null,
+        attachedDocuments: documents,
       },
     });
   }
 
-  async update(id: number, data: UpdateEquipmentDto) {
+  async update(
+    id: number,
+    data: UpdateEquipmentDto,
+    files?: {
+      photo?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ) {
     const currentEquipment = await this.findOne(id);
 
     if (data.status && data.status !== currentEquipment.status) {
@@ -95,9 +113,22 @@ export class EquipmentService {
       ...equipmentData
     } = data as any;
 
+    const photo = files?.photo?.[0];
+    const documents = files?.documents?.map((file) => file.filename) ?? [];
+
     return this.prisma.equipment.update({
       where: { id },
-      data: equipmentData,
+      data: {
+        ...equipmentData,
+
+        ...(photo && {
+          photo: photo.filename,
+        }),
+
+        ...(documents.length > 0 && {
+          attachedDocuments: documents,
+        }),
+      },
     });
   }
 

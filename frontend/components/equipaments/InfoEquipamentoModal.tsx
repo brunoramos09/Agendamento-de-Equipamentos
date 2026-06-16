@@ -155,6 +155,68 @@ export default function InfoEquipamentoModal({ equipamento, onClose }: Props) {
           </p>
         </div>
 
+        {equipamento.attachedDocuments?.length > 0 && (
+          <div
+            style={{
+              background: "#f9fafb",
+              border: "1px solid #e5e7eb",
+              borderRadius: "12px",
+              padding: "16px",
+              marginBottom: "24px",
+            }}
+          >
+            <h3
+              style={{
+                margin: "0 0 12px",
+                fontSize: "16px",
+              }}
+            >
+              Documentos Anexados
+            </h3>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              {equipamento.attachedDocuments.map((documento, index) => (
+                <a
+                  key={index}
+                  href={`${filesUrl}/uploads/equipments/${documento}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 14px",
+                    background: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "10px",
+                    textDecoration: "none",
+                    color: "#111827",
+                    fontWeight: 500,
+                  }}
+                >
+                  <span>{documento.replace(/^\d+-/, "")}</span>
+
+                  <span
+                    style={{
+                      color: "#2563eb",
+                      fontSize: "14px",
+                    }}
+                  >
+                    Exibir
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div
           style={{
             display: "flex",

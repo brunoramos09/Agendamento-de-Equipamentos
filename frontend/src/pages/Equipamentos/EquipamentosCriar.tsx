@@ -30,6 +30,8 @@ export default function CriarEquipamento() {
     roomId: 0,
     status: "DISPONIVEL",
     photo: null,
+    documents: [],
+    attachedDocuments: [""],
   });
 
   usePageTitle("Equipamentos: Novo");
@@ -88,6 +90,12 @@ export default function CriarEquipamento() {
 
       if (equipamento.photo) {
         formData.append("photo", equipamento.photo);
+      }
+
+      if (equipamento.documents) {
+        equipamento.documents.forEach((file) => {
+          formData.append("documents", file);
+        });
       }
 
       await criarEquipamento(formData);

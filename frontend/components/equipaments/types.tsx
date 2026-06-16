@@ -7,4 +7,8 @@ export type EquipamentoFormData = {
   roomId: number;
   status: "DISPONIVEL" | "MANUTENCAO" | "INATIVO";
   photo: File | null;
+  photoUrl?: string;
+
+  documents?: File[];
+  attachedDocuments?: string[];
 };

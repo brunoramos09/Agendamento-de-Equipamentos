@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Body,
   Controller,
@@ -9,15 +7,14 @@ import {
   Post,
   Patch,
   Delete,
-  UploadedFile,
   UseInterceptors,
   Res,
+  UploadedFiles,
 } from '@nestjs/common';
 import { Response } from 'express';
 
-import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
@@ -38,17 +35,35 @@ export class EquipmentController {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor('photo', {
-      storage: diskStorage({
-        destination: './uploads/equipments',
-        filename: (req, file, cb) => {
-          cb(null, `${Date.now()}-${file.originalname}`);
-        },
-      }),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: 'photo', maxCount: 1 },
+        { name: 'documents', maxCount: 20 },
+      ],
+      {
+        storage: diskStorage({
+          destination: './uploads/equipments',
+          filename: (req, file, cb) => {
+            const originalName = Buffer.from(
+              file.originalname,
+              'latin1',
+            ).toString('utf8');
+
+            cb(null, `${Date.now()}-${originalName}`);
+          },
+        }),
+      },
+    ),
   )
-  create(@Body() body: CreateEquipmentDto, @UploadedFile() photo: any) {
-    return this.equipmentService.create(body, photo);
+  create(
+    @Body() body: CreateEquipmentDto,
+    @UploadedFiles()
+    files: {
+      photo?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ) {
+    return this.equipmentService.create(body, files);
   }
 
   @Delete(':id')
@@ -58,29 +73,43 @@ export class EquipmentController {
 
   @Patch(':id')
   @UseInterceptors(
-    FileInterceptor('photo', {
-      storage: diskStorage({
-        destination: './uploads/equipments',
-        filename: (req, file, cb) => {
-          cb(null, `${Date.now()}-${file.originalname}`);
-        },
-      }),
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: 'photo', maxCount: 1 },
+        { name: 'documents', maxCount: 3 },
+      ],
+      {
+        storage: diskStorage({
+          destination: './uploads/equipments',
+          filename: (req, file, cb) => {
+            const originalName = Buffer.from(
+              file.originalname,
+              'latin1',
+            ).toString('utf8');
+
+            cb(null, `${Date.now()}-${originalName}`);
+          },
+        }),
+      },
+    ),
   )
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateEquipmentDto,
-    @UploadedFile() photo?: any,
+    @UploadedFiles()
+    files: {
+      photo?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
   ) {
-    if (photo) {
-      body.photo = photo.filename;
-    }
-
-    return this.equipmentService.update(id, body);
+    return this.equipmentService.update(id, body, files);
   }
 
   @Get(':id/report')
-  async generateReport(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+  async generateReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
     await this.equipmentService.generateReport(id, res);
   }
 }
