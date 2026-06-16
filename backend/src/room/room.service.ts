@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Response } from 'express';
-import PDFDocument from 'pdfkit'
+import PDFDocument from 'pdfkit';
 
 @Injectable()
 export class RoomService {
@@ -112,17 +113,19 @@ export class RoomService {
       const cols = getColumns();
       doc.rect(margin, y, contentW, 22).fill('#f1f5f9');
       doc.fillColor('#475569').fontSize(8).font('Helvetica-Bold');
-      doc.text('NOME',        cols.nome.x       + 8, y + 7, { characterSpacing: 0.8 });
-      doc.text('RESPONSÁVEL', cols.responsavel.x + 8, y + 7, { characterSpacing: 0.8 });
-      doc.text('STATUS',      cols.status.x      + 8, y + 7, { characterSpacing: 0.8 });
+      doc.text('NOME', cols.nome.x + 8, y + 7, { characterSpacing: 0.8 });
+      doc.text('RESPONSÁVEL', cols.responsavel.x + 8, y + 7, {
+        characterSpacing: 0.8,
+      });
+      doc.text('STATUS', cols.status.x + 8, y + 7, { characterSpacing: 0.8 });
       return y + 22;
     }
 
     function getColumns() {
       return {
-        nome:        { x: margin,       w: 180 },
+        nome: { x: margin, w: 180 },
         responsavel: { x: margin + 188, w: 150 },
-        status:      { x: margin + 346, w: 100 },
+        status: { x: margin + 346, w: 100 },
       };
     }
 
@@ -178,9 +181,9 @@ export class RoomService {
     const cardW = (contentW - cardGap * 2) / 3;
 
     const cards = [
-      { label: 'Prédio',  value: room.building ?? '-' },
-      { label: 'Andar',   value: room.floor    ?? '-' },
-      { label: 'Campus',  value: room.campus   ?? '-' },
+      { label: 'Prédio', value: room.building ?? '-' },
+      { label: 'Andar', value: room.floor ?? '-' },
+      { label: 'Campus', value: room.campus ?? '-' },
     ];
 
     cards.forEach((card, i) => {
@@ -190,7 +193,9 @@ export class RoomService {
         .fillColor('#64748b')
         .fontSize(8)
         .font('Helvetica')
-        .text(card.label.toUpperCase(), x + 14, cardY + 12, { characterSpacing: 1 });
+        .text(card.label.toUpperCase(), x + 14, cardY + 12, {
+          characterSpacing: 1,
+        });
       doc
         .fillColor('#0f172a')
         .fontSize(13)
@@ -227,15 +232,15 @@ export class RoomService {
 
     // ── Linhas da tabela ──────────────────────────────────────────────────────
     const statusColors: Record<string, { bg: string; text: string }> = {
-      DISPONIVEL:         { bg: '#dcfce7', text: '#166534' },
-      MANUTENCAO:         { bg: '#fef3c7', text: '#92400e' },
-      INATIVO:            { bg: '#fee2e2', text: '#991b1b' },
+      DISPONIVEL: { bg: '#dcfce7', text: '#166534' },
+      MANUTENCAO: { bg: '#fef3c7', text: '#92400e' },
+      INATIVO: { bg: '#fee2e2', text: '#991b1b' },
       AGUARDANDO_REVISAO: { bg: '#ede9fe', text: '#6d28d9' },
     };
     const statusLabels: Record<string, string> = {
-      DISPONIVEL:         'Disponível',
-      MANUTENCAO:         'Manutenção',
-      INATIVO:            'Inativo',
+      DISPONIVEL: 'Disponível',
+      MANUTENCAO: 'Manutenção',
+      INATIVO: 'Inativo',
       AGUARDANDO_REVISAO: 'Ag. Revisão',
     };
 
@@ -255,16 +260,17 @@ export class RoomService {
         doc.rect(margin, rowY, contentW, rowH).fill('#f8fafc');
       }
 
-      const sc = statusColors[equip.status] ?? { bg: '#f1f5f9', text: '#475569' };
+      const sc = statusColors[equip.status] ?? {
+        bg: '#f1f5f9',
+        text: '#475569',
+      };
       const statusText = statusLabels[equip.status] ?? equip.status;
 
       doc.fillColor('#0f172a').fontSize(10).font('Helvetica');
-      doc.text(
-        equip.name,
-        cols.nome.x + 8,
-        rowY + 9,
-        { width: cols.nome.w - 12, ellipsis: true },
-      );
+      doc.text(equip.name, cols.nome.x + 8, rowY + 9, {
+        width: cols.nome.w - 12,
+        ellipsis: true,
+      });
       doc.text(
         equip.responsibleEmployee ?? '-',
         cols.responsavel.x + 8,
@@ -280,7 +286,10 @@ export class RoomService {
         .fillColor(sc.text)
         .fontSize(8)
         .font('Helvetica-Bold')
-        .text(statusText, badgeX, badgeY + 4, { width: badgeW, align: 'center' });
+        .text(statusText, badgeX, badgeY + 4, {
+          width: badgeW,
+          align: 'center',
+        });
 
       doc.rect(margin, rowY + rowH - 1, contentW, 1).fill('#f1f5f9');
 
