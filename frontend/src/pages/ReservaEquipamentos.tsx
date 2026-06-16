@@ -6,6 +6,7 @@ import { listarReservas } from "../services/reservaService";
 import type Equipment from "../interfaces/equipamento";
 import type Reservation from "../interfaces/reserva";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { isAdmin, getUsuario } from "../utils/authRole";
 
 type MetricCard = {
   label: string;
@@ -24,9 +25,19 @@ function formatarData(data: string) {
   return new Date(data).toLocaleDateString("pt-BR");
 }
 
-function diasAtraso(endDate: string) {
+function calcularTempoAtraso(endDate: string) {
   const diff = Date.now() - new Date(endDate).getTime();
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  const partes = [];
+  if (dias > 0) partes.push(`${dias}d`);
+  if (horas > 0) partes.push(`${horas}h`);
+  if (minutos > 0) partes.push(`${minutos}m`);
+
+  return partes.length > 0 ? partes.join(" ") : "Poucos minutos";
 }
 
 const defaultMetrics: MetricCard[] = [
@@ -55,16 +66,22 @@ const defaultRecentItems: RecentItem[] = [
     status: "—",
   },
   {
+    title: "Reservas atrasadas",
+    description: "Carregando...",
+    meta: "—",
+    status: "—",
+  },
+  {
     title: "Equipamentos disponíveis",
     description: "Carregando...",
     meta: "—",
     status: "—",
   },
   {
-    title: "Reservas atrasadas",
+    title: "Equipamentos em manutenção",
     description: "Carregando...",
-    meta: "—",
-    status: "—",
+    meta: "-",
+    status: "-",
   },
   {
     title: "Equipamentos aguardando revisão",
@@ -79,6 +96,9 @@ export function ReservaEquipamentos() {
   const [recentItems, setRecentItems] =
     useState<RecentItem[]>(defaultRecentItems);
 
+  const admin = isAdmin();
+  const usuarioLogado = getUsuario();
+
   usePageTitle("Visão Geral");
 
   useEffect(() => {
@@ -89,37 +109,51 @@ export function ReservaEquipamentos() {
 
         const now = new Date();
 
+        const reservasFiltradas = admin
+          ? reservas
+          : reservas.filter((r) => r.user.name === usuarioLogado?.name);
+
         const total = equipamentos.length;
 
         const disponiveis = equipamentos.filter(
           (e) => e.status === "DISPONIVEL",
         );
 
+        const manutencao = equipamentos.filter(
+          (e) => e.status === "MANUTENCAO",
+        );
+
         const revisao = equipamentos.filter(
           (e) => e.status === "AGUARDANDO_REVISAO",
         );
 
-        const ativas = reservas.filter(
+        const ativas = reservasFiltradas.filter(
           (r) => !r.returnedAt && new Date(r.endDate) >= now,
         );
 
-        setMetrics([
-          {
-            label: "Equipamentos totais",
-            value: String(total),
-            hint: "Total de equipamentos cadastrados",
-          },
+        // Métricas condicionais
+        const metricasExibidas: MetricCard[] = [
           {
             label: "Equipamentos disponíveis",
             value: String(disponiveis.length),
             hint: "Com status disponível",
           },
           {
-            label: "Reservas ativas",
+            label: admin ? "Reservas ativas" : "Minhas reservas ativas",
             value: String(ativas.length),
             hint: "Em andamento no momento atual",
           },
-        ]);
+        ];
+
+        if (admin) {
+          metricasExibidas.unshift({
+            label: "Equipamentos totais",
+            value: String(total),
+            hint: "Total de equipamentos cadastrados",
+          });
+        }
+
+        setMetrics(metricasExibidas);
 
         const proximasVencer = [...ativas]
           .sort(
@@ -137,7 +171,7 @@ export function ReservaEquipamentos() {
                     .filter(Boolean)
                     .join(", ");
 
-                  return `${r.user}${nomes ? ` · ${nomes}` : ""}`;
+                  return `${admin ? r.user.name : 'Minha reserva'}${nomes ? ` · ${nomes}` : ""}`;
                 })
                 .join(" / ")
             : "Nenhuma reserva ativa no momento.";
@@ -151,6 +185,10 @@ export function ReservaEquipamentos() {
           .sort((a, b) => a.name.localeCompare(b.name))
           .slice(0, 4);
 
+        const primeirosManutencao = [...manutencao]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .slice(0, 4);  
+
         const primeirosRevisao = [...revisao]
           .sort((a, b) => a.name.localeCompare(b.name))
           .slice(0, 4);
@@ -163,6 +201,15 @@ export function ReservaEquipamentos() {
                 )
                 .join(", ")
             : "Nenhum equipamento disponível no momento.";
+        
+        const descricaoManutencao =
+          primeirosManutencao.length > 0
+            ? primeirosManutencao
+                .map((e) =>
+                e.room?.name ? `${e.name} (${e.room.name})` : e.name,
+              )
+              .join(", ")
+            : "Nenhum equipamento em manutenção no momento.";
 
         const descricaoRevisao =
           primeirosRevisao.length > 0
@@ -173,7 +220,7 @@ export function ReservaEquipamentos() {
                 .join(", ")
             : "Nenhum equipamento aguardando revisão no momento.";
 
-        const atrasadas = reservas
+        const atrasadas = reservasFiltradas
           .filter((r) => !r.returnedAt && new Date(r.endDate) < now)
           .sort(
             (a, b) =>
@@ -185,11 +232,9 @@ export function ReservaEquipamentos() {
           atrasadas.length > 0
             ? atrasadas
                 .map((r) => {
-                  const dias = diasAtraso(r.endDate);
+                  const tempo = calcularTempoAtraso(r.endDate);
 
-                  return `${r.user} · ${dias} dia${
-                    dias !== 1 ? "s" : ""
-                  } em atraso`;
+                  return `${admin ? r.user.name : 'Minha reserva'} · ${tempo} em atraso`;
                 })
                 .join(" / ")
             : "Nenhuma reserva em atraso.";
@@ -201,12 +246,18 @@ export function ReservaEquipamentos() {
               } em atraso`
             : "Em dia";
 
-        setRecentItems([
+        const itensExibidos: RecentItem[] = [
           {
-            title: "Reservas ativas",
+            title: admin ? "Reservas ativas" : "Minhas reservas ativas",
             description: descricaoAtivas,
             meta: metaAtivas,
             status: `${ativas.length} ativa${ativas.length !== 1 ? "s" : ""}`,
+          },
+          {
+            title: admin ? "Reservas atrasadas" : "Minhas reservas atrasadas",
+            description: descricaoAtrasadas,
+            meta: metaAtrasadas,
+            status: atrasadas.length > 0 ? "Atenção" : "Em dia",
           },
           {
             title: "Equipamentos disponíveis",
@@ -216,28 +267,38 @@ export function ReservaEquipamentos() {
             }`,
             status: "Disponível",
           },
-          {
-            title: "Reservas atrasadas",
-            description: descricaoAtrasadas,
-            meta: metaAtrasadas,
-            status: atrasadas.length > 0 ? "Atenção" : "Em dia",
-          },
-          {
+        ];
+
+        if (admin) {
+          itensExibidos.push({
+            title: "Equipamentos em manutenção",
+            description: descricaoManutencao,
+            meta: `${manutencao.length} equipamento${
+              manutencao.length !== 1 ? "s" : ""
+            }`,
+            status: "Manutenção",
+          });
+        }
+
+        if (admin) {
+          itensExibidos.push({
             title: "Equipamentos aguardando revisão",
             description: descricaoRevisao,
             meta: `${revisao.length} equipamento${
               revisao.length !== 1 ? "s" : ""
             }`,
             status: "Aguardando revisão",
-          },
-        ]);
+          });
+        }
+
+        setRecentItems(itensExibidos);
       } catch (error) {
         console.error(error);
       }
     }
 
     fetchDados();
-  }, []);
+  }, [admin, usuarioLogado]);
 
   return (
     <AppTemplate
