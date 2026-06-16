@@ -5,6 +5,7 @@ import {
   buttonStyle,
 } from "../../src/styles/equipamentosStyles";
 import { API_URL, equipmentFileUrl } from "../../src/services/api";
+import { statusLabels } from "../../src/utils/equipamentoFormConstants";
 
 type Props = {
   equipamento: Equipment | null;
@@ -94,7 +95,17 @@ export default function InfoEquipamentoModal({ equipamento, onClose }: Props) {
           <span>{equipamento.responsibleEmployee || "-"}</span>
 
           <strong>Status</strong>
-          <span>{equipamento.status || "-"}</span>
+          <span>{statusLabels[equipamento.status] ?? equipamento.status}</span>
+
+          {equipamento.status === "MANUTENCAO" && (
+            <>
+              <strong>Descrição</strong>
+              <span>
+                {equipamento.maintenances?.find((m) => !m.endDate)
+                  ?.observations ?? "Sem descrição"}
+              </span>
+            </>
+          )}
         </div>
 
         <div

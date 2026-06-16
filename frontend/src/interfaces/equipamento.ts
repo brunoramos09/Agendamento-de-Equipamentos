@@ -13,7 +13,20 @@ export interface Room {
   createdAt: string;
   updatedAt: string;
 }
+export interface Maintenance {
+  id: number;
 
+  equipmentId: number;
+
+  startDate: string;
+  endDate: string | null;
+
+  responsiblePerson: string | null;
+  observations: string | null;
+
+  createdAt: string;
+  updatedAt: string;
+}
 export default interface Equipment {
   id: number;
 
@@ -42,4 +55,10 @@ export default interface Equipment {
   createdAt: string;
 
   updatedAt: string;
+
+  maintenances?: {
+    id: number;
+    observations?: string | null;
+    endDate?: string | null;
+  }[];
 }

@@ -110,6 +110,7 @@ export default function EquipamentoForm({
             <label style={labelStyle}>Patrimônio</label>
 
             <input
+              required
               value={equipamento.serialNumber}
               onChange={(e) =>
                 setEquipamento({
@@ -181,6 +182,7 @@ export default function EquipamentoForm({
             <label style={labelStyle}>Status</label>
 
             <select
+              required
               value={equipamento.status}
               disabled={statusDisabled}
               onChange={(e) =>

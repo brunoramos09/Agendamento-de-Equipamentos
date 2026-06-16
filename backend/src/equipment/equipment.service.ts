@@ -17,6 +17,7 @@ export class EquipmentService {
     return this.prisma.equipment.findMany({
       include: {
         room: true,
+        maintenances: true,
       },
       orderBy: {
         id: 'asc',
@@ -29,6 +30,13 @@ export class EquipmentService {
       where: { id },
       include: {
         room: true,
+
+        maintenances: {
+          orderBy: {
+            startDate: 'desc',
+          },
+        },
+
         reservations: {
           include: {
             reservation: true,
