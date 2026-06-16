@@ -51,6 +51,7 @@ export class EquipmentService {
       documents?: Express.Multer.File[];
     },
   ) {
+    console.log('DOCUMENTS:', files.documents);
     const photo = files.photo?.[0];
 
     const documents = files.documents?.map((file) => file.filename) ?? [];
