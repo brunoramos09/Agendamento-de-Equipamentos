@@ -1,11 +1,10 @@
 import type Equipment from "../../src/interfaces/equipamento";
-import { filesUrl } from "../../src/utils/equipamentosUtils";
 import {
   modalOverlayStyle,
   modalBoxStyle,
   buttonStyle,
 } from "../../src/styles/equipamentosStyles";
-import { equipmentFileUrl } from "../../src/services/api";
+import { API_URL, equipmentFileUrl } from "../../src/services/api";
 
 type Props = {
   equipamento: Equipment | null;
@@ -61,7 +60,7 @@ export default function InfoEquipamentoModal({ equipamento, onClose }: Props) {
             }}
           >
             <img
-              src={`${filesUrl}/uploads/equipments/${equipamento.photo}`}
+              src={`${API_URL}/equipments/file/${encodeURIComponent(equipamento.photo)}`}
               alt={equipamento.name}
               style={{
                 width: "100%",
