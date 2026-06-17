@@ -84,7 +84,13 @@ export default function ReservaBasicFields({
           return total + (item?.subdivisionsQuantity ?? 0);
         }, 0);
 
-      return reservadas >= totalSubdivisoes;
+      const quantidadeSolicitada =
+        reserva.equipments.find((item) => item.equipmentId === equipmentId)
+          ?.subdivisionsQuantity ?? 1;
+
+      const livres = totalSubdivisoes - reservadas;
+
+      return livres < quantidadeSolicitada;
     });
   }
 
