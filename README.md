@@ -7,9 +7,9 @@
 ### 1. Instruções gerais
 
 ```bash
-Seguir o passo a passo na ordem;
-Rodar apenas um comando por vez;
-Utilizar um ambiente Linux (WSL, por exemplo);
+Seguir o passo a passo na ordem
+Rodar apenas um comando por vez
+Utilizar um ambiente Linux (WSL, por exemplo)
 Clonar o repositório
 ```
 
@@ -31,4 +31,13 @@ npm run dev
 cd frontend
 npm install
 npm run dev
+```
+
+### 4. Execução
+
+```bash
+Para executar o backend, estar em /backend e rodar o comando "npm run dev"
+Para executar o frontend, estar em /frontend e rodar o comando "npm run dev"
+
+Ambos os serviços devem ester rodando para o funcionamento da aplicação
 ```
