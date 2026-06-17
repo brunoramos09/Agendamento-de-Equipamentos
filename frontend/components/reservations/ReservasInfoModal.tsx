@@ -15,6 +15,7 @@ export default function ReservaInfoModal({
   reserva,
   onClose,
 }: ReservaInfoModalProps) {
+  console.log(reserva.equipments);
   return (
     <div style={modalOverlayStyle}>
       <div
@@ -152,28 +153,58 @@ export default function ReservaInfoModal({
                     borderRadius: "12px",
                     padding: "12px 14px",
                     background: "#fafafa",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
-                  <strong
-                    style={{
-                      display: "block",
-                      color: "#111827",
-                    }}
-                  >
-                    {item.equipment?.name || "-"}
-                  </strong>
+                  <div>
+                    <strong
+                      style={{
+                        display: "block",
+                        color: "#111827",
+                      }}
+                    >
+                      {item.equipment?.name || "-"}
+                    </strong>
 
-                  {"serialNumber" in (item.equipment || {}) &&
-                    item.equipment?.serialNumber && (
+                    {item.equipment?.room?.name && (
                       <span
                         style={{
                           color: "#6b7280",
                           fontSize: "13px",
+                          display: "block",
                         }}
                       >
-                        Série: {item.equipment.serialNumber}
+                        Sala: {item.equipment.room.name}
                       </span>
                     )}
+
+                    {item.equipment?.responsibleEmployee && (
+                      <span
+                        style={{
+                          color: "#6b7280",
+                          fontSize: "13px",
+                          display: "block",
+                        }}
+                      >
+                        Responsável: {item.equipment.responsibleEmployee}
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      background: "#eef2ff",
+                      color: "#4338ca",
+                      padding: "6px 12px",
+                      borderRadius: "999px",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {item.subdivisionsQuantity ?? 1} un.
+                  </div>
                 </div>
               ))}
             </div>

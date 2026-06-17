@@ -27,7 +27,11 @@ export class ReservationService {
         user: true,
         equipments: {
           include: {
-            equipment: true,
+            equipment: {
+              include: {
+                room: true,
+              },
+            },
           },
         },
       },
@@ -45,7 +49,11 @@ export class ReservationService {
         user: true,
         equipments: {
           include: {
-            equipment: true,
+            equipment: {
+              include: {
+                room: true,
+              },
+            },
           },
         },
       },
