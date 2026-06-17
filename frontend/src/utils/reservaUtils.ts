@@ -2,10 +2,10 @@ import type Reservation from "../interfaces/reserva";
 
 export const ITENS_POR_PAGINA = 8;
 
-export type FiltroStatus = "TODAS" | "ATIVA" | "ATRASADA" | "DEVOLVIDA";
+export type FiltroStatus = "TODAS" | "ATIVA" | "ATRASADA" | "DEVOLVIDA" | "AGENDADA" | "PENDENTE";
 
 export type ReservaStatus = {
-  label: "ATIVA" | "ATRASADA" | "DEVOLVIDA";
+  label: "ATIVA" | "ATRASADA" | "DEVOLVIDA" | "AGENDADA" | "PENDENTE";
   bg: string;
   color: string;
   key: Exclude<FiltroStatus, "TODAS">;
@@ -21,6 +21,9 @@ export const filtroOptions: {
   { value: "ATIVA", label: "Ativas", bg: "#dcfce7", color: "#166534" },
   { value: "ATRASADA", label: "Atrasadas", bg: "#fee2e2", color: "#991b1b" },
   { value: "DEVOLVIDA", label: "Devolvidas", bg: "#dbeafe", color: "#1d4ed8" },
+  { value: "AGENDADA", label: "Agendadas", bg: "#f0dbfe", color: "#871dd8" },
+  { value: "PENDENTE", label: "Pendentes", bg: "#feecdb", color: "#d8b61d" },
+
 ];
 
 export function formatarData(data?: string | null) {
@@ -45,12 +48,30 @@ export function getStatusReserva(reserva: Reservation): ReservaStatus {
     };
   }
 
+  if (reserva.status === "PENDENTE_APROVACAO") {
+    return {
+      label: "PENDENTE",
+      bg: "#feecdb",
+      color: "#d8b61d",
+      key: "PENDENTE",
+    };
+  }
+
   if (new Date(reserva.endDate) < new Date()) {
     return {
       label: "ATRASADA",
       bg: "#fee2e2",
       color: "#991b1b",
       key: "ATRASADA",
+    };
+  }
+
+  if (new Date(reserva.startDate) > new Date()) {
+    return {
+      label: "AGENDADA",
+      bg: "#f0dbfe",
+      color: "#871dd8",
+      key: "AGENDADA",
     };
   }
 
@@ -61,6 +82,7 @@ export function getStatusReserva(reserva: Reservation): ReservaStatus {
     key: "ATIVA",
   };
 }
+
 
 export function filtrarReservas(
   reservas: Reservation[],

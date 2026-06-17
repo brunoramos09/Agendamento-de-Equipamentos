@@ -278,8 +278,29 @@ export class EquipmentService {
 
     const agora = new Date();
     const totalReservas = equipment.reservations.length;
+
+    const getReservaStatus = (
+      item: typeof equipment.reservations[number],
+    ): 'ATIVA' | 'AGENDADA' | 'DEVOLVIDA' | 'ATRASADA' => {
+      const r = item.reservation;
+
+      if (r.returnedAt) {
+        return 'DEVOLVIDA';
+      }
+
+      if (new Date(r.endDate) < agora) {
+        return 'ATRASADA';
+      }
+
+      if (new Date(r.startDate) > agora) {
+        return 'AGENDADA';
+      }
+
+      return 'ATIVA';
+    };
+
     const reservasFuturas = equipment.reservations.filter(
-      (r) => new Date(r.reservation.startDate) >= agora,
+      (item) => getReservaStatus(item) === 'AGENDADA',
     ).length;
 
     let totalDiasReservados = 0;
@@ -356,7 +377,7 @@ export class EquipmentService {
     const metricCards = [
       { label: 'Total de Reservas', value: String(totalReservas) },
       { label: 'Reservas Futuras', value: String(reservasFuturas) },
-      { label: 'Uso Médio', value: String(tempoMedioReservaFormatado) },
+      { label: 'Reserva Média', value: String(tempoMedioReservaFormatado) },
       { label: 'Taxa de Utilização', value: `${taxaUtilizacao}%` },
     ];
 
@@ -401,9 +422,18 @@ export class EquipmentService {
     y += 16;
 
     // exibição de reserva atual, caso tenha alguma
-    const reservaAtual = equipment.reservations.find(
-      (item) => !item.reservation.returnedAt,
-    );
+    const reservasAtuais = equipment.reservations
+      .filter((item) => {
+        const status = getReservaStatus(item);
+        return status === 'ATIVA' || status === 'ATRASADA';
+      })
+      .sort(
+        (a, b) =>
+          new Date(a.reservation.startDate).getTime() -
+          new Date(b.reservation.startDate).getTime(),
+      );
+
+    const reservaAtual = reservasAtuais[0];
 
     function formatarDataHora(data: Date): string {
       const dataFormatada = data.toLocaleDateString('pt-BR');
@@ -426,7 +456,8 @@ export class EquipmentService {
       y += 24;
     } else {
       const r = reservaAtual.reservation;
-      const atrasada = new Date(r.endDate) < agora;
+      const reservaAtualStatus = getReservaStatus(reservaAtual);
+      const atrasada = reservaAtualStatus === 'ATRASADA';
 
       const corFundo = atrasada ? '#fef2f2' : '#f0fdf4';
       const corBorda = atrasada ? '#991b1b' : '#166534';
@@ -451,7 +482,7 @@ export class EquipmentService {
         .fillColor('#0f172a')
         .fontSize(10)
         .font('Helvetica')
-        .text(r.user.name, col1X, y + 22, { width: contentW * 0.32 });
+        .text(r.user.name, col1X, y + 30, { width: contentW * 0.32 });
 
       doc
         .fillColor('#64748b')
@@ -462,7 +493,7 @@ export class EquipmentService {
         .fillColor('#0f172a')
         .fontSize(10)
         .font('Helvetica')
-        .text(formatarDataHora(new Date(r.startDate)), col2X, y + 22, {
+        .text(formatarDataHora(new Date(r.startDate)), col2X, y + 30, {
           width: contentW * 0.3,
         });
 
@@ -475,7 +506,7 @@ export class EquipmentService {
         .fillColor('#0f172a')
         .fontSize(10)
         .font('Helvetica')
-        .text(formatarDataHora(new Date(r.endDate)), col3X, y + 22, {
+        .text(formatarDataHora(new Date(r.endDate)), col3X, y + 30, {
           width: contentW * 0.28,
         });
 
@@ -515,12 +546,8 @@ export class EquipmentService {
     // exibindo ultimas reservas
     y = sectionTitle('ÚLTIMAS RESERVAS', y);
 
-    const referenciaInicio = reservaAtual
-      ? new Date(reservaAtual.reservation.startDate)
-      : agora;
-
     const ultimasReservas = equipment.reservations
-      .filter((item) => new Date(item.reservation.endDate) < referenciaInicio)
+      .filter((item) => getReservaStatus(item) === 'DEVOLVIDA')
       .sort(
         (a, b) =>
           new Date(b.reservation.startDate).getTime() -
@@ -541,14 +568,14 @@ export class EquipmentService {
         doc.rect(margin, headerY, contentW, 22).fill('#f1f5f9');
         doc.fillColor('#475569').fontSize(8).font('Helvetica-Bold');
         doc.text('USUÁRIO', margin + 8, headerY + 7, { characterSpacing: 0.8 });
-        doc.text('INÍCIO', margin + 148, headerY + 7, {
+        doc.text('INÍCIO', margin + 100, headerY + 7, {
           characterSpacing: 0.8,
         });
-        doc.text('FIM', margin + 248, headerY + 7, { characterSpacing: 0.8 });
-        doc.text('DEVOLUÇÃO', margin + 348, headerY + 7, {
+        doc.text('FIM', margin + 200, headerY + 7, { characterSpacing: 0.8 });
+        doc.text('DEVOLUÇÃO', margin + 300, headerY + 7, {
           characterSpacing: 0.8,
         });
-        doc.text('STATUS', margin + 428, headerY + 7, {
+        doc.text('STATUS', margin + 420, headerY + 7, {
           characterSpacing: 0.8,
         });
         return headerY + 22;
@@ -579,28 +606,28 @@ export class EquipmentService {
           width: 132,
           ellipsis: true,
         });
-        doc.text(formatarDataHora(new Date(r.startDate)), margin + 148, y + 9, {
+        doc.text(formatarDataHora(new Date(r.startDate)), margin + 100, y + 9, {
           width: 92,
         });
-        doc.text(formatarDataHora(new Date(r.endDate)), margin + 248, y + 9, {
+        doc.text(formatarDataHora(new Date(r.endDate)), margin + 200, y + 9, {
           width: 92,
         });
         doc.text(
           r.returnedAt
-            ? new Date(r.returnedAt).toLocaleDateString('pt-BR')
+            ? formatarDataHora(new Date(r.returnedAt))
             : '-',
-          margin + 348,
+          margin + 300,
           y + 9,
           { width: 72 },
         );
 
         const rbadgeW = 64;
-        doc.roundedRect(margin + 428, y + 6, rbadgeW, 16, 8).fill(rsc.bg);
+        doc.roundedRect(margin + 420, y + 6, rbadgeW, 16, 8).fill(rsc.bg);
         doc
           .fillColor(rsc.text)
           .fontSize(8)
           .font('Helvetica-Bold')
-          .text(rsc.label, margin + 428, y + 10, {
+          .text(rsc.label, margin + 420, y + 10, {
             width: rbadgeW,
             align: 'center',
           });
@@ -610,15 +637,13 @@ export class EquipmentService {
       });
     }
 
+    y += 15;
+
     // exibindo próximas reservas
     y = sectionTitle('PRÓXIMAS RESERVAS', y);
 
-    const referenciaFim = reservaAtual
-      ? new Date(reservaAtual.reservation.endDate)
-      : agora;
-
     const proximasReservas = equipment.reservations
-      .filter((item) => new Date(item.reservation.startDate) > referenciaFim)
+      .filter((item) => getReservaStatus(item) === 'AGENDADA')
       .sort(
         (a, b) =>
           new Date(a.reservation.startDate).getTime() -
