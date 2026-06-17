@@ -53,10 +53,15 @@ export default function ReservaBasicFields({
 
     return equipamentosSelecionados.some((equipmentId) => {
       const equipamento = equipamentos.find((e) => e.id === equipmentId);
-
       const totalSubdivisoes = Math.max(equipamento?.subdivisions ?? 1, 1);
 
-      const reservadas = reservas
+      const reservasDoEquipamento = reservas.filter((reservaExistente) =>
+        reservaExistente.equipments.some(
+          (item) => item.equipmentId === equipmentId,
+        ),
+      );
+
+      const reservadas = reservasDoEquipamento
         .filter(
           (reservaExistente) =>
             reservaExistente.status === "ATIVA" ||
@@ -67,8 +72,7 @@ export default function ReservaBasicFields({
           const fim = new Date(reservaExistente.endDate);
 
           return (
-            date.getTime() >= inicio.getTime() &&
-            date.getTime() <= fim.getTime()
+            date.getTime() >= inicio.getTime() && date.getTime() < fim.getTime()
           );
         })
         .reduce((total, reservaExistente) => {
@@ -76,7 +80,7 @@ export default function ReservaBasicFields({
             (e) => e.equipmentId === equipmentId,
           );
 
-          return total + (item?.subdivisionsQuantity ?? 1);
+          return total + (item?.subdivisionsQuantity ?? 0);
         }, 0);
 
       return reservadas >= totalSubdivisoes;
