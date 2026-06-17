@@ -202,7 +202,7 @@ export default function ReservasTable({
                         </>
                       )}
 
-                      {getStatusReserva(reserva).key === "ATIVA" && (
+                      {getStatusReserva(reserva).key === "ATIVA" || getStatusReserva(reserva).key === "ATRASADA" && (
                         <IconActionButton
                           title={
                             devolvendoId === reserva.id
