@@ -70,6 +70,7 @@ export default function ReservaBasicFields({
         .filter((reservaExistente) => {
           const inicio = new Date(reservaExistente.startDate);
           const fim = new Date(reservaExistente.endDate);
+          fim.setMinutes(fim.getMinutes() + 15);
 
           return (
             date.getTime() >= inicio.getTime() && date.getTime() < fim.getTime()
