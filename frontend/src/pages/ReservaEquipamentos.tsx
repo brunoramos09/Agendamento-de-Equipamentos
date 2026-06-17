@@ -388,7 +388,7 @@ export function ReservaEquipamentos() {
             meta: `${revisao.length} equipamento${
               revisao.length !== 1 ? "s" : ""
             }`,
-            status: "Aguardando revisão",
+            status: "Aguardando Revisão",
           });
         }
 
