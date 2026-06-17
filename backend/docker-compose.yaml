@@ -1,9 +1,14 @@
 services:
+  backend:
+    build: .
+    volumes:
+      - uploads_data:/app/uploads
+
   postgres:
     image: postgres:16
     container_name: engsoft-postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -13,3 +18,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:
